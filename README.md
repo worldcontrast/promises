@@ -1,6 +1,6 @@
 # World Contrast 🌍
 
-**Comparing political campaigns — because the world is clearer when you see the difference.**
+**Comparing promises campaigns — because the world is clearer when you see the difference.**
 
 > "The truth emerges from contrast — not from repetition."
 
