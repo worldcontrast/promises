@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>World Contrast — Comparing Political Campaigns</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=DM+Sans:wght@300;400;500&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--ink:#0B1D2E;--paper:#F5F0E8;--gold:#C8A96E;--gold-dark:#8B6914;--rule:rgba(11,29,46,0.12);--muted:rgba(11,29,46,0.5)}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);overflow-x:hidden}
+
+nav{display:flex;justify-content:space-between;align-items:center;padding:18px 40px;background:var(--paper);border-bottom:1px solid var(--rule);position:sticky;top:0;z-index:100}
+.nav-logo{font-family:'Playfair Display',serif;font-size:17px;font-weight:900;color:var(--ink);letter-spacing:-0.3px}
+.nav-logo span{color:var(--gold)}
+.nav-links{display:flex;gap:28px;list-style:none}
+.nav-links a{font-size:11px;font-weight:400;color:var(--muted);text-decoration:none;letter-spacing:1.5px;text-transform:uppercase;transition:color .2s}
+.nav-links a:hover{color:var(--ink)}
+.nav-cta{font-size:11px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:var(--paper);background:var(--ink);border:none;padding:10px 20px;cursor:pointer;border-radius:2px}
+
+/* HERO */
+.hero{display:grid;grid-template-columns:1fr 1fr;height:90vh;min-height:600px;position:relative}
+.hero-divider{position:absolute;left:50%;top:0;bottom:0;width:1px;background:linear-gradient(to bottom,transparent,var(--rule) 15%,var(--rule) 85%,transparent);z-index:5}
+.vs-bubble{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:10;width:56px;height:56px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:13px;font-weight:700;color:var(--ink);letter-spacing:1px;box-shadow:0 0 0 10px rgba(200,169,110,0.12),0 0 0 20px rgba(200,169,110,0.05)}
+.side-a{background:var(--ink);display:flex;flex-direction:column;justify-content:center;padding:72px 64px 80px 64px;position:relative;overflow:hidden}
+.side-b{background:var(--paper);display:flex;flex-direction:column;justify-content:center;padding:72px 64px 80px 64px;position:relative;overflow:hidden}
+.side-a::before{content:'';position:absolute;top:-60px;right:-60px;width:280px;height:280px;border-radius:50%;border:1px solid rgba(200,169,110,0.08)}
+.side-b::after{content:'';position:absolute;bottom:-60px;left:-60px;width:240px;height:240px;border-radius:50%;border:1px solid rgba(11,29,46,0.06)}
+.side-tag{font-size:10px;font-weight:500;letter-spacing:2.5px;text-transform:uppercase;margin-bottom:24px}
+.side-tag-a{color:var(--gold)}
+.side-tag-b{color:var(--gold-dark)}
+.hero-hed-a{font-family:'Playfair Display',serif;font-size:clamp(42px,5.5vw,68px);font-weight:900;color:var(--paper);line-height:1.0;letter-spacing:-1px;margin-bottom:28px}
+.hero-hed-b{font-family:'Playfair Display',serif;font-size:clamp(42px,5.5vw,68px);font-weight:400;font-style:italic;color:var(--ink);line-height:1.0;letter-spacing:-1px;margin-bottom:28px}
+.hero-dek{font-size:15px;font-weight:300;line-height:1.8;max-width:360px;margin-bottom:40px}
+.hero-dek-a{color:rgba(245,240,232,0.65)}
+.hero-dek-b{color:rgba(11,29,46,0.6)}
+.cta-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.btn-solid-a{font-size:11px;font-weight:500;letter-spacing:1px;text-transform:uppercase;background:var(--gold);color:var(--ink);border:none;padding:13px 24px;cursor:pointer;border-radius:2px;transition:opacity .2s}
+.btn-solid-a:hover{opacity:.85}
+.btn-ghost-a{font-size:11px;font-weight:400;color:rgba(245,240,232,0.5);background:none;border:none;cursor:pointer;letter-spacing:.5px;text-decoration:underline;text-underline-offset:3px}
+.btn-solid-b{font-size:11px;font-weight:500;letter-spacing:1px;text-transform:uppercase;background:var(--ink);color:var(--paper);border:none;padding:13px 24px;cursor:pointer;border-radius:2px;transition:opacity .2s}
+.btn-solid-b:hover{opacity:.8}
+.btn-ghost-b{font-size:11px;font-weight:400;color:rgba(11,29,46,0.4);background:none;border:none;cursor:pointer;letter-spacing:.5px;text-decoration:underline;text-underline-offset:3px}
+.scroll-hint{position:absolute;bottom:28px;left:50%;transform:translateX(-50%);z-index:10;display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:rgba(11,29,46,0.12);cursor:pointer}
+.scroll-hint svg{animation:bounce 1.8s ease-in-out infinite}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(3px)}}
+
+/* RESPONSIVE HERO */
+@media(max-width:768px){
+  .hero{grid-template-columns:1fr;height:auto}
+  .hero-divider,.vs-bubble{display:none}
+  .side-a,.side-b{padding:56px 32px}
+  nav{padding:14px 20px}
+  .nav-links{display:none}
+  .stats{grid-template-columns:1fr 1fr}
+  .stat{border-right:none;border-bottom:1px solid var(--rule)}
+  .mband{grid-template-columns:1fr}
+  .mband-rule{display:none}
+  .mband-quote,.mband-text{padding:48px 32px}
+  .pillars-sec,.demo-sec{padding:56px 32px}
+  .pillars-grid{grid-template-columns:1fr 1fr}
+  .cats-sec{padding:48px 20px}
+  .cats-grid{grid-template-columns:repeat(3,1fr)}
+  .demo-cols{grid-template-columns:1fr}
+  .demo-sep{display:none}
+  footer{padding:48px 32px 28px}
+  .foot-top{grid-template-columns:1fr;gap:32px}
+}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.stat{padding:44px 36px;border-right:1px solid var(--rule)}
+.stat:last-child{border-right:none}
+.stat-val{font-family:'Playfair Display',serif;font-size:48px;font-weight:700;color:var(--ink);line-height:1;margin-bottom:8px}
+.stat-val span{color:var(--gold)}
+.stat-lab{font-size:13px;font-weight:300;color:var(--muted)}
+
+/* MANIFESTO BAND */
+.mband{background:var(--ink);display:grid;grid-template-columns:1fr 1px 1.2fr;gap:0}
+.mband-quote{padding:72px 64px;display:flex;flex-direction:column;justify-content:center}
+.mband-quote p{font-family:'Playfair Display',serif;font-size:clamp(24px,3vw,34px);font-style:italic;font-weight:400;color:var(--paper);line-height:1.45}
+.mband-quote p span{color:var(--gold)}
+.mband-rule{background:rgba(200,169,110,0.25)}
+.mband-text{padding:72px 64px;display:flex;flex-direction:column;justify-content:center;gap:20px}
+.mband-text p{font-size:14px;font-weight:300;color:rgba(245,240,232,0.6);line-height:1.85;padding-left:20px;border-left:1px solid rgba(200,169,110,0.3)}
+.mband-text strong{color:var(--gold);font-weight:500}
+
+/* PILLARS */
+.pillars-sec{padding:88px 64px}
+.sec-eyebrow{display:flex;align-items:baseline;gap:16px;margin-bottom:56px}
+.sec-num{font-size:11px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+.sec-hed{font-family:'Playfair Display',serif;font-size:38px;font-weight:700;color:var(--ink)}
+.pillars-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;background:var(--rule);border:1px solid var(--rule)}
+.pillar{background:var(--paper);padding:32px 24px;transition:background .22s}
+.pillar:hover{background:var(--ink)}
+.pillar:hover .p-num{color:var(--gold)}
+.pillar:hover .p-name{color:var(--paper)}
+.pillar:hover .p-desc{color:rgba(245,240,232,0.55)}
+.p-num{font-size:10px;font-weight:500;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);margin-bottom:16px;transition:color .22s}
+.p-name{font-family:'Playfair Display',serif;font-size:19px;font-weight:700;color:var(--ink);margin-bottom:14px;line-height:1.2;transition:color .22s}
+.p-desc{font-size:12px;font-weight:300;color:rgba(11,29,46,0.55);line-height:1.75;transition:color .22s}
+
+/* CATEGORIES */
+.cats-sec{background:var(--ink);padding:72px 64px}
+.cats-label{font-size:10px;font-weight:500;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:24px}
+.cats-grid{display:grid;grid-template-columns:repeat(9,1fr);gap:1px;background:rgba(200,169,110,0.2)}
+.cat-box{background:var(--ink);padding:20px 12px;text-align:center;transition:background .2s;cursor:default}
+.cat-box:hover{background:rgba(200,169,110,0.12)}
+.cat-name{font-size:11px;font-weight:400;color:rgba(245,240,232,0.65);line-height:1.45}
+.cat-bar{width:24px;height:2px;background:var(--gold);margin:8px auto 0;border-radius:1px;opacity:.5}
+
+/* DEMO */
+.demo-sec{padding:88px 64px;background:var(--paper)}
+.demo-ui{margin-top:48px;border:1px solid var(--rule);overflow:hidden}
+.demo-cols{display:grid;grid-template-columns:1fr 1px 1fr}
+.demo-col-a{background:var(--ink);padding:32px 28px}
+.demo-col-b{background:var(--paper);padding:32px 28px}
+.demo-sep{background:var(--rule)}
+.d-cand{font-size:9px;font-weight:500;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px}
+.d-cand-a{color:var(--gold)}
+.d-cand-b{color:var(--gold-dark)}
+.d-name{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;margin-bottom:20px}
+.d-name-a{color:var(--paper)}
+.d-name-b{color:var(--ink)}
+.d-promise{display:flex;gap:10px;padding:12px 0;border-bottom:1px solid rgba(245,240,232,0.07)}
+.d-promise-r{display:flex;gap:10px;padding:12px 0;border-bottom:1px solid var(--rule)}
+.d-promise:last-child,.d-promise-r:last-child{border-bottom:none}
+.d-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;margin-top:6px}
+.d-dot-a{background:var(--gold)}
+.d-dot-r{background:var(--gold-dark)}
+.d-cat{font-size:9px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px}
+.d-cat-a{color:rgba(245,240,232,0.4)}
+.d-cat-r{color:rgba(11,29,46,0.4)}
+.d-text{font-size:12px;font-weight:300;line-height:1.55}
+.d-text-a{color:rgba(245,240,232,0.82)}
+.d-text-r{color:rgba(11,29,46,0.78)}
+
+/* FOOTER */
+footer{background:var(--ink);padding:60px 64px 36px}
+.foot-top{display:grid;grid-template-columns:1fr 1fr 1fr;gap:48px;padding-bottom:48px;border-bottom:1px solid rgba(245,240,232,0.08);margin-bottom:32px}
+.foot-brand{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--paper);margin-bottom:10px}
+.foot-brand span{color:var(--gold)}
+.foot-tagline{font-size:12px;font-weight:300;color:rgba(245,240,232,0.4);line-height:1.7;max-width:240px}
+.foot-col-title{font-size:9px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:14px}
+.foot-links{list-style:none}
+.foot-links li{margin-bottom:9px}
+.foot-links a{font-size:12px;font-weight:300;color:rgba(245,240,232,0.45);text-decoration:none;transition:color .2s}
+.foot-links a:hover{color:var(--paper)}
+.foot-bottom{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.foot-copy{font-size:11px;color:rgba(245,240,232,0.25)}
+.foot-neutral{display:flex;align-items:center;gap:7px;font-size:11px;color:rgba(245,240,232,0.3)}
+.gold-dot{width:6px;height:6px;border-radius:50%;background:var(--gold)}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">World<span>Contrast</span></div>
+  <ul class="nav-links">
+    <li><a href="#">How it works</a></li>
+    <li><a href="#">Countries</a></li>
+    <li><a href="#">Manifesto</a></li>
+    <li><a href="#">Open data</a></li>
+  </ul>
+  <button class="nav-cta">Compare now</button>
+</nav>
+
+<section class="hero">
+  <div class="side-a">
+    <p class="side-tag side-tag-a">Candidate A · Side A</p>
+    <h1 class="hero-hed-a">The Power<br>of the<br>Side-by-Side.</h1>
+    <p class="hero-dek hero-dek-a">We don't tell you who to believe. We don't point the way. We illuminate the differences — and let you decide.</p>
+    <div class="cta-row">
+      <button class="btn-solid-a">Start comparing</button>
+      <button class="btn-ghost-a">Read the Manifesto</button>
+    </div>
+  </div>
+
+  <div class="hero-divider"></div>
+  <div class="vs-bubble">VS</div>
+
+  <div class="side-b">
+    <p class="side-tag side-tag-b">Candidate B · Side B</p>
+    <h1 class="hero-hed-b">Because the world is clearer in contrast.</h1>
+    <p class="hero-dek hero-dek-b">Every promise made in a campaign belongs to the public. We organize them. We track them. We compare them — in any language.</p>
+    <div class="cta-row">
+      <button class="btn-solid-b">Choose a country</button>
+      <button class="btn-ghost-b">See live elections</button>
+    </div>
+  </div>
+
+  <div class="scroll-hint" onclick="document.querySelector('.stats').scrollIntoView({behavior:'smooth'})">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <path d="M3 5l4 4 4-4" stroke="#0B1D2E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+</section>
+
+<div class="stats">
+  <div class="stat"><div class="stat-val">142<span>+</span></div><div class="stat-lab">Countries monitored</div></div>
+  <div class="stat"><div class="stat-val">38<span>k</span></div><div class="stat-lab">Promises catalogued</div></div>
+  <div class="stat"><div class="stat-val">0<span>%</span></div><div class="stat-lab">Political bias</div></div>
+  <div class="stat"><div class="stat-val" style="font-size:40px">∞</div><div class="stat-lab">Right to compare</div></div>
+</div>
+
+<div class="mband">
+  <div class="mband-quote">
+    <p>"The truth emerges from <span>contrast</span> — not from repetition."</p>
+  </div>
+  <div class="mband-rule"></div>
+  <div class="mband-text">
+    <p>We live in an era of excess. Words, promises, speeches and data float in an ocean of digital noise. But in any corner of the world — under full democracy or other systems — the human desire for a better future remains constant.</p>
+    <p>World Contrast was born from a simple premise: <strong>information is not enough. Clarity is.</strong> We copy official sources. We organize them. We show them side by side. We never contact, never editorialize, never judge.</p>
+  </div>
+</div>
+
+<section class="pillars-sec">
+  <div class="sec-eyebrow">
+    <span class="sec-num">01 — Foundation</span>
+    <h2 class="sec-hed">Our Eight Pillars</h2>
+  </div>
+  <div class="pillars-grid">
+    <div class="pillar"><p class="p-num">I</p><h3 class="p-name">Radical Neutrality</h3><p class="p-desc">We are the mirror, not the judge. Contrast reveals what words try to hide.</p></div>
+    <div class="pillar"><p class="p-num">II</p><h3 class="p-name">Sovereignty Respect</h3><p class="p-desc">We operate within each nation's legal framework without exception.</p></div>
+    <div class="pillar"><p class="p-num">III</p><h3 class="p-name">Democracy of Information</h3><p class="p-desc">If there is a proposal that affects human lives, there must be clarity about it.</p></div>
+    <div class="pillar"><p class="p-num">IV</p><h3 class="p-name">The Right to Compare</h3><p class="p-desc">Comparing is an act of intelligence. It is our universal language.</p></div>
+    <div class="pillar"><p class="p-num">V</p><h3 class="p-name">Source Integrity</h3><p class="p-desc">Every record is timestamped, URL-cited, and cryptographically archived.</p></div>
+    <div class="pillar"><p class="p-num">VI</p><h3 class="p-name">Zero Contact</h3><p class="p-desc">We never contact candidates or parties. We only observe public records.</p></div>
+    <div class="pillar"><p class="p-num">VII</p><h3 class="p-name">Open Infrastructure</h3><p class="p-desc">Our code, data, and methodology are fully open-source and auditable.</p></div>
+    <div class="pillar"><p class="p-num">VIII</p><h3 class="p-name">No Advertising</h3><p class="p-desc">We carry no ads, sponsored content, or monetized placements. Ever.</p></div>
+  </div>
+</section>
+
+<section class="cats-sec">
+  <p class="cats-label">9 Categories — applied equally to every candidate in every country</p>
+  <div class="cats-grid">
+    <div class="cat-box"><p class="cat-name">Economy &amp; Fiscal</p><div class="cat-bar"></div></div>
+    <div class="cat-box"><p class="cat-name">Education &amp; Culture</p><div class="cat-bar"></div></div>
+    <div class="cat-box"><p class="cat-name">Health &amp; Sanitation</p><div class="cat-bar"></div></div>
+    <div class="cat-box"><p class="cat-name">Public Safety &amp; Justice</p><div class="cat-bar"></div></div>
+    <div class="cat-box"><p class="cat-name">Environment &amp; Climate</p><div class="cat-bar"></div></div>
+    <div class="cat-box"><p class="cat-name">Social Assistance</p><div class="cat-bar"></div></div>
+    <div class="cat-box"><p class="cat-name">Human Rights</p><div class="cat-bar"></div></div>
+    <div class="cat-box"><p class="cat-name">Infrastructure &amp; Transport</p><div class="cat-bar"></div></div>
+    <div class="cat-box"><p class="cat-name">Governance &amp; Reform</p><div class="cat-bar"></div></div>
+  </div>
+</section>
+
+<section class="demo-sec">
+  <div class="sec-eyebrow">
+    <span class="sec-num">02 — Live Demo</span>
+    <h2 class="sec-hed">The Contrast in Action</h2>
+  </div>
+  <div class="demo-ui">
+    <div class="demo-cols">
+      <div class="demo-col-a">
+        <p class="d-cand d-cand-a">Candidate A</p>
+        <h3 class="d-name d-name-a">João da Silva</h3>
+        <div class="d-promise">
+          <div class="d-dot d-dot-a"></div>
+          <div><p class="d-cat d-cat-a">Economy</p><p class="d-text d-text-a">Reduce income tax for workers earning up to 5,000 BRL/month, effective 2027</p></div>
+        </div>
+        <div class="d-promise">
+          <div class="d-dot d-dot-a"></div>
+          <div><p class="d-cat d-cat-a">Environment</p><p class="d-text d-text-a">Zero deforestation in the Amazon by end of first term</p></div>
+        </div>
+        <div class="d-promise">
+          <div class="d-dot d-dot-a"></div>
+          <div><p class="d-cat d-cat-a">Human Rights</p><p class="d-text d-text-a">National Gender Equality Plan within 180 days of taking office</p></div>
+        </div>
+      </div>
+      <div class="demo-sep"></div>
+      <div class="demo-col-b">
+        <p class="d-cand d-cand-b">Candidate B</p>
+        <h3 class="d-name d-name-b">Maria Rodrigues</h3>
+        <div class="d-promise-r">
+          <div class="d-dot d-dot-r"></div>
+          <div><p class="d-cat d-cat-r">Economy</p><p class="d-text d-text-r">Privatize 3 state companies; proceeds directed to infrastructure bonds</p></div>
+        </div>
+        <div class="d-promise-r">
+          <div class="d-dot d-dot-r"></div>
+          <div><p class="d-cat d-cat-r">Environment</p><p class="d-text d-text-r">Carbon market expansion and tax incentives for green energy investments</p></div>
+        </div>
+        <div class="d-promise-r">
+          <div class="d-dot d-dot-r"></div>
+          <div><p class="d-cat d-cat-r">Human Rights</p><p class="d-text d-text-r">Expand Human Rights Council with civil society binding voting power</p></div>
+        </div>
+      </div>
+    </div>
+    <div style="background:var(--paper);border-top:1px solid var(--rule);padding:14px 28px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+      <span style="font-size:11px;color:var(--muted)">All data from official sources · timestamped · cryptographically archived</span>
+      <button style="font-size:11px;font-weight:500;padding:8px 18px;border:0.5px solid var(--rule);background:var(--ink);color:var(--paper);border-radius:2px;cursor:pointer;letter-spacing:.5px">Full comparison →</button>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="foot-top">
+    <div>
+      <div class="foot-brand">World<span>Contrast</span></div>
+      <p class="foot-tagline">Comparing political campaigns — because the world is clearer when you see the difference.</p>
+    </div>
+    <div>
+      <p class="foot-col-title">Platform</p>
+      <ul class="foot-links">
+        <li><a href="#">How it works</a></li>
+        <li><a href="#">Compare tool</a></li>
+        <li><a href="#">Live elections</a></li>
+        <li><a href="#">Open data API</a></li>
+      </ul>
+    </div>
+    <div>
+      <p class="foot-col-title">Mission</p>
+      <ul class="foot-links">
+        <li><a href="#">Manifesto v2.0</a></li>
+        <li><a href="#">Eight pillars</a></li>
+        <li><a href="#">Transparency report</a></li>
+        <li><a href="#">Contribute data</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot-bottom">
+    <p class="foot-copy">© 2025 World Contrast — Non-profit initiative. All data open source. All code open source.</p>
+    <div class="foot-neutral"><div class="gold-dot"></div>Zero bias · Zero contact · Zero agenda</div>
+  </div>
+</footer>
+
+</body>
+</html>

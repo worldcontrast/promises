@@ -1,0 +1,286 @@
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'DM Sans',sans-serif;background:var(--color-background-primary);color:var(--color-text-primary)}
+  .arch-wrap{padding:0 0 24px}
+  .arch-header{display:flex;justify-content:space-between;align-items:flex-end;padding:0 0 20px;border-bottom:0.5px solid var(--color-border-tertiary);margin-bottom:28px}
+  .arch-title{font-size:16px;font-weight:500;color:var(--color-text-primary)}
+  .arch-sub{font-size:12px;color:var(--color-text-secondary);margin-top:3px}
+  .arch-badge{font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--color-text-success);background:var(--color-background-success);padding:4px 10px;border-radius:4px}
+  .layer{margin-bottom:12px}
+  .layer-label{font-size:10px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--color-text-tertiary);margin-bottom:8px;padding-left:2px}
+  .layer-row{display:grid;gap:8px}
+  .layer-row.cols-5{grid-template-columns:repeat(5,1fr)}
+  .layer-row.cols-4{grid-template-columns:repeat(4,1fr)}
+  .layer-row.cols-3{grid-template-columns:repeat(3,1fr)}
+  .layer-row.cols-2{grid-template-columns:repeat(2,1fr)}
+  .layer-row.cols-1{grid-template-columns:1fr}
+  .node-card{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:12px 14px;position:relative}
+  .node-card.accent-blue{border-left:2px solid #378ADD}
+  .node-card.accent-teal{border-left:2px solid #1D9E75}
+  .node-card.accent-amber{border-left:2px solid #BA7517}
+  .node-card.accent-purple{border-left:2px solid #7F77DD}
+  .node-card.accent-coral{border-left:2px solid #D85A30}
+  .node-card.accent-green{border-left:2px solid #639922}
+  .node-name{font-size:12px;font-weight:500;color:var(--color-text-primary);margin-bottom:4px}
+  .node-desc{font-size:11px;font-weight:300;color:var(--color-text-secondary);line-height:1.55}
+  .node-tag{display:inline-block;font-size:9px;font-weight:500;letter-spacing:0.8px;text-transform:uppercase;padding:2px 7px;border-radius:3px;margin-top:6px}
+  .tag-blue{background:#E6F1FB;color:#0C447C}
+  .tag-teal{background:#E1F5EE;color:#085041}
+  .tag-amber{background:#FAEEDA;color:#633806}
+  .tag-purple{background:#EEEDFE;color:#3C3489}
+  .tag-coral{background:#FAECE7;color:#712B13}
+  .tag-green{background:#EAF3DE;color:#27500A}
+  .tag-gray{background:var(--color-background-tertiary);color:var(--color-text-secondary)}
+  .arrow-row{display:flex;align-items:center;justify-content:center;height:24px;color:var(--color-text-tertiary);font-size:11px;gap:8px;margin:4px 0}
+  .arrow-line{flex:1;height:0.5px;background:var(--color-border-secondary)}
+  .arrow-mid{font-size:10px;font-weight:500;letter-spacing:1px;color:var(--color-text-tertiary);white-space:nowrap}
+  .flow-connector{display:flex;justify-content:center;align-items:center;height:20px;margin:0}
+  .flow-dot{width:1px;background:var(--color-border-secondary);height:100%}
+  .section-divider{height:0.5px;background:var(--color-border-tertiary);margin:20px 0}
+  .db-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:8px}
+  .db-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:10px 12px}
+  .db-card-name{font-size:11px;font-weight:500;color:var(--color-text-primary);margin-bottom:2px}
+  .db-card-type{font-family:'DM Mono',monospace;font-size:9px;color:var(--color-text-tertiary)}
+  .policy-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .policy-card{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:12px 14px;background:var(--color-background-primary)}
+  .policy-title{font-size:11px;font-weight:500;margin-bottom:4px;color:var(--color-text-primary)}
+  .policy-body{font-size:10px;font-weight:300;color:var(--color-text-secondary);line-height:1.6}
+  .rule-item{font-size:10px;font-weight:300;color:var(--color-text-secondary);line-height:1.6;padding:3px 0;border-bottom:0.5px solid var(--color-border-tertiary)}
+  .rule-item:last-child{border-bottom:none}
+  .rule-item::before{content:"—  ";color:var(--color-text-tertiary)}
+  .status-row{display:flex;gap:16px;flex-wrap:wrap;padding:12px 0}
+  .status-pill{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--color-text-secondary)}
+  .pill-dot{width:7px;height:7px;border-radius:50%}
+</style>
+<div class="arch-wrap">
+
+<div class="arch-header">
+  <div>
+    <div class="arch-title">World Contrast — Agent System Architecture</div>
+    <div class="arch-sub">Automated collection pipeline · Zero editorial intervention · Full auditability</div>
+  </div>
+  <div class="arch-badge">Open Source</div>
+</div>
+
+<div class="layer">
+  <div class="layer-label">Layer 0 — Public sources (read-only, no contact)</div>
+  <div class="layer-row cols-5">
+    <div class="node-card accent-blue">
+      <div class="node-name">Official campaign sites</div>
+      <div class="node-desc">Candidate's registered domain, scraped on schedule</div>
+      <span class="node-tag tag-blue">HTML / PDF</span>
+    </div>
+    <div class="node-card accent-blue">
+      <div class="node-name">Official social media</div>
+      <div class="node-desc">Public posts via platform APIs (Twitter/X, Facebook, Instagram)</div>
+      <span class="node-tag tag-blue">API public</span>
+    </div>
+    <div class="node-card accent-blue">
+      <div class="node-name">Electoral manifestos</div>
+      <div class="node-desc">Officially registered documents with electoral courts</div>
+      <span class="node-tag tag-blue">PDF / GOV</span>
+    </div>
+    <div class="node-card accent-blue">
+      <div class="node-name">Government gazettes</div>
+      <div class="node-desc">Official incumbents' published plans and commitments</div>
+      <span class="node-tag tag-blue">GOV portal</span>
+    </div>
+    <div class="node-card accent-blue">
+      <div class="node-name">Video transcripts</div>
+      <div class="node-desc">Debates and official speeches — auto-transcribed, not edited</div>
+      <span class="node-tag tag-blue">YouTube API</span>
+    </div>
+  </div>
+</div>
+
+<div class="arrow-row">
+  <div class="arrow-line"></div>
+  <div class="arrow-mid">Crawler agents — read only · no login · no form submission · no contact</div>
+  <div class="arrow-line"></div>
+</div>
+
+<div class="layer">
+  <div class="layer-label">Layer 1 — Collection agents</div>
+  <div class="layer-row cols-4">
+    <div class="node-card accent-teal">
+      <div class="node-name">Web Crawler Agent</div>
+      <div class="node-desc">Visits official URLs, extracts raw HTML, saves full-page archive + SHA-256 hash of content</div>
+      <span class="node-tag tag-teal">Playwright · Scrapy</span>
+    </div>
+    <div class="node-card accent-teal">
+      <div class="node-name">PDF Parser Agent</div>
+      <div class="node-desc">Extracts text from electoral manifestos and official PDFs with layout preservation</div>
+      <span class="node-tag tag-teal">pdfplumber · OCR</span>
+    </div>
+    <div class="node-card accent-teal">
+      <div class="node-name">Social API Agent</div>
+      <div class="node-desc">Polls public social media APIs for official account posts filtered by campaign period</div>
+      <span class="node-tag tag-teal">REST API · OAuth</span>
+    </div>
+    <div class="node-card accent-teal">
+      <div class="node-name">Archive Agent</div>
+      <div class="node-desc">Saves immutable snapshots to Wayback Machine + internal store. Every record is permanent.</div>
+      <span class="node-tag tag-teal">Wayback · IPFS</span>
+    </div>
+  </div>
+</div>
+
+<div class="arrow-row">
+  <div class="arrow-line"></div>
+  <div class="arrow-mid">Raw content → extraction pipeline</div>
+  <div class="arrow-line"></div>
+</div>
+
+<div class="layer">
+  <div class="layer-label">Layer 2 — Extraction & classification agents (AI-powered, no human editorial)</div>
+  <div class="layer-row cols-3">
+    <div class="node-card accent-purple">
+      <div class="node-name">Promise Extractor Agent</div>
+      <div class="node-desc">LLM-powered agent identifies commitments using strict prompt rules: extract verbatim, flag ambiguity, reject opinions and attacks. Returns structured JSON with quote + source location.</div>
+      <span class="node-tag tag-purple">LLM · Claude API</span>
+    </div>
+    <div class="node-card accent-purple">
+      <div class="node-name">Category Classifier Agent</div>
+      <div class="node-desc">Maps each extracted promise to one of 9 standard categories. Confidence score attached. Flags multi-category promises for dual tagging.</div>
+      <span class="node-tag tag-purple">Classifier · 9 cats</span>
+    </div>
+    <div class="node-card accent-purple">
+      <div class="node-name">Translation Agent</div>
+      <div class="node-desc">Translates promises to English + 5 other UN languages while preserving exact meaning. Original language always kept as canonical record.</div>
+      <span class="node-tag tag-purple">DeepL · NLLB</span>
+    </div>
+  </div>
+</div>
+
+<div class="arrow-row">
+  <div class="arrow-line"></div>
+  <div class="arrow-mid">Structured records → validation layer</div>
+  <div class="arrow-line"></div>
+</div>
+
+<div class="layer">
+  <div class="layer-label">Layer 3 — Validation & quality control</div>
+  <div class="layer-row cols-4">
+    <div class="node-card accent-amber">
+      <div class="node-name">Duplicate Detector</div>
+      <div class="node-desc">Semantic dedup — same promise from multiple sources merges into one record with all source citations</div>
+      <span class="node-tag tag-amber">Vector similarity</span>
+    </div>
+    <div class="node-card accent-amber">
+      <div class="node-name">Sentiment Guard</div>
+      <div class="node-desc">Rejects any extraction containing attacks, insults, or opinion framing. Promises only — zero editorial content allowed through</div>
+      <span class="node-tag tag-amber">Classifier · Block</span>
+    </div>
+    <div class="node-card accent-amber">
+      <div class="node-name">Confidence Scorer</div>
+      <div class="node-desc">Each promise gets a confidence score 0–100. Low-confidence records flagged for human review of data quality (not content)</div>
+      <span class="node-tag tag-amber">Quality gate</span>
+    </div>
+    <div class="node-card accent-amber">
+      <div class="node-name">Provenance Ledger</div>
+      <div class="node-desc">Immutable log: source URL + archive URL + collection timestamp + SHA-256 hash. Every record traceable to its origin forever</div>
+      <span class="node-tag tag-amber">Audit trail</span>
+    </div>
+  </div>
+</div>
+
+<div class="arrow-row">
+  <div class="arrow-line"></div>
+  <div class="arrow-mid">Validated records → database</div>
+  <div class="arrow-line"></div>
+</div>
+
+<div class="layer">
+  <div class="layer-label">Layer 4 — Data store</div>
+  <div class="db-row">
+    <div class="db-card">
+      <div class="db-card-name">Promises DB</div>
+      <div class="db-card-type">PostgreSQL · partitioned by country</div>
+    </div>
+    <div class="db-card">
+      <div class="db-card-name">Archive Store</div>
+      <div class="db-card-type">S3 + IPFS · immutable snapshots</div>
+    </div>
+    <div class="db-card">
+      <div class="db-card-name">Vector Store</div>
+      <div class="db-card-type">pgvector · semantic search</div>
+    </div>
+    <div class="db-card">
+      <div class="db-card-name">Audit Ledger</div>
+      <div class="db-card-type">Append-only · cryptographic log</div>
+    </div>
+  </div>
+</div>
+
+<div class="arrow-row">
+  <div class="arrow-line"></div>
+  <div class="arrow-mid">Public API + frontend</div>
+  <div class="arrow-line"></div>
+</div>
+
+<div class="layer">
+  <div class="layer-label">Layer 5 — Public interface</div>
+  <div class="layer-row cols-3">
+    <div class="node-card accent-green">
+      <div class="node-name">Compare UI</div>
+      <div class="node-desc">Side-by-side comparison screen — data only, zero framing</div>
+      <span class="node-tag tag-green">React · Next.js</span>
+    </div>
+    <div class="node-card accent-green">
+      <div class="node-name">Open Data API</div>
+      <div class="node-desc">Full public REST API — all data free to download and build upon</div>
+      <span class="node-tag tag-green">REST · GraphQL</span>
+    </div>
+    <div class="node-card accent-green">
+      <div class="node-name">Audit Portal</div>
+      <div class="node-desc">Anyone can verify any record's source, archive URL, and hash</div>
+      <span class="node-tag tag-green">Public · Open</span>
+    </div>
+  </div>
+</div>
+
+<div class="section-divider"></div>
+
+<div class="layer">
+  <div class="layer-label">Operational rules — hardcoded into agent system, non-negotiable</div>
+  <div class="policy-row">
+    <div class="policy-card">
+      <div class="policy-title">Zero Contact Policy</div>
+      <div class="policy-body">
+        <div class="rule-item">Agents never submit forms, login, or interact with any site</div>
+        <div class="rule-item">No emails, no DMs, no API keys from candidates</div>
+        <div class="rule-item">No partnerships with campaigns or parties</div>
+        <div class="rule-item">All data collection is passive read-only observation</div>
+      </div>
+    </div>
+    <div class="policy-card">
+      <div class="policy-title">Promises Only Doctrine</div>
+      <div class="policy-body">
+        <div class="rule-item">Extractor agent configured: collect commitments, reject attacks</div>
+        <div class="rule-item">No negative framing, no comparison of candidates by agents</div>
+        <div class="rule-item">Verbatim quotes only — no paraphrasing of political content</div>
+        <div class="rule-item">Ambiguous statements flagged, never silently interpreted</div>
+      </div>
+    </div>
+    <div class="policy-card">
+      <div class="policy-title">Symmetric Coverage Rule</div>
+      <div class="policy-body">
+        <div class="rule-item">All official candidates in an election receive identical coverage</div>
+        <div class="rule-item">Same 9 categories applied to every candidate without exception</div>
+        <div class="rule-item">If data is unavailable for one, all show the same "no data" state</div>
+        <div class="rule-item">No candidate receives more or fewer collection attempts</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="status-row">
+  <div class="status-pill"><div class="pill-dot" style="background:#1D9E75"></div>Collection agents — active</div>
+  <div class="status-pill"><div class="pill-dot" style="background:#7F77DD"></div>AI extraction — Claude API</div>
+  <div class="status-pill"><div class="pill-dot" style="background:#BA7517"></div>Validation — automated</div>
+  <div class="status-pill"><div class="pill-dot" style="background:#378ADD"></div>All source code — open source</div>
+  <div class="status-pill"><div class="pill-dot" style="background:#639922"></div>All data — public domain</div>
+</div>
+
+</div>
