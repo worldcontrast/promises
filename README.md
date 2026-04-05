@@ -452,10 +452,15 @@ See `MANIFESTO.md` for the full founding document.
 
 **Code**: MIT License — free to use, modify, and distribute.
 
-**Data**: Creative Commons CC0 1.0 (Public Domain) — all collected promise data is free for any use, including commercial research.
+Data: Creative Commons CC0 1.0 (Public Domain) — all collected promise data is free for any use, including commercial research.
+Manifesto: All Rights Reserved — the founding document may be quoted but not modified.
+Trademark: The name "World Contrast", the logo, and the domain worldcontrast.org are not covered by the MIT License. Forks of this code may not:
 
-**Manifesto**: All Rights Reserved — the founding document may be quoted but not modified.
+Use the name "World Contrast" or any confusingly similar name
+Use the worldcontrast.org domain or any subdomain thereof
+Imply they are the official, original, or affiliated project
+Reproduce the Manifesto in modified form
 
----
+Forks must clearly identify themselves as independent projects derived from this codebase.
 
-*World Contrast is a non-profit initiative. We carry no advertising, accept no political funding, and have no commercial agenda.*
+World Contrast is a non-profit initiative. We carry no advertising, accept no political funding, and have no commercial agenda.
