@@ -1,0 +1,35 @@
+# World Contrast — Agent Dependencies
+# File: agents/requirements.txt
+
+# ── CORE ──────────────────────────────────────────────────────
+anthropic>=0.34.0          # Claude API — promise extraction
+playwright>=1.45.0         # Headless browser — JavaScript pages
+httpx>=0.27.0              # HTTP client — static pages
+beautifulsoup4>=4.12.0     # HTML parsing — text extraction
+lxml>=5.0.0                # Fast HTML/XML parser (bs4 backend)
+
+# ── PDF PROCESSING ────────────────────────────────────────────
+pdfplumber>=0.11.0         # PDF text extraction (electoral filings)
+pdf2image>=1.17.0          # PDF → image (for OCR fallback)
+pytesseract>=0.3.13        # OCR (for scanned PDFs)
+Pillow>=10.0.0             # Image processing (pytesseract dependency)
+
+# ── DATABASE ──────────────────────────────────────────────────
+supabase>=2.5.0            # Supabase Python client
+asyncpg>=0.29.0            # Async PostgreSQL driver
+
+# ── BLOCKCHAIN / ARCHIVE ──────────────────────────────────────
+# (Phase 2 — uncomment when implementing blockchain registration)
+# web3>=6.20.0             # Ethereum integration
+# py-ipfs-http-client      # IPFS integration
+
+# ── UTILITIES ─────────────────────────────────────────────────
+python-dotenv>=1.0.0       # Load .env file in development
+pydantic>=2.7.0            # Data validation
+tenacity>=8.3.0            # Retry logic for API calls
+aiofiles>=23.2.1           # Async file I/O
+
+# ── TESTING ───────────────────────────────────────────────────
+pytest>=8.2.0
+pytest-asyncio>=0.23.0
+pytest-mock>=3.14.0
