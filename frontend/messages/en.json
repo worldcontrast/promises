@@ -1,0 +1,169 @@
+{
+  "nav": {
+    "compare": "Compare now",
+    "countries": "Countries",
+    "manifesto": "Manifesto",
+    "audit": "Audit",
+    "github": "GitHub"
+  },
+
+  "language": {
+    "select": "Choose your language",
+    "current": "EN"
+  },
+
+  "hero": {
+    "live": "Live — Brazil 2026",
+    "headline": "What did they <gold>promise</gold>?",
+    "headline2": "See it side by side.",
+    "subheadline": "Choose a country and a topic. We show you exactly what each candidate promised — from their own official pages. No opinions. No bias. Just the facts.",
+    "searchLabel": "Choose what you want to compare",
+    "searchButton": "Compare promises now →",
+    "trust1": "Official sources only",
+    "trust2": "Zero political bias",
+    "trust3": "Free forever"
+  },
+
+  "howItWorks": {
+    "title": "How does it work?",
+    "subtitle": "Three steps. No account needed.",
+    "step1Title": "Choose a country",
+    "step1Desc": "Select the election you want to follow",
+    "step2Title": "Pick a topic",
+    "step2Desc": "Health, economy, education — or see everything",
+    "step3Title": "See the contrast",
+    "step3Desc": "Each candidate's exact words, side by side"
+  },
+
+  "categories": {
+    "title": "Browse by topic",
+    "all": "All topics",
+    "economy": "Economy",
+    "education": "Education",
+    "health": "Health",
+    "safety": "Public Safety",
+    "environment": "Environment",
+    "social": "Social",
+    "rights": "Human Rights",
+    "infrastructure": "Infrastructure",
+    "governance": "Governance"
+  },
+
+  "countries": {
+    "title": "Available countries",
+    "live": "Live",
+    "comingSoon": "Coming soon",
+    "planned": "Planned",
+    "contribute": "Want to add your country?",
+    "contributeLink": "Contribute on GitHub"
+  },
+
+  "promise": {
+    "ourPromise": "Our promise to you",
+    "ourPromiseText": "We never accept money from politicians. We never editorialize. We only compare.",
+    "zeroAds": "Zero ads",
+    "zeroFunding": "Zero political funding",
+    "openSource": "100% open source"
+  },
+
+  "compare": {
+    "backToCountries": "← All countries",
+    "title": "What did each candidate promise?",
+    "officialSource": "Official source",
+    "lastUpdated": "Last updated",
+    "noPromise": "No promise found for this topic in official sources.",
+    "lastChecked": "Last checked",
+    "stated": "Stated",
+    "partial": "Partial",
+    "absent": "No data",
+    "archive": "Archive",
+    "sourceFound": "Promise found in official source",
+    "noData": "No promise found",
+    "ourPrinciples": "Our principles"
+  },
+
+  "candidate": {
+    "electoralFiling": "Electoral filing",
+    "officialSite": "Official site",
+    "lastCollected": "Last collected",
+    "totalPromises": "Total promises",
+    "backToComparison": "← Back to comparison",
+    "viewCandidate": "View candidate"
+  },
+
+  "audit": {
+    "title": "Audit portal",
+    "subtitle": "Every promise in our database is publicly verifiable. Verify any record independently — without trusting us.",
+    "warrantTitle": "Warrant Canary",
+    "warrantUpdated": "Updated",
+    "warrantConfirms": "World Contrast confirms:",
+    "w1": "Has NOT received any government order to remove or modify data",
+    "w2": "Has NOT received legal threats from any candidate or political actor",
+    "w3": "Has NOT been contacted by any intelligence agency",
+    "w4": "Has NOT been pressured to favor or disfavor any candidate",
+    "w5": "Has NOT modified any collected promise data under political pressure",
+    "howToVerify": "How to verify any promise record",
+    "recentRuns": "Recent agent runs",
+    "openAPI": "Open data API",
+    "apiDocs": "Full documentation"
+  },
+
+  "manifesto": {
+    "eyebrow": "Founding document · April 4, 2026",
+    "title": "Our manifesto",
+    "subtitle": "\"The truth emerges from contrast — not from repetition.\"",
+    "whyTitle": "Why we exist",
+    "whyP1": "We live in an era of excess. Words, promises, speeches and data float in an ocean of digital noise. In any corner of the world, the human desire for a better future remains constant.",
+    "whyP2": "World Contrast was born from a simple premise: information is not enough. Clarity is. We do not tell you who to believe. We do not point the way. We only illuminate the differences — and let you decide.",
+    "whatTitle": "What we do — and what we never do",
+    "whatP1": "We collect promises only from official sources. We never contact politicians. We never accept money from parties or governments. We never editorialize.",
+    "whatP2": "We copy. We organize. We compare.",
+    "pillarsTitle": "Our eight pillars",
+    "pillar1Name": "Radical Neutrality",
+    "pillar1Desc": "We are the mirror, not the judge. Contrast reveals what words try to hide.",
+    "pillar2Name": "Sovereignty Respect",
+    "pillar2Desc": "We operate within each country's legal framework, without exception.",
+    "pillar3Name": "Democracy of Information",
+    "pillar3Desc": "If there is a proposal that affects people's lives, there must be clarity.",
+    "pillar4Name": "The Right to Compare",
+    "pillar4Desc": "Comparing is an act of intelligence. It is our universal language.",
+    "pillar5Name": "Source Integrity",
+    "pillar5Desc": "Every record is timestamped, URL-cited, and cryptographically archived.",
+    "pillar6Name": "Zero Contact",
+    "pillar6Desc": "We never reach out to candidates or parties. We only observe public records.",
+    "pillar7Name": "Open Infrastructure",
+    "pillar7Desc": "Our code, data, and methodology are fully open-source and auditable.",
+    "pillar8Name": "No Advertising",
+    "pillar8Desc": "No ads. No sponsored content. No monetization. Ever.",
+    "ctaTitle": "Compare. Contrast. Decide.",
+    "ctaSubtitle": "Because the world is clearer when you see the difference."
+  },
+
+  "footer": {
+    "tagline": "Comparing political campaigns — because the world is clearer when you see the difference.",
+    "platform": "Platform",
+    "mission": "Mission",
+    "legal": "Legal",
+    "compareTool": "Compare tool",
+    "liveElections": "Live elections",
+    "openData": "Open data API",
+    "manifesto": "Manifesto v2.0",
+    "pillars": "Eight pillars",
+    "transparency": "Transparency",
+    "contribute": "Contribute",
+    "security": "Security policy",
+    "dataStandards": "Data standards",
+    "privacy": "Privacy",
+    "license": "MIT License",
+    "neutral": "Zero bias · Zero contact · Zero agenda",
+    "copyright": "World Contrast — Non-profit · Open-source · All data public domain"
+  },
+
+  "meta": {
+    "homeTitle": "World Contrast — Compare Political Promises",
+    "homeDescription": "See what candidates promised, side by side. Official sources only. Zero bias. Free forever.",
+    "compareTitle": "Compare Promises",
+    "manifestoTitle": "Our Manifesto",
+    "auditTitle": "Audit Portal"
+  }
+}
