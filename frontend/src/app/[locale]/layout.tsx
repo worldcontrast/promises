@@ -1,53 +1,18 @@
-// ============================================================
-// World Contrast — Root Layout
-// File: src/app/[locale]/layout.tsx
-// ============================================================
-
 import type { Metadata } from 'next'
-import { Plus_Jakarta_Sans } from 'next/font/google'
 import { NextIntlClientProvider } from 'next-intl'
-import { getMessages, getTranslations } from 'next-intl/server'
+import { getMessages } from 'next-intl/server'
 import { notFound } from 'next/navigation'
 import { locales, localeConfig, type Locale } from '@/i18n'
 import Navbar from '@/components/layout/Navbar'
-import './globals.css'
+import '../globals.css'
 
-const font = Plus_Jakarta_Sans({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700', '800'],
-  display: 'swap',
-})
-
-// Generate metadata per locale
-export async function generateMetadata({
-  params: { locale },
-}: {
-  params: { locale: Locale }
-}): Promise<Metadata> {
-  const t = await getTranslations({ locale, namespace: 'meta' })
-
-  return {
-    title: {
-      default: t('homeTitle'),
-      template: `%s — World Contrast`,
-    },
-    description: t('homeDescription'),
-    metadataBase: new URL('https://worldcontrast.org'),
-    openGraph: {
-      siteName: 'World Contrast',
-      locale,
-      type: 'website',
-    },
-    robots: {
-      index: true,
-      follow: true,
-    },
-  }
+export const metadata: Metadata = {
+  title: { default: 'World Contrast', template: '%s — World Contrast' },
+  description: 'Compare political campaign promises side by side. Official sources. Zero bias.',
 }
 
-// Generate static params for all locales
 export function generateStaticParams() {
-  return locales.map((locale) => ({ locale }))
+  return locales.map(locale => ({ locale }))
 }
 
 export default async function RootLayout({
@@ -55,19 +20,15 @@ export default async function RootLayout({
   params: { locale },
 }: {
   children: React.ReactNode
-  params: { locale: Locale }
+  params: { locale: string }
 }) {
-  // Validate locale
-  if (!locales.includes(locale)) notFound()
-
-  // Load messages for this locale
+  if (!locales.includes(locale as Locale)) notFound()
   const messages = await getMessages()
-
-  const dir = localeConfig[locale]?.dir || 'ltr'
+  const dir = localeConfig[locale as Locale]?.dir || 'ltr'
 
   return (
     <html lang={locale} dir={dir}>
-      <body className={font.className}>
+      <body>
         <NextIntlClientProvider messages={messages}>
           <Navbar />
           <main>{children}</main>
