@@ -5,8 +5,8 @@ import type { Category } from '@/types'
 import { CATEGORY_CONFIG } from '@/types'
 
 interface Props {
-  params: { locale: string; electionId: string }
-  searchParams: { category?: string }
+  params: Promise<{ locale: string; electionId: string }>
+  searchParams: Promise<{ category?: string }>
 }
 
 export async function generateStaticParams() {
@@ -14,8 +14,9 @@ export async function generateStaticParams() {
 }
 
 export default async function ComparePage({ params, searchParams }: Props) {
-  const { locale, electionId } = params
-  const category = searchParams.category as Category | undefined
+  const { locale, electionId } = await params
+  const { category } = await searchParams
+  const cat = category as Category | undefined
 
   const election = await getElection(electionId)
   if (!election) notFound()
@@ -24,7 +25,7 @@ export default async function ComparePage({ params, searchParams }: Props) {
   const candB = election.candidates[1]
   if (!candA || !candB) notFound()
 
-  const data = getComparisonData(election, candA.id, candB.id, category)
+  const data = getComparisonData(election, candA.id, candB.id, cat)
   const allCats = Object.keys(CATEGORY_CONFIG) as Category[]
   const isPt = locale === 'pt'
 
@@ -86,17 +87,17 @@ export default async function ComparePage({ params, searchParams }: Props) {
       <div style={{ padding: '10px 24px', background: '#fff', borderBottom: '1px solid #E5E7EB', display: 'flex', gap: 6, flexWrap: 'wrap', position: 'sticky', top: 60, zIndex: 50 }}>
         <Link
           href={`/compare/${electionId}`}
-          style={{ fontSize: 12, fontWeight: 600, padding: '6px 14px', borderRadius: 20, border: `1.5px solid ${!category ? '#0B1D2E' : '#E5E7EB'}`, background: !category ? '#0B1D2E' : '#fff', color: !category ? '#fff' : '#374151', textDecoration: 'none', whiteSpace: 'nowrap' }}
+          style={{ fontSize: 12, fontWeight: 600, padding: '6px 14px', borderRadius: 20, border: `1.5px solid ${!cat ? '#0B1D2E' : '#E5E7EB'}`, background: !cat ? '#0B1D2E' : '#fff', color: !cat ? '#fff' : '#374151', textDecoration: 'none', whiteSpace: 'nowrap' }}
         >
           {isPt ? 'Todos' : 'All topics'}
         </Link>
-        {allCats.map(cat => {
-          const cfg = CATEGORY_CONFIG[cat]
-          const active = category === cat
+        {allCats.map(c => {
+          const cfg = CATEGORY_CONFIG[c]
+          const active = cat === c
           return (
             <Link
-              key={cat}
-              href={`/compare/${electionId}?category=${cat}`}
+              key={c}
+              href={`/compare/${electionId}?category=${c}`}
               style={{ fontSize: 12, fontWeight: 600, padding: '6px 14px', borderRadius: 20, border: `1.5px solid ${active ? '#0B1D2E' : '#E5E7EB'}`, background: active ? '#0B1D2E' : '#fff', color: active ? '#fff' : '#374151', textDecoration: 'none', whiteSpace: 'nowrap' }}
             >
               {cfg.emoji} {cfg.label[locale] || cfg.label['en']}
@@ -145,7 +146,6 @@ function PromiseCell({
   p: any; locale: string; cfg: any; border?: boolean
 }) {
   const isPt = locale === 'pt'
-
   const getHost = (url: string) => {
     try { return new URL(url).hostname } catch { return url }
   }
