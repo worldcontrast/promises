@@ -4,16 +4,8 @@ import createNextIntlPlugin from 'next-intl/plugin'
 const withNextIntl = createNextIntlPlugin('./src/i18n.ts')
 
 const nextConfig: NextConfig = {
-  // O Next.js vai interceptar quem acessar a raiz e jogar direto para a página pronta
-  async redirects() {
-    return [
-      {
-        source: '/',
-        destination: '/pt/compare/brazil-2026',
-        permanent: false, 
-      },
-    ]
-  },
+  // Redirect removido daqui — feito no middleware para evitar
+  // conflito com o next-intl que também intercepta a raiz "/"
 }
 
 export default withNextIntl(nextConfig)
