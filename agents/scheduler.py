@@ -1,22 +1,17 @@
 """
 World Contrast — Main Scheduler
 File: agents/scheduler.py
-
-Orchestrates the full collection pipeline:
-1. Load source registry (which URLs to visit)
-2. Run crawler agents (fetch raw content)
-3. Run extraction pipeline (Claude API → structured promises)
-4. Run validation layer (dedup, sentiment guard, confidence)
-5. Save to database with full provenance
-
-Runs every 5 days via GitHub Actions cron.
-Can also be triggered manually: python scheduler.py --country BR --dry-run
 """
+
+import sys
+import os
+
+# Garante que a raiz do projeto está no PATH, independente de onde o script é chamado
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import asyncio
 import argparse
 import logging
-import sys
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
@@ -29,6 +24,8 @@ from config.settings import Settings
 from config.database import Database
 
 # ── LOGGING ──────────────────────────────────────────────────
+Path('logs').mkdir(exist_ok=True)  # garante que o diretório existe antes de criar o FileHandler
+
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s [%(levelname)s] %(name)s: %(message)s',
@@ -46,17 +43,6 @@ async def run_pipeline(
     dry_run: bool = False,
     election_id: str | None = None,
 ) -> dict:
-    """
-    Run the full collection pipeline.
-
-    Args:
-        country_filter: ISO 3166-1 alpha-2 country code (e.g. 'BR')
-        dry_run: If True, fetch and extract but do NOT save to database
-        election_id: Run for a specific election only
-
-    Returns:
-        dict with run statistics
-    """
     run_id = str(uuid.uuid4())
     started_at = datetime.now(timezone.utc)
 
@@ -84,12 +70,10 @@ async def run_pipeline(
         'errors': [],
     }
 
-    # ── STEP 1: Load source registry ─────────────────────────
     log.info("Step 1/5: Loading source registry...")
     registry = load_source_registry(country_filter, election_id)
     log.info(f"  Found {len(registry)} elections to process")
 
-    # ── STEP 2-5: Process each election ──────────────────────
     crawler = WebCrawler(settings)
     extractor = PromiseExtractor(settings)
     validator = PromiseValidator(settings)
@@ -110,20 +94,17 @@ async def run_pipeline(
                 stats['sources_visited'] += 1
 
                 try:
-                    # ── STEP 2: Crawl ─────────────────────────
                     page = await crawler.fetch(url, source_type)
                     if not page:
                         log.warning(f"    ✗ Failed to fetch: {url}")
                         stats['errors'].append(f"fetch_failed:{url}")
                         continue
 
-                    # ── STEP 3: Archive ───────────────────────
                     archive_url = await archiver.save(page)
                     page['archive_url'] = archive_url
                     stats['pages_archived'] += 1
                     log.info(f"    ✓ Archived: {archive_url}")
 
-                    # ── STEP 4: Extract ───────────────────────
                     extraction = await extractor.extract(
                         content=page['text'],
                         candidate_name=candidate['name'],
@@ -145,7 +126,6 @@ async def run_pipeline(
                             log.info(f"      → [{p['category']}] {p['text_original'][:80]}...")
                         continue
 
-                    # ── STEP 5: Validate + Save ───────────────
                     for raw_promise in extraction.get('promises', []):
                         validated = await validator.validate(
                             promise=raw_promise,
@@ -165,7 +145,6 @@ async def run_pipeline(
                     stats['errors'].append(f"processing_error:{url}:{str(e)}")
                     continue
 
-    # ── FINALIZE ─────────────────────────────────────────────
     stats['completed_at'] = datetime.now(timezone.utc).isoformat()
     stats['status'] = 'completed' if not stats['errors'] else 'completed_with_errors'
 
@@ -190,10 +169,6 @@ def load_source_registry(
     country_filter: str | None = None,
     election_id: str | None = None,
 ) -> list[dict]:
-    """
-    Loads election and candidate source URLs from the data directory.
-    These are the JSON files in /data/countries/*.json
-    """
     import json
     data_dir = Path(__file__).parent.parent / 'data' / 'countries'
 
@@ -202,7 +177,6 @@ def load_source_registry(
         with open(filepath) as f:
             data = json.load(f)
 
-        # Apply filters
         if country_filter and data.get('country_code') != country_filter:
             continue
         if election_id:
@@ -243,7 +217,6 @@ Examples:
         election_id=args.election,
     ))
 
-    # Exit with error code if there were errors
     sys.exit(1 if stats.get('errors') else 0)
 
 
