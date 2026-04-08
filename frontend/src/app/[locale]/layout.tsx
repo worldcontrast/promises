@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { NextIntlClientProvider } from 'next-intl'
-import { getMessages } from 'next-intl/server'
+import { getMessages, setRequestLocale } from 'next-intl/server'
 import { notFound } from 'next/navigation'
 import { locales, localeConfig, type Locale } from '@/i18n'
 import Navbar from '@/components/layout/Navbar'
@@ -23,6 +23,10 @@ export default async function RootLayout({
   params: Promise<{ locale: string }>
 }) {
   const { locale } = await params
+  
+  // CORREÇÃO: Habilitando a renderização estática para o next-intl
+  setRequestLocale(locale)
+
   if (!locales.includes(locale as Locale)) notFound()
   const messages = await getMessages()
   const dir = localeConfig[locale as Locale]?.dir || 'ltr'
