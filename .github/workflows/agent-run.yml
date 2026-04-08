@@ -50,17 +50,24 @@ jobs:
           pip install -r agents/requirements.txt
           playwright install chromium
 
+      - name: Create logs directory
+        run: mkdir -p logs
+
       - name: Run collection pipeline
         env:
+          # Anthropic — tenta os dois nomes para compatibilidade
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          CLAUDE_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          # Supabase
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          # Meta
           AGENT_VERSION: '1.0.0'
           LOG_LEVEL: 'INFO'
         run: |
           python agents/scheduler.py \
-            ${{ github.event.inputs.country && format('--country {0}', github.event.inputs.country) || '' }} \
-            ${{ github.event.inputs.election_id && format('--election {0}', github.event.inputs.election_id) || '' }} \
+            ${{ github.event.inputs.country != '' && format('--country {0}', github.event.inputs.country) || '' }} \
+            ${{ github.event.inputs.election_id != '' && format('--election {0}', github.event.inputs.election_id) || '' }} \
             ${{ github.event.inputs.dry_run == 'true' && '--dry-run' || '' }}
 
       - name: Upload run logs
@@ -69,4 +76,5 @@ jobs:
         with:
           name: agent-logs-${{ github.run_id }}
           path: logs/*.log
+          if-no-files-found: warn
           retention-days: 90
