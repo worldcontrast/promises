@@ -4,9 +4,8 @@ import { getElection, getComparisonData, getLocalised } from '@/lib/data'
 import type { Category } from '@/types'
 import { CATEGORY_CONFIG } from '@/types'
 import { setRequestLocale } from 'next-intl/server'
-export const dynamic = 'force-dynamic'
 
-// ESTA LINHA É O SEGREDO: Ela impede o erro de build da Vercel
+// Apenas UMA declaração de force-dynamic
 export const dynamic = 'force-dynamic'
 
 interface Props {
@@ -14,17 +13,15 @@ interface Props {
   searchParams: Promise<{ category?: string }>
 }
 
-// Simplificamos aqui para não travar o build
 export async function generateStaticParams() {
-  return [] 
+  return []
 }
 
 export default async function ComparePage({ params, searchParams }: Props) {
   const { locale, electionId } = await params
-  
-  // Habilitando a renderização para o next-intl
+
   setRequestLocale(locale)
-  
+
   const { category } = await searchParams
   const cat = category as Category | undefined
 
