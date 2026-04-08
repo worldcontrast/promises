@@ -52,6 +52,9 @@ jobs:
         run: mkdir -p logs
 
       - name: Run collection pipeline
+        # O script é sempre chamado da raiz do repo.
+        # PYTHONPATH=. garante que `import config.*` e `import agents.*`
+        # funcionem independente de qualquer sys.path dentro do script.
         env:
           PYTHONPATH: .
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
