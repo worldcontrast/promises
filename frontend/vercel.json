@@ -1,5 +1,9 @@
 {
   "redirects": [
-    { "source": "/", "destination": "/pt/", "permanent": true }
+    {
+      "source": "/",
+      "destination": "/pt/compare/brazil-2026/",
+      "permanent": true
+    }
   ]
 }
