@@ -6,9 +6,6 @@ import { CATEGORY_CONFIG } from '@/types'
 import { setRequestLocale } from 'next-intl/server'
 export const dynamic = 'force-dynamic'
 
-// ESTA LINHA É O SEGREDO: Ela impede o erro de build da Vercel
-export const dynamic = 'force-dynamic'
-
 interface Props {
   params: Promise<{ locale: string; electionId: string }>
   searchParams: Promise<{ category?: string }>
