@@ -15,14 +15,12 @@ export const localeConfig: Record<Locale, { name: string; flag: string; dir: 'lt
 }
 
 export default getRequestConfig(async ({ requestLocale }) => {
-  // 1. Aguardamos a promessa do idioma (Regra do Next.js 15)
-  let locale = await requestLocale;
+  const locale = await requestLocale;
 
-  if (!locales.includes(locale as Locale)) notFound()
+  if (!locales.includes(locale as any)) notFound();
 
   return {
-    // 2. Retornamos o locale explicitamente para o Vercel não reclamar
     locale,
-    messages: (await import(`../messages/${locale}.json`)).default,
-  }
-})
+    messages: (await import(`../messages/${locale}.json`)).default
+  };
+});
