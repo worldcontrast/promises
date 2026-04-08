@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { getElection, getComparisonData, getLocalised } from '@/lib/data'
 import type { Category } from '@/types'
 import { CATEGORY_CONFIG } from '@/types'
+import { setRequestLocale } from 'next-intl/server'
 
 interface Props {
   params: Promise<{ locale: string; electionId: string }>
@@ -15,6 +16,10 @@ export async function generateStaticParams() {
 
 export default async function ComparePage({ params, searchParams }: Props) {
   const { locale, electionId } = await params
+  
+  // CORREÇÃO: Habilitando a renderização estática para o next-intl
+  setRequestLocale(locale)
+  
   const { category } = await searchParams
   const cat = category as Category | undefined
 
