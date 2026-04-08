@@ -2,23 +2,22 @@
 World Contrast — Main Scheduler
 File: agents/scheduler.py
 
-Orchestrates the full collection pipeline:
-1. Load source registry (which URLs to visit)
-2. Run crawler agents (fetch raw content)
-3. Run extraction pipeline (Claude API → structured promises)
-4. Run validation layer (dedup, sentiment guard, confidence)
-5. Save to database with full provenance
-
-Runs every 5 days via GitHub Actions cron.
-Can also be triggered manually: python agents/scheduler.py --country BR --dry-run
+Pipeline order (respects FK constraints in schema.sql):
+  1. db.start_run()           → INSERT collection_runs
+  2. db.upsert_candidate()    → UPSERT candidates
+  3. crawler.fetch()          → fetch URL
+  4. db.save_crawled_page()   → INSERT crawled_pages
+  5. extractor.extract()      → Claude API → promises[]
+  6. validator.validate()     → filter + enrich
+  7. db.save_promise()        → INSERT promises (needs candidate_id + crawled_page_id)
+  8. db.finish_run()          → UPDATE collection_runs
 """
 
 import sys
 import os
 
-# Garante que a RAIZ do repositório está no path.
-# os.getcwd() no GitHub Actions é sempre a raiz do repo após checkout.
-# Isso permite importar tanto `agents.*` quanto `config.*` sem conflito.
+# Insere a RAIZ do repo no path — permite `from config.x` e `from agents.x`
+# os.getcwd() no GitHub Actions é sempre a raiz após o checkout.
 sys.path.insert(0, os.getcwd())
 
 import asyncio
@@ -28,10 +27,9 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
-# Cria o diretório de logs antes de qualquer coisa — o FileHandler abaixo depende disso
+# Cria logs/ antes do FileHandler tentar abrir o arquivo
 Path('logs').mkdir(exist_ok=True)
 
-# ── LOGGING ──────────────────────────────────────────────────
 logging.basicConfig(
     level=os.environ.get('LOG_LEVEL', 'INFO'),
     format='%(asctime)s [%(levelname)s] %(name)s: %(message)s',
@@ -42,14 +40,6 @@ logging.basicConfig(
 )
 log = logging.getLogger('scheduler')
 
-# Importações internas — todas usam caminhos absolutos a partir da raiz do repo.
-# Estrutura esperada (nomes SEM prefixo agent_):
-#   agents/crawler/crawler.py        → class WebCrawler
-#   agents/extraction/extractor.py   → class PromiseExtractor
-#   agents/validation/validator.py   → class PromiseValidator
-#   agents/archive/archiver.py       → class PageArchiver
-#   config/settings.py               → class Settings
-#   config/database.py               → class Database
 from agents.crawler.crawler import WebCrawler
 from agents.extraction.extractor import PromiseExtractor
 from agents.validation.validator import PromiseValidator
@@ -58,35 +48,23 @@ from config.settings import Settings
 from config.database import Database
 
 
-# ── PIPELINE ─────────────────────────────────────────────────
 async def run_pipeline(
     country_filter: str | None = None,
     dry_run: bool = False,
     election_id: str | None = None,
 ) -> dict:
-    """
-    Run the full collection pipeline.
 
-    Args:
-        country_filter: ISO 3166-1 alpha-2 country code (e.g. 'BR')
-        dry_run: If True, fetch and extract but do NOT save to database
-        election_id: Run for a specific election only
-
-    Returns:
-        dict with run statistics
-    """
     run_id = str(uuid.uuid4())
     started_at = datetime.now(timezone.utc)
 
     log.info("═══════════════════════════════════════")
     log.info(f"World Contrast Agent — Run {run_id[:8]}")
-    log.info(f"Started: {started_at.isoformat()}")
+    log.info(f"Started:        {started_at.isoformat()}")
     log.info(f"Country filter: {country_filter or 'all'}")
-    log.info(f"Dry run: {dry_run}")
+    log.info(f"Dry run:        {dry_run}")
     log.info("═══════════════════════════════════════")
 
     settings = Settings()
-    db = Database(settings) if not dry_run else None
 
     stats = {
         'run_id': run_id,
@@ -102,12 +80,18 @@ async def run_pipeline(
         'errors': [],
     }
 
-    # ── STEP 1: Load source registry ─────────────────────────
+    # ── STEP 1: Open DB + start run ───────────────────────────
+    db = None
+    if not dry_run:
+        db = Database(settings)
+        trigger = 'scheduled' if os.environ.get('GITHUB_EVENT_NAME') == 'schedule' else 'manual'
+        await db.start_run(trigger=trigger)
+
+    # ── STEP 2: Load registry ─────────────────────────────────
     log.info("Step 1/5: Loading source registry...")
     registry = load_source_registry(country_filter, election_id)
     log.info(f"  Found {len(registry)} elections to process")
 
-    # ── STEP 2-5: Process each election ──────────────────────
     crawler   = WebCrawler(settings)
     extractor = PromiseExtractor(settings)
     validator = PromiseValidator(settings)
@@ -118,9 +102,20 @@ async def run_pipeline(
         stats['elections_processed'] += 1
 
         for candidate in election['candidates']:
-            log.info(f"  Candidate: {candidate['name']}")
+            log.info(f"  Candidate: {candidate.get('name', candidate.get('fullName', ''))}")
 
-            for source_type, url in candidate['sources'].items():
+            # ── STEP 3: Upsert candidate row ──────────────────
+            candidate_db_id = None
+            if not dry_run and db:
+                candidate_db_id = await db.upsert_candidate(
+                    candidate=candidate,
+                    election_id=election['id'],
+                )
+                if not candidate_db_id:
+                    log.warning(f"  Could not upsert candidate, skipping")
+                    continue
+
+            for source_type, url in candidate.get('sources', {}).items():
                 if not url:
                     continue
 
@@ -128,23 +123,31 @@ async def run_pipeline(
                 stats['sources_visited'] += 1
 
                 try:
-                    # ── STEP 2: Crawl ─────────────────────────
+                    # ── STEP 4: Crawl ─────────────────────────
                     page = await crawler.fetch(url, source_type)
                     if not page:
                         log.warning(f"    ✗ Failed to fetch: {url}")
                         stats['errors'].append(f"fetch_failed:{url}")
                         continue
 
-                    # ── STEP 3: Archive ───────────────────────
+                    # ── STEP 5: Archive ───────────────────────
                     archive_url = await archiver.save(page)
                     page['archive_url'] = archive_url
                     stats['pages_archived'] += 1
                     log.info(f"    ✓ Archived: {archive_url}")
 
-                    # ── STEP 4: Extract ───────────────────────
+                    # ── STEP 6: Save crawled page (gets UUID) ─
+                    crawled_page_id = None
+                    if not dry_run and db:
+                        crawled_page_id = await db.save_crawled_page(
+                            page=page,
+                            candidate_id=candidate_db_id,
+                        )
+
+                    # ── STEP 7: Extract ───────────────────────
                     extraction = await extractor.extract(
                         content=page['text'],
-                        candidate_name=candidate['name'],
+                        candidate_name=candidate.get('name', ''),
                         country=election['country'],
                         source_type=source_type,
                         source_url=url,
@@ -159,22 +162,33 @@ async def run_pipeline(
 
                     if dry_run:
                         for p in extraction.get('promises', []):
-                            log.info(f"      → [{p['category']}] {p['text_original'][:80]}...")
+                            log.info(f"      → [{p.get('category')}] {p.get('text_original','')[:80]}...")
                         continue
 
-                    # ── STEP 5: Validate + Save ───────────────
+                    # ── STEP 8: Validate + Save ───────────────
                     for raw_promise in extraction.get('promises', []):
                         validated = await validator.validate(
                             promise=raw_promise,
-                            candidate_id=candidate['id'],
+                            candidate_id=candidate.get('id', ''),
                             election_id=election['id'],
                             page=page,
                         )
-                        if validated:
-                            await db.save_promise(validated)
-                            stats['promises_saved'] += 1
-                        else:
-                            log.debug(f"      Validator rejected: {raw_promise.get('text_original', '')[:60]}")
+
+                        if not validated:
+                            log.debug(f"      Validator rejected: {raw_promise.get('text_original','')[:60]}")
+                            continue
+
+                        # Inject the DB foreign keys before saving
+                        validated['candidate_id']    = candidate_db_id
+                        validated['crawled_page_id'] = crawled_page_id
+                        validated['source_url']      = url
+                        validated['archive_url']     = archive_url
+                        validated['content_hash']    = page.get('content_hash', '')
+
+                        if db:
+                            saved = await db.save_promise(validated)
+                            if saved:
+                                stats['promises_saved'] += 1
 
                 except Exception as e:
                     log.error(f"    ✗ Error processing {url}: {e}")
@@ -186,7 +200,7 @@ async def run_pipeline(
     stats['status'] = 'completed' if not stats['errors'] else 'completed_with_errors'
 
     log.info("\n═══════════════════════════════════════")
-    log.info(f"Run complete: {run_id[:8]}")
+    log.info(f"Run complete:        {run_id[:8]}")
     log.info(f"Elections processed: {stats['elections_processed']}")
     log.info(f"Sources visited:     {stats['sources_visited']}")
     log.info(f"Pages archived:      {stats['pages_archived']}")
@@ -197,7 +211,7 @@ async def run_pipeline(
     log.info("═══════════════════════════════════════")
 
     if not dry_run and db:
-        await db.save_run_log(stats)
+        await db.finish_run(stats)
 
     return stats
 
@@ -206,13 +220,7 @@ def load_source_registry(
     country_filter: str | None = None,
     election_id: str | None = None,
 ) -> list[dict]:
-    """
-    Loads election and candidate source URLs from data/countries/*.json
-    Path is resolved relative to the repo root (os.getcwd()).
-    """
     import json
-
-    # Resolve sempre a partir da raiz do repo, não do __file__
     data_dir = Path(os.getcwd()) / 'data' / 'countries'
 
     if not data_dir.exists():
@@ -226,36 +234,37 @@ def load_source_registry(
 
         if country_filter and data.get('country_code') != country_filter:
             continue
-        if election_id:
-            data['elections'] = [e for e in data.get('elections', []) if e['id'] == election_id]
 
-        for election in data.get('elections', []):
+        country_elections = data.get('elections', [])
+        if election_id:
+            country_elections = [e for e in country_elections if e['id'] == election_id]
+
+        for election in country_elections:
             elections.append({
-                'id': election['id'],
-                'country': data['country_code'],
+                'id':           election['id'],
+                'country':      data['country_code'],
                 'tribunal_url': data.get('tribunal', {}).get('url'),
-                'candidates': election.get('candidates', []),
+                'candidates':   election.get('candidates', []),
             })
 
     return elections
 
 
-# ── CLI ENTRY POINT ───────────────────────────────────────────
 def main():
     parser = argparse.ArgumentParser(
         description='World Contrast Agent — Collection Pipeline',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  python agents/scheduler.py                          # Run all countries
+  python agents/scheduler.py                          # all countries
   python agents/scheduler.py --country BR             # Brazil only
-  python agents/scheduler.py --country BR --dry-run   # Test without saving
-  python agents/scheduler.py --election brazil-2026   # Specific election
+  python agents/scheduler.py --country BR --dry-run   # test, no DB writes
+  python agents/scheduler.py --election brazil-2026   # specific election
         """
     )
-    parser.add_argument('--country',  help='ISO country code (e.g. BR, US)')
+    parser.add_argument('--country',  help='ISO country code (e.g. BR)')
     parser.add_argument('--election', help='Election ID (e.g. brazil-2026)')
-    parser.add_argument('--dry-run',  action='store_true', help='Extract but do not save')
+    parser.add_argument('--dry-run',  action='store_true')
     args = parser.parse_args()
 
     stats = asyncio.run(run_pipeline(
