@@ -4,7 +4,8 @@ import createNextIntlPlugin from 'next-intl/plugin'
 const withNextIntl = createNextIntlPlugin('./src/i18n.ts')
 
 const nextConfig: NextConfig = {
-  // Removemos qualquer menção a 'export' ou 'static'
+  // Isso ajuda a evitar erros de rota no servidor
+  trailingSlash: true,
 }
 
 export default withNextIntl(nextConfig)
