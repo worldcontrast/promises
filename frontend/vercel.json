@@ -1,4 +1,7 @@
 {
   "cleanUrls": true,
-  "framework": "nextjs"
+  "trailingSlash": true,
+  "redirects": [
+    { "source": "/", "destination": "/pt/", "permanent": true }
+  ]
 }
