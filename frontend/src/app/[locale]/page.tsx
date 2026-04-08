@@ -1,146 +1,185 @@
+import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { getAllElections } from '@/lib/data'
+import { getElection, getComparisonData, getLocalised } from '@/lib/data'
+import type { Category } from '@/types'
+import { CATEGORY_CONFIG } from '@/types'
 
-export default async function HomePage({
-  params: { locale },
-}: {
-  params: { locale: string }
-}) {
-  const elections = await getAllElections()
-  const live = elections.find(e => e.status === 'live')
+interface Props {
+  params: Promise<{ locale: string; electionId: string }>
+  searchParams: Promise<{ category?: string }>
+}
+
+export async function generateStaticParams() {
+  return [{ electionId: 'brazil-2026' }]
+}
+
+export default async function ComparePage({ params, searchParams }: Props) {
+  const { locale, electionId } = await params
+  const { category } = await searchParams
+  const cat = category as Category | undefined
+
+  const election = await getElection(electionId)
+  if (!election) notFound()
+
+  const candA = election.candidates[0]
+  const candB = election.candidates[1]
+  if (!candA || !candB) notFound()
+
+  const data = getComparisonData(election, candA.id, candB.id, cat)
+  const allCats = Object.keys(CATEGORY_CONFIG) as Category[]
   const isPt = locale === 'pt'
 
   return (
-    <div>
-      {/* HERO */}
-      <section style={{ background: '#0B1D2E', padding: '56px 24px 64px', textAlign: 'center' }}>
-        <div style={{
-          display: 'inline-flex', alignItems: 'center', gap: 6,
-          fontSize: 12, fontWeight: 600, color: '#C8A96E',
-          background: 'rgba(200,169,110,0.15)', border: '1px solid rgba(200,169,110,0.3)',
-          padding: '5px 12px', borderRadius: 20, marginBottom: 20,
-        }}>
-          <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#C8A96E', display: 'inline-block' }} />
-          {isPt ? 'Ao vivo — Brasil 2026' : 'Live — Brazil 2026'}
-        </div>
+    <div style={{ background: '#F9FAFB', minHeight: '100vh' }}>
 
-        <h1 style={{ fontSize: 'clamp(28px,5vw,48px)', fontWeight: 800, color: '#fff', lineHeight: 1.15, letterSpacing: -1, marginBottom: 14 }}>
-          {isPt
-            ? <><span style={{ color: '#C8A96E' }}>O que prometeram</span>?</>
-            : <>What did they <span style={{ color: '#C8A96E' }}>promise</span>?</>}
-          <br />
-          {isPt ? 'Veja lado a lado.' : 'See it side by side.'}
-        </h1>
-
-        <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.6)', maxWidth: 500, margin: '0 auto 36px', lineHeight: 1.6 }}>
-          {isPt
-            ? 'Escolha um país e um tema. Mostramos exatamente o que cada candidato prometeu — nas páginas oficiais. Sem opiniões. Sem viés.'
-            : 'Choose a country and a topic. We show you exactly what each candidate promised — from their own official pages. No opinions. No bias.'}
-        </p>
-
-        {live && (
-          <Link href={`/compare/${live.id}`} style={{
-            display: 'inline-block', background: '#C8A96E', color: '#0B1D2E',
-            fontWeight: 700, fontSize: 15, padding: '14px 32px', borderRadius: 10, textDecoration: 'none',
-          }}>
-            {isPt ? 'Comparar promessas agora →' : 'Compare promises now →'}
+      {/* Header */}
+      <div style={{ background: '#fff', borderBottom: '1px solid #E5E7EB', padding: '16px 24px' }}>
+        <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 6 }}>
+          <Link href="/" style={{ color: '#6B7280', textDecoration: 'none' }}>
+            ← {isPt ? 'Todos os países' : 'All countries'}
           </Link>
-        )}
-
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 20, marginTop: 20, flexWrap: 'wrap' }}>
-          {[
-            isPt ? 'Apenas fontes oficiais' : 'Official sources only',
-            isPt ? 'Zero viés político' : 'Zero political bias',
-            isPt ? 'Grátis para sempre' : 'Free forever',
-          ].map(t => (
-            <span key={t} style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', display: 'flex', alignItems: 'center', gap: 5 }}>
-              <span style={{ color: '#C8A96E' }}>✓</span>{t}
-            </span>
-          ))}
         </div>
-      </section>
-
-      {/* HOW IT WORKS */}
-      <section style={{ padding: '56px 24px', maxWidth: 700, margin: '0 auto', textAlign: 'center' }}>
-        <h2 style={{ fontSize: 22, fontWeight: 800, color: '#111827', marginBottom: 8 }}>
-          {isPt ? 'Como funciona?' : 'How does it work?'}
-        </h2>
-        <p style={{ fontSize: 14, color: '#6B7280', marginBottom: 36 }}>
-          {isPt ? 'Três passos. Sem cadastro.' : 'Three steps. No account needed.'}
-        </p>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 16 }}>
-          {[
-            {
-              n: '1',
-              t: isPt ? 'Escolha um país' : 'Choose a country',
-              d: isPt ? 'Selecione a eleição que quer acompanhar' : 'Select the election you want to follow',
-            },
-            {
-              n: '2',
-              t: isPt ? 'Escolha um tema' : 'Pick a topic',
-              d: isPt ? 'Saúde, economia, educação — ou veja tudo' : 'Health, economy, education — or see everything',
-            },
-            {
-              n: '3',
-              t: isPt ? 'Veja o contraste' : 'See the contrast',
-              d: isPt ? 'As palavras exatas de cada candidato, lado a lado' : "Each candidate's exact words, side by side",
-            },
-          ].map(s => (
-            <div key={s.n} style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 16, padding: '24px 16px' }}>
-              <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#0B1D2E', color: '#fff', fontSize: 14, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
-                {s.n}
-              </div>
-              <div style={{ fontSize: 14, fontWeight: 700, color: '#111827', marginBottom: 6 }}>{s.t}</div>
-              <div style={{ fontSize: 12, color: '#6B7280', lineHeight: 1.6 }}>{s.d}</div>
-            </div>
-          ))}
+        <div style={{ fontSize: 18, fontWeight: 800, color: '#111827' }}>
+          {election.flag} {getLocalised(election.electionName, locale)}
         </div>
-      </section>
-
-      {/* COUNTRIES */}
-      <section style={{ padding: '0 24px 56px', maxWidth: 700, margin: '0 auto' }}>
-        <h2 style={{ fontSize: 16, fontWeight: 700, color: '#111827', marginBottom: 12 }}>
-          {isPt ? 'Países disponíveis' : 'Available countries'}
-        </h2>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {[
-            { flag: '🇧🇷', name: 'Brazil', election: 'Presidential · Oct 2026', status: 'live', id: 'brazil-2026' },
-            { flag: '🇺🇸', name: 'United States', election: 'Midterm · Nov 2026', status: 'soon', id: null },
-            { flag: '🇦🇷', name: 'Argentina', election: 'Legislative · Oct 2026', status: 'soon', id: null },
-          ].map(c => (
-            <div key={c.name} style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 12, padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 12, opacity: c.status === 'live' ? 1 : 0.6 }}>
-              <span style={{ fontSize: 24 }}>{c.flag}</span>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 14, fontWeight: 700 }}>{c.name}</div>
-                <div style={{ fontSize: 12, color: '#6B7280' }}>{c.election}</div>
-              </div>
-              {c.status === 'live' && c.id ? (
-                <Link href={`/compare/${c.id}`} style={{ fontSize: 10, fontWeight: 700, padding: '4px 10px', borderRadius: 20, background: '#DCFCE7', color: '#166534', textDecoration: 'none' }}>
-                  ● {isPt ? 'Ao vivo' : 'Live'}
-                </Link>
-              ) : (
-                <span style={{ fontSize: 10, fontWeight: 700, padding: '4px 10px', borderRadius: 20, background: '#FEF3C7', color: '#92400E' }}>
-                  {isPt ? 'Em breve' : 'Coming soon'}
-                </span>
-              )}
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* BOTTOM */}
-      <div style={{ background: '#0B1D2E', padding: '40px 24px', textAlign: 'center' }}>
-        <div style={{ fontSize: 15, fontWeight: 700, color: '#fff', marginBottom: 16, lineHeight: 1.5 }}>
-          {isPt ? 'Nunca aceitamos dinheiro de políticos.' : 'We never accept money from politicians.'}<br />
-          {isPt ? 'Nunca editorializamos. Só comparamos.' : 'We never editorialize. We only compare.'}
-        </div>
-        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.2)', marginTop: 20 }}>
-          © 2026 World Contrast · Non-profit · Open-source ·{' '}
-          <a href="https://github.com/worldcontrast/promises" target="_blank" rel="noopener noreferrer" style={{ color: 'rgba(255,255,255,0.35)' }}>
-            GitHub ↗
+        <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 2 }}>
+          {isPt ? 'Apenas fontes oficiais' : 'Official sources only'} · {isPt ? 'Atualizado' : 'Updated'}: {election.lastUpdated.slice(0, 10)} ·{' '}
+          <a href={election.tribunal.url} target="_blank" rel="noopener noreferrer" style={{ color: '#3B82F6' }}>
+            {election.tribunal.name} ↗
           </a>
         </div>
       </div>
+
+      {/* Candidate headers */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 40px 1fr', background: '#fff', borderBottom: '1px solid #E5E7EB' }}>
+        <div style={{ padding: '16px 20px', borderRight: '1px solid #E5E7EB' }}>
+          <div style={{ width: 40, height: 40, borderRadius: '50%', background: candA.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 800, color: '#fff', marginBottom: 8 }}>
+            {candA.initials}
+          </div>
+          <div style={{ fontSize: 14, fontWeight: 700 }}>{candA.fullName}</div>
+          <div style={{ fontSize: 11, color: '#6B7280' }}>{candA.party} · No. {candA.electoralNumber}</div>
+          {candA.sources.electoralFiling && (
+            <a href={candA.sources.electoralFiling} target="_blank" rel="noopener noreferrer" style={{ fontSize: 10, color: '#3B82F6', textDecoration: 'none', display: 'inline-block', marginTop: 4 }}>
+              {isPt ? 'Fonte oficial ↗' : 'Official source ↗'}
+            </a>
+          )}
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#F9FAFB', borderRight: '1px solid #E5E7EB' }}>
+          <div style={{ width: 26, height: 26, background: '#C8A96E', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 800, color: '#0B1D2E' }}>
+            VS
+          </div>
+        </div>
+        <div style={{ padding: '16px 20px' }}>
+          <div style={{ width: 40, height: 40, borderRadius: '50%', background: candB.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 800, color: '#fff', marginBottom: 8 }}>
+            {candB.initials}
+          </div>
+          <div style={{ fontSize: 14, fontWeight: 700 }}>{candB.fullName}</div>
+          <div style={{ fontSize: 11, color: '#6B7280' }}>{candB.party} · No. {candB.electoralNumber}</div>
+          {candB.sources.electoralFiling && (
+            <a href={candB.sources.electoralFiling} target="_blank" rel="noopener noreferrer" style={{ fontSize: 10, color: '#3B82F6', textDecoration: 'none', display: 'inline-block', marginTop: 4 }}>
+              {isPt ? 'Fonte oficial ↗' : 'Official source ↗'}
+            </a>
+          )}
+        </div>
+      </div>
+
+      {/* Filter bar */}
+      <div style={{ padding: '10px 24px', background: '#fff', borderBottom: '1px solid #E5E7EB', display: 'flex', gap: 6, flexWrap: 'wrap', position: 'sticky', top: 60, zIndex: 50 }}>
+        <Link
+          href={`/compare/${electionId}`}
+          style={{ fontSize: 12, fontWeight: 600, padding: '6px 14px', borderRadius: 20, border: `1.5px solid ${!cat ? '#0B1D2E' : '#E5E7EB'}`, background: !cat ? '#0B1D2E' : '#fff', color: !cat ? '#fff' : '#374151', textDecoration: 'none', whiteSpace: 'nowrap' }}
+        >
+          {isPt ? 'Todos' : 'All topics'}
+        </Link>
+        {allCats.map(c => {
+          const cfg = CATEGORY_CONFIG[c]
+          const active = cat === c
+          return (
+            <Link
+              key={c}
+              href={`/compare/${electionId}?category=${c}`}
+              style={{ fontSize: 12, fontWeight: 600, padding: '6px 14px', borderRadius: 20, border: `1.5px solid ${active ? '#0B1D2E' : '#E5E7EB'}`, background: active ? '#0B1D2E' : '#fff', color: active ? '#fff' : '#374151', textDecoration: 'none', whiteSpace: 'nowrap' }}
+            >
+              {cfg.emoji} {cfg.label[locale] || cfg.label['en']}
+            </Link>
+          )
+        })}
+      </div>
+
+      {/* Promise blocks */}
+      {data.map(block => {
+        const cfg = CATEGORY_CONFIG[block.category]
+        const count = block.rows.filter((r: any) => r.promiseA || r.promiseB).length
+        return (
+          <div key={block.category} style={{ borderBottom: '1px solid #E5E7EB' }}>
+            <div style={{ padding: '8px 24px', background: '#F9FAFB', borderBottom: '1px solid #E5E7EB', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ width: 8, height: 8, borderRadius: 2, background: cfg.color, flexShrink: 0 }} />
+              <span style={{ fontSize: 10, fontWeight: 700, color: '#374151', letterSpacing: '0.5px', textTransform: 'uppercase' }}>
+                {cfg.emoji} {cfg.label[locale] || cfg.label['en']}
+              </span>
+              <span style={{ fontSize: 10, color: '#9CA3AF', marginLeft: 'auto' }}>{count} items</span>
+            </div>
+            {block.rows.map((row: any, i: number) => (
+              <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', borderBottom: '1px solid #F3F4F6' }}>
+                <PromiseCell p={row.promiseA} locale={locale} cfg={cfg} />
+                <PromiseCell p={row.promiseB} locale={locale} cfg={cfg} border />
+              </div>
+            ))}
+          </div>
+        )
+      })}
+
+      {/* Footer */}
+      <div style={{ background: '#fff', borderTop: '1px solid #E5E7EB', padding: '12px 24px', fontSize: 10, color: '#9CA3AF', textAlign: 'center' }}>
+        World Contrast · Zero bias · All data from official sources ·{' '}
+        <a href="https://github.com/worldcontrast/promises" target="_blank" rel="noopener noreferrer" style={{ color: '#3B82F6' }}>
+          GitHub ↗
+        </a>
+      </div>
+    </div>
+  )
+}
+
+function PromiseCell({
+  p, locale, cfg, border,
+}: {
+  p: any; locale: string; cfg: any; border?: boolean
+}) {
+  const isPt = locale === 'pt'
+  const getHost = (url: string) => {
+    try { return new URL(url).hostname } catch { return url }
+  }
+
+  return (
+    <div style={{ padding: '14px 20px', background: p ? '#fff' : '#F9FAFB', borderLeft: border ? '1px solid #E5E7EB' : undefined, minHeight: 80 }}>
+      {!p ? (
+        <p style={{ fontSize: 11, color: '#9CA3AF', fontStyle: 'italic' }}>
+          {isPt ? 'Nenhuma promessa encontrada nas fontes oficiais.' : 'No promise found in official sources.'}
+        </p>
+      ) : (
+        <>
+          <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.8px', textTransform: 'uppercase', padding: '2px 8px', borderRadius: 4, background: cfg.bg, color: cfg.color, display: 'inline-block', marginBottom: 8 }}>
+            {cfg.label[locale] || cfg.label['en']}
+          </span>
+          <p style={{ fontSize: 13, fontWeight: 500, color: '#111827', lineHeight: 1.6, marginBottom: p.quote ? 8 : 0 }}>
+            {p.text?.[locale] || p.text?.['en'] || ''}
+          </p>
+          {p.quote && (
+            <p style={{ fontSize: 11, fontStyle: 'italic', color: '#6B7280', paddingLeft: 10, borderLeft: '2px solid #E5E7EB', marginBottom: 8, lineHeight: 1.55 }}>
+              {p.quote?.[locale] || p.quote?.['en'] || ''}
+            </p>
+          )}
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', fontSize: 9, color: '#9CA3AF' }}>
+            <span style={{ fontFamily: 'monospace' }}>{getHost(p.sourceUrl || '')}</span>
+            <span>· {(p.collectedAt || '').slice(0, 10)}</span>
+            {p.archiveUrl && (
+              <a href={p.archiveUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#3B82F6' }}>
+                Archive ↗
+              </a>
+            )}
+          </div>
+        </>
+      )}
     </div>
   )
 }
