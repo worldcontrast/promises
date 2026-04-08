@@ -8,9 +8,9 @@ const intlMiddleware = createMiddleware({
 });
 
 export default function middleware(request: NextRequest) {
-  // Redireciona a raiz pura para a página inicial real (lista de países)
+  // Redireciona a raiz pura para a página principal em português
   if (request.nextUrl.pathname === '/') {
-    return NextResponse.redirect(new URL('/pt', request.url));
+    return NextResponse.redirect(new URL('/pt/compare/brazil-2026', request.url));
   }
 
   return intlMiddleware(request);
