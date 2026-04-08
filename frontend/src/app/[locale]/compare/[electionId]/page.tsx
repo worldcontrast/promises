@@ -5,19 +5,23 @@ import type { Category } from '@/types'
 import { CATEGORY_CONFIG } from '@/types'
 import { setRequestLocale } from 'next-intl/server'
 
+// ESTA LINHA É O SEGREDO: Ela impede o erro de build da Vercel
+export const dynamic = 'force-dynamic'
+
 interface Props {
   params: Promise<{ locale: string; electionId: string }>
   searchParams: Promise<{ category?: string }>
 }
 
+// Simplificamos aqui para não travar o build
 export async function generateStaticParams() {
-  return [{ electionId: 'brazil-2026' }]
+  return [] 
 }
 
 export default async function ComparePage({ params, searchParams }: Props) {
   const { locale, electionId } = await params
   
-  // CORREÇÃO: Habilitando a renderização estática para o next-intl
+  // Habilitando a renderização para o next-intl
   setRequestLocale(locale)
   
   const { category } = await searchParams
@@ -89,7 +93,7 @@ export default async function ComparePage({ params, searchParams }: Props) {
       </div>
 
       {/* Filter bar */}
-      <div style={{ padding: '10px 24px', background: '#fff', borderBottom: '1px solid #E5E7EB', display: 'flex', gap: 6, flexWrap: 'wrap', position: 'sticky', top: 60, zIndex: 50 }}>
+      <div style={{ padding: '10px 24px', background: '#fff', borderBottom: '1px solid #E5E7EB', display: 'flex', gap: 6, flexWrap: 'wrap', position: 'sticky', top: 0, zIndex: 50 }}>
         <Link
           href={`/compare/${electionId}`}
           style={{ fontSize: 12, fontWeight: 600, padding: '6px 14px', borderRadius: 20, border: `1.5px solid ${!cat ? '#0B1D2E' : '#E5E7EB'}`, background: !cat ? '#0B1D2E' : '#fff', color: !cat ? '#fff' : '#374151', textDecoration: 'none', whiteSpace: 'nowrap' }}
