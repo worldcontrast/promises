@@ -7,5 +7,6 @@ export default createMiddleware({
 });
 
 export const config = {
+  // Essa linha diz para o servidor ignorar arquivos e focar só nas páginas
   matcher: ['/((?!api|_next|_vercel|.*\\..*).*)']
 };
