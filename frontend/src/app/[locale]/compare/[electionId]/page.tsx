@@ -4,6 +4,7 @@ import { getElection, getComparisonData, getLocalised } from '@/lib/data'
 import type { Category } from '@/types'
 import { CATEGORY_CONFIG } from '@/types'
 import { setRequestLocale } from 'next-intl/server'
+export const dynamic = 'force-dynamic'
 
 // ESTA LINHA É O SEGREDO: Ela impede o erro de build da Vercel
 export const dynamic = 'force-dynamic'
