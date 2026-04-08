@@ -1,12 +1,15 @@
-import createMiddleware from 'next-intl/middleware'
+import createMiddleware from 'next-intl/middleware';
 
 export default createMiddleware({
+  // Idiomas suportados
   locales: ['en', 'pt', 'es', 'fr', 'de', 'ar'],
-  defaultLocale: 'en',
-  localeDetection: true,
-  localePrefix: 'as-needed',
-})
+  // Idioma padrão
+  defaultLocale: 'pt',
+  // Garante que o /pt ou /en sempre apareça
+  localePrefix: 'always'
+});
 
 export const config = {
-  matcher: ['/((?!api|_next|_vercel|.*\\..*).*)'],
-}
+  // Ignora arquivos de sistema e imagens, foca nas páginas
+  matcher: ['/((?!api|_next|_vercel|.*\\..*).*)']
+};
