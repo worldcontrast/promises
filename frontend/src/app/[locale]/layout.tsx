@@ -17,11 +17,12 @@ export function generateStaticParams() {
 
 export default async function RootLayout({
   children,
-  params: { locale },
+  params,
 }: {
   children: React.ReactNode
-  params: { locale: string }
+  params: Promise<{ locale: string }>
 }) {
+  const { locale } = await params
   if (!locales.includes(locale as Locale)) notFound()
   const messages = await getMessages()
   const dir = localeConfig[locale as Locale]?.dir || 'ltr'
