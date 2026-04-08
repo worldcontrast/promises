@@ -1,9 +1,4 @@
 {
-  "redirects": [
-    {
-      "source": "/",
-      "destination": "/pt",
-      "permanent": true
-    }
-  ]
+  "cleanUrls": true,
+  "framework": "nextjs"
 }
