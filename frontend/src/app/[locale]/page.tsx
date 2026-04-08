@@ -37,8 +37,9 @@ export default async function HomePage({ params }: Props) {
       countriesEye: '02 — Live Elections',
       countriesHed: 'Choose a Country',
       compare: 'Compare →',
-      updated: 'Updated',
-      officialSources: 'Official sources only',
+      candidatesTxt: 'candidates',
+      promisesTxt: 'promises',
+      statusTxt: 'Status',
       footTagline: 'Comparing political campaigns — because the world is clearer when you see the difference.',
       footCopy: '© 2025 World Contrast — Non-profit initiative. All data open source. All code open source.',
       footNeutral: 'Zero bias · Zero contact · Zero agenda',
@@ -77,8 +78,9 @@ export default async function HomePage({ params }: Props) {
       countriesEye: '02 — Eleições ao Vivo',
       countriesHed: 'Escolha um País',
       compare: 'Comparar →',
-      updated: 'Atualizado',
-      officialSources: 'Apenas fontes oficiais',
+      candidatesTxt: 'candidatos',
+      promisesTxt: 'promessas',
+      statusTxt: 'Status',
       footTagline: 'Comparando campanhas políticas — porque o mundo fica mais claro quando você vê a diferença.',
       footCopy: '© 2025 World Contrast — Iniciativa sem fins lucrativos. Todos os dados são open source. Todo o código é open source.',
       footNeutral: 'Zero viés · Zero contato · Zero agenda',
@@ -117,8 +119,9 @@ export default async function HomePage({ params }: Props) {
       countriesEye: '02 — Elecciones en Vivo',
       countriesHed: 'Elige un País',
       compare: 'Comparar →',
-      updated: 'Actualizado',
-      officialSources: 'Solo fuentes oficiales',
+      candidatesTxt: 'candidatos',
+      promisesTxt: 'promesas',
+      statusTxt: 'Estado',
       footTagline: 'Comparando campañas políticas — porque el mundo es más claro cuando ves la diferencia.',
       footCopy: '© 2025 World Contrast — Iniciativa sin fines de lucro.',
       footNeutral: 'Cero sesgo · Cero contacto · Cero agenda',
@@ -376,8 +379,6 @@ export default async function HomePage({ params }: Props) {
           </div>
           <div className="elections-grid">
             {elections.map(election => {
-              const candA = election.candidates[0]
-              const candB = election.candidates[1]
               const name = typeof election.electionName === 'object'
                 ? (election.electionName[locale] || election.electionName['en'] || election.electionName['pt'])
                 : election.electionName
@@ -391,17 +392,17 @@ export default async function HomePage({ params }: Props) {
                     <div className="ec-flag">{election.flag}</div>
                     <div className="ec-info">
                       <div className="ec-name">{name}</div>
-                      <div className="ec-meta">{election.tribunal?.name || ''}</div>
+                      <div className="ec-meta">{election.electionDate}</div>
                     </div>
                   </div>
-                  {candA && candB && (
-                    <div className="ec-cands">
-                      {candA.fullName} &nbsp;·&nbsp; {candB.fullName}
-                    </div>
-                  )}
+                  
+                  <div className="ec-cands">
+                    {election.candidateCount} {copy.candidatesTxt} &nbsp;·&nbsp; {election.promiseCount} {copy.promisesTxt}
+                  </div>
+                  
                   <div className="ec-footer">
                     <span className="ec-updated">
-                      {copy.updated}: {(election.lastUpdated || '').slice(0, 10)}
+                      {copy.statusTxt}: {election.status}
                     </span>
                     <span className="ec-arrow">{copy.compare}</span>
                   </div>
