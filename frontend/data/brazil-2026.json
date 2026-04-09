@@ -34,7 +34,7 @@
     {
       "id": "bolsonaro-2026",
       "slug": "bolsonaro",
-      "fullName": "Jair Messias Bolsonaro",
+      "fullName": "Flavio Bolsonaro",
       "displayName": "Bolsonaro",
       "party": "PL",
       "partyFullName": "Partido Liberal",
@@ -60,12 +60,12 @@
       "category": "economy",
       "status": "stated",
       "text": {
-        "pt": "Ampliar a isenção do imposto de renda para trabalhadores que ganham até R$5.000 por mês, a partir de 2026.",
-        "en": "Expand income tax exemption to workers earning up to R$5,000/month, effective 2026."
+        "pt": "Isenção do Imposto de Renda para quem ganha até R$ 5.000 mensais.",
+        "en": "Income tax exemption for those earning up to R$ 5,000 per month."
       },
       "quote": {
-        "pt": "\"Vamos garantir que quem ganha até cinco mil reais não pague imposto de renda.\"",
-        "en": "\"We will guarantee that those earning up to five thousand reais pay no income tax.\""
+        "pt": "É uma medida profundamente justa que vai abrir um forte diálogo com uma parcela importante da sociedade.",
+        "en": "It is a deeply fair measure that will open a strong dialogue with an important part of society."
       },
       "sourceUrl": "https://pt.org.br/propostas",
       "sourceType": "official_site",
@@ -81,12 +81,12 @@
       "category": "economy",
       "status": "stated",
       "text": {
-        "pt": "Consolidação fiscal com déficit primário zero até o 2º ano de governo, por meio de revisão de gastos e tributação da economia digital.",
-        "en": "Fiscal consolidation with zero primary deficit by year 2, through spending review and digital economy taxation."
+        "pt": "Implementação do 'Tesouraço': programa de ajuste fiscal rigoroso e redução drástica de impostos corporativos.",
+        "en": "Implementation of 'Tesouraço': rigorous fiscal adjustment program and drastic corporate tax reduction."
       },
       "quote": {
-        "pt": "\"O Brasil precisa de responsabilidade fiscal para crescer com estabilidade.\"",
-        "en": "\"Brazil needs fiscal responsibility to grow with stability.\""
+        "pt": "O Brasil precisa de modernização da máquina e privatizações responsáveis.",
+        "en": "Brazil needs machine modernization and responsible privatizations."
       },
       "sourceUrl": "https://pl.org.br/programa",
       "sourceType": "official_site",
