@@ -4,8 +4,8 @@ import { getElection, getComparisonData, getLocalised } from '@/lib/data'
 import type { Category } from '@/types'
 import { CATEGORY_CONFIG } from '@/types'
 import { setRequestLocale } from 'next-intl/server'
+import AuthenticityBadge from '@/components/AuthenticityBadge'
 
-// Apenas UMA declaração de force-dynamic
 export const dynamic = 'force-dynamic'
 
 interface Props {
@@ -19,7 +19,6 @@ export async function generateStaticParams() {
 
 export default async function ComparePage({ params, searchParams }: Props) {
   const { locale, electionId } = await params
-
   setRequestLocale(locale)
 
   const { category } = await searchParams
@@ -42,7 +41,7 @@ export default async function ComparePage({ params, searchParams }: Props) {
       {/* Header */}
       <div style={{ background: '#fff', borderBottom: '1px solid #E5E7EB', padding: '16px 24px' }}>
         <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 6 }}>
-          <Link href="/" style={{ color: '#6B7280', textDecoration: 'none' }}>
+          <Link href={`/${locale}`} style={{ color: '#6B7280', textDecoration: 'none' }}>
             ← {isPt ? 'Todos os países' : 'All countries'}
           </Link>
         </div>
@@ -93,7 +92,7 @@ export default async function ComparePage({ params, searchParams }: Props) {
       {/* Filter bar */}
       <div style={{ padding: '10px 24px', background: '#fff', borderBottom: '1px solid #E5E7EB', display: 'flex', gap: 6, flexWrap: 'wrap', position: 'sticky', top: 0, zIndex: 50 }}>
         <Link
-          href={`/compare/${electionId}`}
+          href={`/${locale}/compare/${electionId}`}
           style={{ fontSize: 12, fontWeight: 600, padding: '6px 14px', borderRadius: 20, border: `1.5px solid ${!cat ? '#0B1D2E' : '#E5E7EB'}`, background: !cat ? '#0B1D2E' : '#fff', color: !cat ? '#fff' : '#374151', textDecoration: 'none', whiteSpace: 'nowrap' }}
         >
           {isPt ? 'Todos' : 'All topics'}
@@ -104,7 +103,7 @@ export default async function ComparePage({ params, searchParams }: Props) {
           return (
             <Link
               key={c}
-              href={`/compare/${electionId}?category=${c}`}
+              href={`/${locale}/compare/${electionId}?category=${c}`}
               style={{ fontSize: 12, fontWeight: 600, padding: '6px 14px', borderRadius: 20, border: `1.5px solid ${active ? '#0B1D2E' : '#E5E7EB'}`, background: active ? '#0B1D2E' : '#fff', color: active ? '#fff' : '#374151', textDecoration: 'none', whiteSpace: 'nowrap' }}
             >
               {cfg.emoji} {cfg.label[locale] || cfg.label['en']}
@@ -165,24 +164,46 @@ function PromiseCell({
         </p>
       ) : (
         <>
+          {/* Category tag */}
           <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.8px', textTransform: 'uppercase', padding: '2px 8px', borderRadius: 4, background: cfg.bg, color: cfg.color, display: 'inline-block', marginBottom: 8 }}>
             {cfg.label[locale] || cfg.label['en']}
           </span>
-          <p style={{ fontSize: 13, fontWeight: 500, color: '#111827', lineHeight: 1.6, marginBottom: p.quote ? 8 : 0 }}>
+
+          {/* Promise text */}
+          <p style={{ fontSize: 13, fontWeight: 500, color: '#111827', lineHeight: 1.6, marginBottom: p.quote ? 8 : 12 }}>
             {p.text?.[locale] || p.text?.['en'] || ''}
           </p>
+
+          {/* Verbatim quote */}
           {p.quote && (
-            <p style={{ fontSize: 11, fontStyle: 'italic', color: '#6B7280', paddingLeft: 10, borderLeft: '2px solid #E5E7EB', marginBottom: 8, lineHeight: 1.55 }}>
+            <p style={{ fontSize: 11, fontStyle: 'italic', color: '#6B7280', paddingLeft: 10, borderLeft: '2px solid #E5E7EB', marginBottom: 12, lineHeight: 1.55 }}>
               {p.quote?.[locale] || p.quote?.['en'] || ''}
             </p>
           )}
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', fontSize: 9, color: '#9CA3AF' }}>
+
+          {/* Provenance row: source · date · archive · [🔒 AUTÊNTICO] */}
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center', fontSize: 9, color: '#9CA3AF' }}>
             <span style={{ fontFamily: 'monospace' }}>{getHost(p.sourceUrl || '')}</span>
             <span>· {(p.collectedAt || '').slice(0, 10)}</span>
             {p.archiveUrl && (
-              <a href={p.archiveUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#3B82F6' }}>
+              <a
+                href={p.archiveUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: '#3B82F6' }}
+              >
                 Archive ↗
               </a>
+            )}
+            {/* Selo de autenticidade — só aparece se houver hash */}
+            {p.contentHash && (
+              <AuthenticityBadge
+                hash={p.contentHash}
+                collectedAt={p.collectedAt || ''}
+                sourceUrl={p.sourceUrl || ''}
+                archiveUrl={p.archiveUrl}
+                locale={locale}
+              />
             )}
           </div>
         </>
