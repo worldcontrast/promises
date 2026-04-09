@@ -6,8 +6,6 @@ import { CATEGORY_CONFIG } from '@/types'
 import { setRequestLocale } from 'next-intl/server'
 import AuthenticityBadge from '@/components/AuthenticityBadge'
 
-export const dynamic = 'force-dynamic'
-
 interface Props {
   params: Promise<{ locale: string; electionId: string }>
   searchParams: Promise<{ category?: string }>
