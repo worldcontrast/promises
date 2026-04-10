@@ -15,6 +15,7 @@ export interface Candidate {
   electoralNumber: string
   initials: string
   color: string
+  photoUrl?: string
   sources: {
     electoralFiling?: string
     officialSite?: string
@@ -22,6 +23,7 @@ export interface Candidate {
     facebook?: string
     twitter?: string
     youtube?: string
+    tiktok?: string
   }
   lastCollected: string
 }
