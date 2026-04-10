@@ -1,0 +1,48 @@
+{
+  "nav": {
+    "compare": "立即比较",
+    "countries": "国家/地区",
+    "manifesto": "宣言",
+    "audit": "审计",
+    "github": "GitHub"
+  },
+  "language": {
+    "select": "选择语言",
+    "current": "中文"
+  },
+  "hero": {
+    "live": "实时 — 巴西 2026",
+    "headline": "他们<gold>承诺</gold>了什么？",
+    "headline2": "并排对比",
+    "subheadline": "选择国家和主题。我们根据候选人的官方页面，向您展示他们的确切承诺。没有意见，没有偏见，只有事实。",
+    "searchLabel": "选择您想要比较的内容",
+    "searchButton": "立即对比承诺 →",
+    "trust1": "仅限官方来源",
+    "trust2": "零政治偏见",
+    "trust3": "永久免费"
+  },
+  "categories": {
+    "all": "所有主题",
+    "economy": "经济",
+    "education": "教育",
+    "health": "医疗健康",
+    "safety": "公共安全",
+    "environment": "环境",
+    "social": "社会",
+    "rights": "人权",
+    "infrastructure": "基础设施",
+    "governance": "治理"
+  },
+  "compare": {
+    "backToCountries": "← 所有国家",
+    "officialSource": "官方来源",
+    "updated": "已更新",
+    "all": "所有主题",
+    "officialSrc": "官方备案 ↗",
+    "noPromise": "在官方来源中未找到相关承诺。",
+    "archive": "存档 ↗",
+    "items": "条记录",
+    "footer": "零偏见 · 所有数据均来自官方来源",
+    "disclaimer": "每次加载时候选人的位置都是随机的，以防止符号定位偏见（左/右）。"
+  }
+}

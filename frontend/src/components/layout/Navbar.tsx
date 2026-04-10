@@ -34,9 +34,9 @@ export default function Navbar() {
   }
 
   const navLinks = [
-    { href: `/${currentLocale}/compare/brazil-2026`, label: { en: 'Compare', pt: 'Comparar', es: 'Comparar', fr: 'Comparer', ar: 'مقارنة', zh: '比较' } },
-    { href: `/${currentLocale}`, label: { en: 'Countries', pt: 'Países', es: 'Países', fr: 'Pays', ar: 'الدول', zh: '国家' } },
-    { href: 'https://github.com/worldcontrast/promises', label: { en: 'GitHub ↗', pt: 'GitHub ↗', es: 'GitHub ↗', fr: 'GitHub ↗', ar: 'GitHub ↗', zh: 'GitHub ↗' }, external: true },
+    { href: `/${currentLocale}/compare/brazil-2026`, label: { en: 'Compare', pt: 'Comparar', es: 'Comparar', fr: 'Comparer', ar: 'مقارنة', zh: '比较', ru: 'Сравнить', hi: 'तुलना' } },
+    { href: `/${currentLocale}`, label: { en: 'Countries', pt: 'Países', es: 'Países', fr: 'Pays', ar: 'الدول', zh: '国家', ru: 'Страны', hi: 'देश' } },
+    { href: 'https://github.com/worldcontrast/promises', label: { en: 'GitHub ↗', pt: 'GitHub ↗', es: 'GitHub ↗', fr: 'GitHub ↗', ar: 'GitHub ↗', zh: 'GitHub ↗', ru: 'GitHub ↗', hi: 'GitHub ↗' }, external: true },
   ]
 
   const loc = currentLocale as string
@@ -127,24 +127,27 @@ export default function Navbar() {
                     style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: 10,
+                      gap: 12,
                       width: '100%',
-                      padding: '7px 10px',
+                      padding: '10px 14px',
                       background: l === currentLocale ? 'var(--ink-06)' : 'transparent',
                       border: 'none',
                       borderRadius: 'var(--radius-sm)',
                       cursor: 'pointer',
                       fontFamily: 'var(--font-sans)',
-                      fontSize: 'var(--text-xs)',
+                      fontSize: '13px',
                       fontWeight: l === currentLocale ? 600 : 400,
                       color: 'var(--ink)',
                       textAlign: 'left' as const,
+                      transition: 'background 0.2s',
                     }}
+                    onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--ink-03)')}
+                    onMouseLeave={(e) => (e.currentTarget.style.background = l === currentLocale ? 'var(--ink-06)' : 'transparent')}
                   >
-                    <span style={{ fontSize: 16 }}>{localeConfig[l].flag}</span>
-                    {localeConfig[l].name}
+                    <span style={{ fontSize: 18, filter: 'grayscale(0.2)' }}>{localeConfig[l].flag}</span>
+                    <span style={{ flex: 1 }}>{localeConfig[l].name}</span>
                     {l === currentLocale && (
-                      <span style={{ marginLeft: 'auto', color: 'var(--gold)', fontSize: 10 }}>✓</span>
+                      <span style={{ color: 'var(--gold)', fontSize: 12 }}>✓</span>
                     )}
                   </button>
                 ))}
@@ -159,7 +162,12 @@ export default function Navbar() {
           className="navbar-cta"
           id="navbar-compare-cta"
         >
-          {currentLocale === 'pt' ? 'Comparar' : currentLocale === 'es' ? 'Comparar' : 'Compare'}
+          {currentLocale === 'pt' ? 'Comparar' : 
+           currentLocale === 'es' ? 'Comparar' : 
+           currentLocale === 'zh' ? '立即比较' :
+           currentLocale === 'ru' ? 'Сравнить' :
+           currentLocale === 'hi' ? 'तुलना करें' :
+           'Compare'}
         </Link>
       </div>
     </nav>

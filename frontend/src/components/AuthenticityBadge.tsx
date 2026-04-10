@@ -61,6 +61,45 @@ const i18n = {
     openSource:  'Auditoría open-source ↗',
     close:       'Cerrar',
   },
+  zh: {
+    badge:       '正品',
+    title:       '已验证数据',
+    subtitle:    'POCVA-01 · SHA-256',
+    labelHash:   'SHA-256 哈希',
+    labelDate:   '收集日期',
+    labelSource: '原始来源',
+    labelArchive:'不可变存档',
+    howTitle:    '如何独立验证',
+    howText:     '下载原始页面。在原始内容上运行 SHA-256。结果必须与上面的哈希逐字符匹配。',
+    openSource:  '开源审计 ↗',
+    close:       '关闭',
+  },
+  ru: {
+    badge:       'Подлинно',
+    title:       'Проверенные данные',
+    subtitle:    'POCVA-01 · SHA-256',
+    labelHash:   'Хэш SHA-256',
+    labelDate:   'Собрано',
+    labelSource: 'Оригинальный источник',
+    labelArchive:'Неизменяемый архив',
+    howTitle:    'Как проверить самостоятельно',
+    howText:     'Загрузите оригинальную страницу. Запустите SHA-256 для необработанного содержимого. Результат должен посимвольно совпадать с указанным выше хэшем.',
+    openSource:  'Open-source аудит ↗',
+    close:       'Закрыть',
+  },
+  hi: {
+    badge:       'प्रमाणित',
+    title:       'सत्यापित डेटा',
+    subtitle:    'POCVA-01 · SHA-256',
+    labelHash:   'SHA-256 हैश',
+    labelDate:   'संग्रह की तारीख',
+    labelSource: 'आधिकारिक स्रोत',
+    labelArchive:'अपरिवर्तनीय संग्रह',
+    howTitle:    'स्वतंत्र रूप से कैसे सत्यापित करें',
+    howText:     'मूल पेज डाउनलोड करें। कच्चे कंटेंट पर SHA-256 चलाएं। परिणाम ऊपर दिए गए हैश से मेल खाना चाहिए।',
+    openSource:  'ओपन-सोर्स ऑडिट ↗',
+    close:       'बंद करें',
+  },
 } as Record<string, {
   badge: string; title: string; subtitle: string;
   labelHash: string; labelDate: string; labelSource: string;
@@ -92,8 +131,14 @@ export default function AuthenticityBadge({
         title={t.title}
         id={`auth-badge-${hash?.slice(0, 8)}`}
         aria-haspopup="dialog"
+        style={{ 
+          borderColor: 'var(--gold)', 
+          background: 'rgba(212, 175, 55, 0.05)',
+          color: 'var(--gold-dark)',
+          fontWeight: 700
+        }}
       >
-        <LockIcon />
+        <LockIcon size={12} color="var(--gold-dark)" />
         {t.badge}
         {/* Hash curto visível — prova da prova */}
         <span style={{

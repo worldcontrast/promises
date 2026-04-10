@@ -61,19 +61,22 @@ export default async function ComparePage({ params, searchParams }: Props) {
   const allCats = Object.keys(CATEGORY_CONFIG) as Category[]
 
   const labels = {
-    back:         { en: '← All countries',       pt: '← Todos os países',   es: '← Todos los países' },
-    officialOnly: { en: 'Official sources only',  pt: 'Apenas fontes oficiais', es: 'Solo fuentes oficiales' },
-    updated:      { en: 'Updated',                pt: 'Atualizado',          es: 'Actualizado' },
-    all:          { en: 'All topics',             pt: 'Todos',               es: 'Todos' },
-    officialSrc:  { en: 'Official filing ↗',      pt: 'Ficha oficial ↗',     es: 'Ficha oficial ↗' },
-    noPromise:    { en: 'No promise found in official sources.', pt: 'Nenhuma promessa encontrada nas fontes oficiais.', es: 'Ninguna promesa encontrada en fuentes oficiales.' },
-    archive:      { en: 'Archive ↗',              pt: 'Arquivo ↗',           es: 'Archivo ↗' },
-    items:        { en: 'entries',                pt: 'registros',           es: 'registros' },
-    footer:       { en: 'Zero bias · All data from official sources', pt: 'Zero viés · Todos os dados de fontes oficiais', es: 'Cero sesgo · Todos los datos de fuentes oficiales' },
+    back:         { en: '← All countries',       pt: '← Todos os países',   es: '← Todos los países',  zh: '← 所有国家',       ru: '← Все страны',    hi: '← सभी देश' },
+    officialOnly: { en: 'Official sources only',  pt: 'Apenas fontes oficiais', es: 'Solo fuentes oficiales', zh: '仅限官方来源',      ru: 'Только офиц. источники', hi: 'केवल आधिकारिक स्रोत' },
+    updated:      { en: 'Updated',                pt: 'Atualizado',          es: 'Actualizado',         zh: '已更新',          ru: 'Обновлено',       hi: 'अपडेट किया गया' },
+    all:          { en: 'All topics',             pt: 'Todos',               es: 'Todos',               zh: '所有主题',         ru: 'Все темы',        hi: 'सभी विषय' },
+    officialSrc:  { en: 'Official filing ↗',      pt: 'Ficha oficial ↗',     es: 'Ficha oficial ↗',     zh: '官方备案 ↗',        ru: 'Офиц. документ ↗', hi: 'आधिकारिक फाइलिंग ↗' },
+    noPromise:    { en: 'No promise found in official sources.', pt: 'Nenhuma promessa encontrada nas fontes oficiais.', es: 'Ninguna promesa encontrada en fuentes oficiales.', zh: '在官方来源中未找到相关承诺。', ru: 'Обещаний в офиц. источниках не найдено.', hi: 'आधिकारिक स्रोतों में कोई वादा नहीं मिला।' },
+    archive:      { en: 'Archive ↗',              pt: 'Arquivo ↗',           es: 'Archivo ↗',           zh: '存档 ↗',           ru: 'Архив ↗',         hi: 'संग्रह ↗' },
+    items:        { en: 'entries',                pt: 'registros',           es: 'registros',           zh: '条记录',           ru: 'записей',         hi: 'प्रविष्टियां' },
+    footer:       { en: 'Zero bias · All data from official sources', pt: 'Zero viés · Todos os dados de fontes oficiais', es: 'Cero sesgo · Todos los datos de fuentes oficiales', zh: '零偏见 · 所有数据均来自官方来源', ru: 'Без предвзятости · Все данные из офиц. источников', hi: 'शून्य पक्षपात · सभी डेटा आधिकारिक स्रोतों से' },
     disclaimer:   { 
       en: 'The placement of candidates is randomized on each load to prevent semiotic positioning bias (Left/Right).', 
       pt: 'A disposição (Esquerda/Direita) é randomizada na renderização para anular predeterminação ou viés semiótico.', 
-      es: 'La disposición de los candidatos (I/D) se aleatoriza en cada carga para evitar sesgos de posicionamiento semiótico.' 
+      es: 'La disposición de los candidatos (I/D) se aleatoriza en cada carga para evitar sesgos de posicionamiento semiótico.',
+      zh: '候选人的位置在每次加载时都是随机的，以防止符号定位偏见（左/右）。',
+      ru: 'Размещение кандидатов рандомизируется при каждой загрузке во избежание семиотического искажения (Лево/Право).',
+      hi: 'पक्षपात (बाएं/दाएं) को रोकने के लिए उम्मीदवारों का स्थान यादृच्छिक रूप से चुना जाता है।' 
     },
   } as Record<string, Record<string, string>>
 
@@ -88,29 +91,32 @@ export default async function ComparePage({ params, searchParams }: Props) {
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          min-height: 44px;
-          padding: 0 16px;
+          min-height: 32px; /* Reduzido de 44px */
+          padding: 0 12px;
           border-radius: 4px;
           background: rgba(11, 29, 46, 0.05);
           color: var(--ink-70);
           font-family: var(--font-sans);
-          font-size: 12px;
+          font-size: 11px; /* Reduzido */
           font-weight: 600;
           letter-spacing: 0.5px;
           text-decoration: none;
           transition: background 0.2s, color 0.2s;
+          border: 1px solid transparent;
         }
         .social-pill:hover {
           background: rgba(11, 29, 46, 0.1);
           color: var(--ink);
+          border-color: var(--rule);
         }
         .social-pill.official {
-          background: var(--gold);
-          color: var(--ink);
+          background: transparent; /* Removida a cor sólida de destaque */
+          border: 1px solid var(--gold);
+          color: var(--gold-dark);
         }
         .social-pill.official:hover {
-          background: var(--gold-dark);
-          color: #fff;
+          background: var(--gold);
+          color: var(--ink);
         }
         .promise-row {
           padding: 8px 0;
@@ -127,7 +133,7 @@ export default async function ComparePage({ params, searchParams }: Props) {
 
         /* ── MOBILE NAV TABS ── */
         .mobile-toggle-nav { display: none; }
-        @media (max-width: 768px) {
+        @media (max-width: 992px) {
           .mobile-toggle-nav {
             display: flex; position: sticky; top: 0; z-index: 100;
             background: var(--paper); border-bottom: 1px solid var(--rule);
@@ -195,9 +201,9 @@ export default async function ComparePage({ params, searchParams }: Props) {
             <div>
               <p className="candidate-name">{candA.fullName}</p>
               <p className="candidate-party">{candA.party} · No. {candA.electoralNumber}</p>
+              <SocialBar sources={candA.sources} t={t} />
             </div>
           </div>
-          <SocialBar sources={candA.sources} t={t} />
         </div>
 
         {/* Separador — regra, não coluna */}
@@ -216,9 +222,9 @@ export default async function ComparePage({ params, searchParams }: Props) {
             <div>
               <p className="candidate-name">{candB.fullName}</p>
               <p className="candidate-party">{candB.party} · No. {candB.electoralNumber}</p>
+              <SocialBar sources={candB.sources} t={t} />
             </div>
           </div>
-          <SocialBar sources={candB.sources} t={t} />
         </div>
       </div>
 
@@ -282,9 +288,9 @@ export default async function ComparePage({ params, searchParams }: Props) {
               {/* Promise rows */}
               {block.rows.map((row: any, i: number) => (
                 <div key={i} className="promise-row">
-                  <PromiseCell p={row.promiseA} locale={locale} cfg={cfg} t={t} />
+                  <PromiseCell p={row.promiseA} locale={locale} cfg={cfg} t={t} side="a" />
                   <div className="candidate-separator" aria-hidden="true" />
-                  <PromiseCell p={row.promiseB} locale={locale} cfg={cfg} t={t} />
+                  <PromiseCell p={row.promiseB} locale={locale} cfg={cfg} t={t} side="b" />
                 </div>
               ))}
             </section>
@@ -340,7 +346,7 @@ function SocialBar({ sources, t }: { sources: any; t: (k: string) => string }) {
   if (sources.tiktok) links.push({ key: 'Tk', url: sources.tiktok })
 
   return (
-    <div className="candidate-social-bar" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '16px' }}>
+    <div className="candidate-social-bar" style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '12px' }}>
       {sources.electoralFiling && (
         <a href={sources.electoralFiling} target="_blank" rel="noopener noreferrer" className="social-pill official">
           {t('officialSrc')}
@@ -357,9 +363,9 @@ function SocialBar({ sources, t }: { sources: any; t: (k: string) => string }) {
 
 /* ── PROMISE CELL ──────────────────────────────────────────── */
 function PromiseCell({
-  p, locale, cfg, t,
+  p, locale, cfg, t, side,
 }: {
-  p: any; locale: string; cfg: any; t: (k: string) => string
+  p: any; locale: string; cfg: any; t: (k: string) => string; side: 'a' | 'b'
 }) {
   const getHost = (url: string) => {
     try { return new URL(url).hostname } catch { return url }
@@ -367,14 +373,14 @@ function PromiseCell({
 
   if (!p) {
     return (
-      <div className="promise-cell promise-cell--empty" aria-label="No data">
+      <div className={`promise-cell promise-cell--empty cand-${side}`} aria-label="No data">
         <p className="promise-empty">{t('noPromise')}</p>
       </div>
     )
   }
 
   return (
-    <article className="promise-cell">
+    <article className={`promise-cell cand-${side}`}>
 
       {/* Promise text — SERIF = FATO */}
       <p className="promise-text">
