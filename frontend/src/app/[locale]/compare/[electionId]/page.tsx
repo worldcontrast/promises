@@ -91,68 +91,88 @@ export default async function ComparePage({ params, searchParams }: Props) {
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          min-height: 32px; /* Reduzido de 44px */
-          padding: 0 12px;
-          border-radius: 4px;
-          background: rgba(11, 29, 46, 0.05);
-          color: var(--ink-70);
-          font-family: var(--font-sans);
-          font-size: 11px; /* Reduzido */
+          height: 20px;
+          padding: 0 8px;
+          border-radius: 2px;
+          background: var(--ink-06);
+          color: var(--ink-60);
+          font-family: var(--font-mono);
+          font-size: 8px;
           font-weight: 600;
-          letter-spacing: 0.5px;
+          text-transform: uppercase;
           text-decoration: none;
-          transition: background 0.2s, color 0.2s;
-          border: 1px solid transparent;
+          transition: all 0.2s;
+          border: 1px solid var(--rule-light);
+          flex-shrink: 0;
         }
-        .social-pill:hover {
-          background: rgba(11, 29, 46, 0.1);
-          color: var(--ink);
-          border-color: var(--rule);
-        }
-        .social-pill.official {
-          background: transparent; /* Removida a cor sólida de destaque */
-          border: 1px solid var(--gold);
-          color: var(--gold-dark);
-        }
-        .social-pill.official:hover {
-          background: var(--gold);
-          color: var(--ink);
-        }
-        .promise-row {
-          padding: 8px 0;
-        }
-        .promise-cell {
-          padding: 32px 32px 40px !important;
-        }
-        .promise-provenance {
-          background: rgba(11, 29, 46, 0.03);
-          padding: 12px 16px;
+        
+        /* Hide scrollbar but allow scroll */
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .filter-pill {
+          padding: 6px 12px;
           border-radius: 4px;
-          border-left: 2px solid var(--rule);
+          border: 1px solid var(--rule);
+          background: var(--paper);
+          color: var(--ink-60);
+          text-decoration: none;
+          font-family: var(--font-mono);
+          font-size: 10px;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          transition: all 0.2s;
+          white-space: nowrap;
+          flex-shrink: 0;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+        .filter-pill.active {
+          background: var(--ink);
+          color: var(--paper);
+          border-color: var(--ink);
+        }
+        
+        .filter-bar {
+          display: flex;
+          flex-wrap: nowrap;
+          overflow-x: auto;
+          gap: 8px;
+          padding: 12px var(--container-pad);
+          background: var(--paper);
+          border-bottom: 1px solid var(--rule);
+          -webkit-overflow-scrolling: touch;
+          scrollbar-width: none; /* Firefox */
+        }
+        .filter-bar::-webkit-scrollbar { display: none; } /* Chrome/Safari */
+        
+        .candidate-avatar {
+          width: 48px;
+          height: 48px;
+          border-radius: 50%;
+          border: 1px solid var(--rule);
+          overflow: hidden;
+          background-position: center;
+          background-size: cover;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 700;
+          color: white;
+          flex-shrink: 0;
         }
 
-        /* ── MOBILE NAV TABS ── */
-        .mobile-toggle-nav { display: none; }
         @media (max-width: 992px) {
-          .mobile-toggle-nav {
-            display: flex; position: sticky; top: 0; z-index: 100;
-            background: var(--paper); border-bottom: 1px solid var(--rule);
-          }
-          .mobile-toggle-nav button {
-            flex: 1; padding: 16px; border: none; background: transparent;
-            font-family: var(--font-sans); border-bottom: 3px solid transparent;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-            cursor: pointer; transition: all 0.2s ease;
-          }
-          .mobile-toggle-nav button.active { background: rgba(0,0,0,0.02); }
-          .mt-avatar { width: 24px; height: 24px; border-radius: 24px; font-size: 10px; display: flex; align-items: center; justify-content: center; color: var(--paper); font-weight: 600; }
-          .mt-name { font-weight: 600; font-size: 13px; color: var(--ink); }
-
-          .candidates-bar, .promise-row { display: block; }
-          .candidate-separator, .row-separator { display: none; }
+          .compare-header { padding: 16px var(--container-pad) 0 !important; }
+          .compare-election-name { font-size: 1.2rem !important; margin-bottom: 4px !important; }
+          .compare-meta { font-size: 10px !important; }
+          .compare-meta.disclaimer { display: none; } /* Mover para o rodapé */
           
-          body.show-cand-a #candidate-col-b, body.show-cand-a .promise-cell.cand-b { display: none !important; }
-          body.show-cand-b #candidate-col-a, body.show-cand-b .promise-cell.cand-a { display: none !important; }
+          .candidates-bar { display: none !important; } /* Ocultar no mobile — as Tabs já identificam */
+          
+          .filter-bar { padding: 8px; }
         }
       `}</style>
       <div className="compare-layout">
@@ -172,7 +192,7 @@ export default async function ComparePage({ params, searchParams }: Props) {
             {election.tribunal.name} ↗
           </a>
         </p>
-        <p className="compare-meta" style={{ marginTop: '8px', color: 'var(--ink-60)', fontWeight: 500 }}>
+        <p className="compare-meta disclaimer" style={{ marginTop: '8px', color: 'var(--ink-60)', fontWeight: 500 }}>
           {t('disclaimer')}
         </p>
       </header>
@@ -189,40 +209,39 @@ export default async function ComparePage({ params, searchParams }: Props) {
       <div className="candidates-bar" role="region" aria-label="Candidates">
 
         {/* Candidato A */}
-        <div className="candidate-col" id="candidate-col-a" style={{ padding: '32px 32px 48px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)' }}>
-            <div
-              className="candidate-avatar"
-              style={{ background: candA.color }}
-              aria-hidden="true"
-            >
-              {candA.initials}
+        <div className="candidate-col" id="candidate-col-a" style={{ padding: '0', background: 'var(--paper)' }}>
+          <div style={{ padding: '24px 32px 20px', display: 'flex', alignItems: 'center', gap: '20px' }}>
+            <div className="candidate-avatar" style={{ 
+              background: candA.photoUrl ? `url(${candA.photoUrl})` : candA.color,
+              backgroundSize: 'cover'
+            }}>
+              {!candA.photoUrl && candA.initials}
             </div>
             <div>
-              <p className="candidate-name">{candA.fullName}</p>
-              <p className="candidate-party">{candA.party} · No. {candA.electoralNumber}</p>
-              <SocialBar sources={candA.sources} t={t} />
+              <p className="candidate-name" style={{ fontSize: '1.4rem', fontWeight: 700 }}>{candA.fullName}</p>
+              <p style={{ fontSize: '12px', color: 'var(--ink-40)', marginTop: '2px', fontFamily: 'var(--font-mono)' }}>
+                {candA.party} · No. {candA.electoralNumber}
+              </p>
             </div>
           </div>
         </div>
 
-        {/* Separador — regra, não coluna */}
         <div className="candidate-separator" aria-hidden="true" />
 
         {/* Candidato B */}
-        <div className="candidate-col" id="candidate-col-b" style={{ padding: '32px 32px 48px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)' }}>
-            <div
-              className="candidate-avatar"
-              style={{ background: candB.color }}
-              aria-hidden="true"
-            >
-              {candB.initials}
+        <div className="candidate-col" id="candidate-col-b" style={{ padding: '0', background: 'var(--paper)' }}>
+          <div style={{ padding: '24px 32px 20px', display: 'flex', alignItems: 'center', gap: '20px' }}>
+            <div className="candidate-avatar" style={{ 
+              background: candB.photoUrl ? `url(${candB.photoUrl})` : candB.color,
+              backgroundSize: 'cover'
+            }}>
+              {!candB.photoUrl && candB.initials}
             </div>
             <div>
-              <p className="candidate-name">{candB.fullName}</p>
-              <p className="candidate-party">{candB.party} · No. {candB.electoralNumber}</p>
-              <SocialBar sources={candB.sources} t={t} />
+              <p className="candidate-name" style={{ fontSize: '1.4rem', fontWeight: 700 }}>{candB.fullName}</p>
+              <p style={{ fontSize: '12px', color: 'var(--ink-40)', marginTop: '2px', fontFamily: 'var(--font-mono)' }}>
+                {candB.party} · No. {candB.electoralNumber}
+              </p>
             </div>
           </div>
         </div>
@@ -296,6 +315,23 @@ export default async function ComparePage({ params, searchParams }: Props) {
             </section>
           )
         })}
+        <section style={{ 
+          display: 'flex', 
+          background: 'var(--paper)',
+          borderTop: '2px solid var(--rule)',
+          borderBottom: '1px solid var(--rule)',
+          marginTop: '40px'
+        }}>
+          <div style={{ flex: 1, padding: '24px var(--space-8)' }}>
+            <p className="t-eyebrow" style={{ marginBottom: '12px' }}>{candA.displayName}</p>
+            <SocialBar sources={candA.sources} t={t} />
+          </div>
+          <div className="candidate-separator" aria-hidden="true" />
+          <div style={{ flex: 1, padding: '24px var(--space-8)' }}>
+            <p className="t-eyebrow" style={{ marginBottom: '12px' }}>{candB.displayName}</p>
+            <SocialBar sources={candB.sources} t={t} />
+          </div>
+        </section>
       </main>
 
         {/* ── FOOTER ───────────────────────────────────────────── */}
@@ -315,6 +351,12 @@ export default async function ComparePage({ params, searchParams }: Props) {
             letterSpacing: '0.06em',
           }}>
             World Contrast · {t('footer')}
+          </p>
+          <p style={{ 
+            fontFamily: 'var(--font-sans)', fontSize: '10px', color: 'var(--ink-40)', 
+            marginTop: '12px', maxWidth: '600px', marginInline: 'auto' 
+          }}>
+            {t('disclaimer')}
           </p>
           <a
             href="https://github.com/worldcontrast/promises"
@@ -336,7 +378,7 @@ export default async function ComparePage({ params, searchParams }: Props) {
 }
 
 /* ── SOCIAL BAR COMPONENT ──────────────────────────────────── */
-function SocialBar({ sources, t }: { sources: any; t: (k: string) => string }) {
+function SocialBar({ sources, t, party }: { sources: any; t: (k: string) => string; party?: string }) {
   const links = []
   if (sources.officialSite) links.push({ key: 'Site', url: sources.officialSite })
   if (sources.instagram) links.push({ key: 'Ig', url: sources.instagram })
@@ -346,7 +388,13 @@ function SocialBar({ sources, t }: { sources: any; t: (k: string) => string }) {
   if (sources.tiktok) links.push({ key: 'Tk', url: sources.tiktok })
 
   return (
-    <div className="candidate-social-bar" style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '12px' }}>
+    <div className="candidate-social-bar hide-scrollbar" style={{ 
+      display: 'flex', 
+      flexWrap: 'nowrap', 
+      gap: '8px', 
+      alignItems: 'center',
+      overflowX: 'auto'
+    }}>
       {sources.electoralFiling && (
         <a href={sources.electoralFiling} target="_blank" rel="noopener noreferrer" className="social-pill official">
           {t('officialSrc')}
@@ -357,6 +405,20 @@ function SocialBar({ sources, t }: { sources: any; t: (k: string) => string }) {
           {l.key} ↗
         </a>
       ))}
+      {party && (
+        <span style={{ 
+          fontFamily: 'var(--font-sans)', 
+          fontSize: '11px', 
+          fontWeight: 500,
+          color: 'var(--ink-30)',
+          marginLeft: 'auto',
+          textTransform: 'uppercase',
+          paddingLeft: '12px',
+          whiteSpace: 'nowrap'
+        }}>
+          {party}
+        </span>
+      )}
     </div>
   )
 }
@@ -394,38 +456,31 @@ function PromiseCell({
         </blockquote>
       )}
 
-      {/* Provenance — TODO em MONO = PROVA CRIPTOGRÁFICA */}
-      <div className="promise-provenance" style={{ marginTop: '24px', display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
-        <span className="provenance-source t-proof" style={{ color: 'var(--ink-70)', fontWeight: 600 }}>
-          {getHost(p.sourceUrl || '')}
-        </span>
-        {p.collectedAt && (
-          <>
-            <span style={{ color: 'var(--ink-20)', fontSize: 'var(--text-3xs)' }}>·</span>
-            <time
-              className="provenance-date t-proof"
-              dateTime={p.collectedAt}
-              style={{ color: 'var(--ink-60)' }}
-            >
-              {p.collectedAt.slice(0, 10)}
-            </time>
-          </>
-        )}
-        {p.archiveUrl && (
-          <>
-            <span style={{ color: 'var(--ink-20)', fontSize: 'var(--text-3xs)' }}>·</span>
-            <a
-              href={p.archiveUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="provenance-archive t-proof"
-              style={{ color: 'var(--gold-dark)', textDecoration: 'underline', padding: '10px', display: 'inline-block' }}
-            >
+      {/* Certificate Box — PROVA TÉCNICA E BLINDADA */}
+      <div className="promise-cert-box">
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span className="provenance-source t-proof" style={{ color: 'var(--ink-70)', fontWeight: 600, fontSize: '9px' }}>
+              {getHost(p.sourceUrl || '')}
+            </span>
+            {p.collectedAt && (
+              <>
+                <span style={{ color: 'var(--ink-20)', fontSize: 10 }}>·</span>
+                <time className="provenance-date t-proof" dateTime={p.collectedAt} style={{ color: 'var(--ink-60)', fontSize: '9px' }}>
+                  {p.collectedAt.slice(0, 10)}
+                </time>
+              </>
+            )}
+          </div>
+          
+          {p.archiveUrl && (
+            <a href={p.archiveUrl} target="_blank" rel="noopener noreferrer" className="provenance-archive t-proof" style={{ fontSize: '9px' }}>
               {t('archive')}
             </a>
-          </>
-        )}
-        {/* LACRE DO CARTÓRIO — só aparece com hash real */}
+          )}
+        </div>
+
+        {/* O Selo Digital Injetado aqui */}
         {p.contentHash && (
           <AuthenticityBadge
             hash={p.contentHash}

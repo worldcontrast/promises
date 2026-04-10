@@ -32,7 +32,20 @@ export default async function RootLayout({
   const dir = localeConfig[locale as Locale]?.dir || 'ltr'
 
   return (
-    <html lang={locale} dir={dir}>
+    <html lang={locale} dir={dir} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: `
+          (function() {
+            try {
+              const theme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+              document.documentElement.setAttribute('data-theme', theme);
+              
+              const font = localStorage.getItem('font-scale') || 'normal';
+              if (font !== 'normal') document.documentElement.classList.add('font-' + font);
+            } catch (e) {}
+          })()
+        `}} />
+      </head>
       <body>
         <NextIntlClientProvider messages={messages}>
           <Navbar />

@@ -1,22 +1,50 @@
 /**
  * World Contrast — Navbar Institucional
  * File: frontend/src/components/layout/Navbar.tsx
- *
- * Design: autoridade de documento soberano.
- * Sem hamburger menu em desktop. Sem sombra pesada.
- * O brand usa serif (fato instucional) — os links usam sans (máquina).
  */
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { locales, localeConfig, type Locale } from '@/i18n'
 
 export default function Navbar() {
   const [langOpen, setLangOpen] = useState(false)
+  const [theme, setTheme] = useState<'light' | 'dark'>('light')
+  const [fontScale, setFontScale] = useState<'small' | 'normal' | 'large'>('normal')
+  
   const pathname = usePathname()
   const router = useRouter()
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark'
+    if (savedTheme) {
+      setTheme(savedTheme)
+      document.documentElement.setAttribute('data-theme', savedTheme)
+    }
+    const savedFont = localStorage.getItem('font-scale') as any
+    if (savedFont) {
+      setFontScale(savedFont)
+      if (savedFont !== 'normal') document.documentElement.classList.add(`font-${savedFont}`)
+    }
+  }, [])
+
+  function toggleTheme() {
+    const newTheme = theme === 'light' ? 'dark' : 'light'
+    setTheme(newTheme)
+    document.documentElement.setAttribute('data-theme', newTheme)
+    localStorage.setItem('theme', newTheme)
+  }
+
+  function cycleFont() {
+    const scales: ('small' | 'normal' | 'large')[] = ['small', 'normal', 'large']
+    const next = scales[(scales.indexOf(fontScale) + 1) % scales.length]
+    document.documentElement.classList.remove('font-small', 'font-large')
+    if (next !== 'normal') document.documentElement.classList.add(`font-${next}`)
+    setFontScale(next)
+    localStorage.setItem('font-scale', next)
+  }
 
   const currentLocale = (
     locales.find(l => pathname.startsWith(`/${l}/`) || pathname === `/${l}`) || 'en'
@@ -33,142 +61,95 @@ export default function Navbar() {
     router.push(newPath || '/')
   }
 
-  const navLinks = [
-    { href: `/${currentLocale}/compare/brazil-2026`, label: { en: 'Compare', pt: 'Comparar', es: 'Comparar', fr: 'Comparer', ar: 'مقارنة', zh: '比较', ru: 'Сравнить', hi: 'तुलना' } },
-    { href: `/${currentLocale}`, label: { en: 'Countries', pt: 'Países', es: 'Países', fr: 'Pays', ar: 'الدول', zh: '国家', ru: 'Страны', hi: 'देश' } },
-    { href: 'https://github.com/worldcontrast/promises', label: { en: 'GitHub ↗', pt: 'GitHub ↗', es: 'GitHub ↗', fr: 'GitHub ↗', ar: 'GitHub ↗', zh: 'GitHub ↗', ru: 'GitHub ↗', hi: 'GitHub ↗' }, external: true },
-  ]
-
   const loc = currentLocale as string
 
   return (
     <nav className="navbar" role="navigation" aria-label="Main navigation">
+      
+      {/* ── LEFT: BRAND + TOOLBAR — Garante visibilidade absoluta ── */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+        <Link href={`/${currentLocale}`} className="navbar-brand" id="navbar-brand">
+          World<em>Contrast</em>
+        </Link>
 
-      {/* Brand — serif = documento oficial */}
-      <Link href={`/${currentLocale}`} className="navbar-brand" id="navbar-brand">
-        World<em>Contrast</em>
-      </Link>
-
-      {/* Nav links — sans = máquina */}
-      <div className="navbar-nav" role="list">
-        {navLinks.map(link => (
-          <Link
-            key={link.href}
-            href={link.href}
-            className="navbar-link"
-            {...(link.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+        {/* TOOLBAR — Tema e Fonte sempre visíveis */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <button
+            onClick={toggleTheme}
+            id="theme-toggle"
+            title="Mudar Tema"
+            style={{
+              background: 'var(--ink-06)', border: '1px solid var(--rule)', cursor: 'pointer',
+              width: 32, height: 32, borderRadius: '50%',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: 'var(--ink)', fontSize: '14px'
+            }}
           >
-            {(link.label as Record<string, string>)[loc] || link.label.en}
-          </Link>
-        ))}
+            {theme === 'light' ? '☾' : '☀'}
+          </button>
+          <button
+            onClick={cycleFont}
+            id="font-cycle"
+            title="Tamanho do Texto"
+            style={{
+              background: 'var(--ink-06)', border: '1px solid var(--rule)', cursor: 'pointer',
+              padding: '0 8px', height: 32, borderRadius: '4px',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: 'var(--ink)', fontFamily: 'var(--font-mono)', fontSize: '10px', fontWeight: 800
+            }}
+          >
+            {fontScale === 'small' ? 'A-' : fontScale === 'large' ? 'A+' : 'A'}
+          </button>
+        </div>
       </div>
 
-      {/* Right actions */}
-      <div className="navbar-actions">
+      {/* ── CENTER: NAVIGATION (Hidden on very small screens if needed) ── */}
+      <div className="navbar-nav hidden-mobile">
+        <Link href={`/${currentLocale}/compare/brazil-2026`} className="navbar-link">
+          {loc === 'pt' ? 'Comparar' : 'Compare'}
+        </Link>
+      </div>
 
+      {/* ── RIGHT: LANGUAGE + CTA ── */}
+      <div className="navbar-actions">
         {/* Language switcher */}
         <div style={{ position: 'relative' }}>
           <button
-            id="lang-switcher-btn"
             onClick={() => setLangOpen(!langOpen)}
-            aria-expanded={langOpen}
-            aria-haspopup="listbox"
             style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: 'var(--text-3xs)',
-              fontWeight: 500,
-              letterSpacing: '0.10em',
-              color: 'var(--ink-60)',
-              background: 'var(--ink-06)',
-              border: '1px solid var(--rule)',
-              padding: '5px 10px',
-              borderRadius: 'var(--radius-sm)',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-              textTransform: 'uppercase' as const,
+              fontFamily: 'var(--font-mono)', fontSize: '10px', fontWeight: 500,
+              color: 'var(--ink-60)', background: 'var(--ink-06)', border: '1px solid var(--rule)',
+              padding: '6px 10px', borderRadius: '4px', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', gap: 4
             }}
           >
-            <span aria-hidden="true">{cfg.flag}</span>
-            {currentLocale.toUpperCase()}
-            <span aria-hidden="true" style={{ opacity: 0.5, fontSize: 8 }}>▾</span>
+            <span>{cfg.flag}</span> {currentLocale.toUpperCase()}
           </button>
 
           {langOpen && (
-            <>
-              <div
-                style={{ position: 'fixed', inset: 0, zIndex: 10 }}
-                onClick={() => setLangOpen(false)}
-                aria-hidden="true"
-              />
-              <div
-                role="listbox"
-                id="lang-dropdown"
-                style={{
-                  position: 'absolute',
-                  top: 'calc(100% + 8px)',
-                  right: 0,
-                  background: 'var(--paper)',
-                  border: '1px solid var(--rule)',
-                  borderRadius: 'var(--radius-md)',
-                  padding: '6px',
-                  zIndex: 20,
-                  minWidth: 160,
-                  boxShadow: 'var(--shadow-soft)',
-                }}
-              >
-                {locales.map(l => (
-                  <button
-                    key={l}
-                    role="option"
-                    aria-selected={l === currentLocale}
-                    onClick={() => switchLocale(l)}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 12,
-                      width: '100%',
-                      padding: '10px 14px',
-                      background: l === currentLocale ? 'var(--ink-06)' : 'transparent',
-                      border: 'none',
-                      borderRadius: 'var(--radius-sm)',
-                      cursor: 'pointer',
-                      fontFamily: 'var(--font-sans)',
-                      fontSize: '13px',
-                      fontWeight: l === currentLocale ? 600 : 400,
-                      color: 'var(--ink)',
-                      textAlign: 'left' as const,
-                      transition: 'background 0.2s',
-                    }}
-                    onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--ink-03)')}
-                    onMouseLeave={(e) => (e.currentTarget.style.background = l === currentLocale ? 'var(--ink-06)' : 'transparent')}
-                  >
-                    <span style={{ fontSize: 18, filter: 'grayscale(0.2)' }}>{localeConfig[l].flag}</span>
-                    <span style={{ flex: 1 }}>{localeConfig[l].name}</span>
-                    {l === currentLocale && (
-                      <span style={{ color: 'var(--gold)', fontSize: 12 }}>✓</span>
-                    )}
-                  </button>
-                ))}
-              </div>
-            </>
+            <div style={{
+              position: 'absolute', top: 'calc(100% + 8px)', right: 0,
+              background: 'var(--paper)', border: '1px solid var(--rule)',
+              borderRadius: '6px', padding: '6px', zIndex: 100, minWidth: 140,
+              boxShadow: 'var(--shadow-soft)'
+            }}>
+              {locales.map(l => (
+                <button
+                  key={l}
+                  onClick={() => switchLocale(l)}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 10, width: '100%',
+                    padding: '8px 12px', background: 'transparent', border: 'none',
+                    borderRadius: '4px', cursor: 'pointer', color: 'var(--ink)',
+                    fontSize: '13px', textAlign: 'left'
+                  }}
+                >
+                  <span>{localeConfig[l].flag}</span> {localeConfig[l].name}
+                </button>
+              ))}
+            </div>
           )}
         </div>
-
-        {/* CTA */}
-        <Link
-          href={`/${currentLocale}/compare/brazil-2026`}
-          className="navbar-cta"
-          id="navbar-compare-cta"
-        >
-          {currentLocale === 'pt' ? 'Comparar' : 
-           currentLocale === 'es' ? 'Comparar' : 
-           currentLocale === 'zh' ? '立即比较' :
-           currentLocale === 'ru' ? 'Сравнить' :
-           currentLocale === 'hi' ? 'तुलना करें' :
-           'Compare'}
-        </Link>
       </div>
     </nav>
   )

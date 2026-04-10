@@ -132,23 +132,62 @@ export default function AuthenticityBadge({
         id={`auth-badge-${hash?.slice(0, 8)}`}
         aria-haspopup="dialog"
         style={{ 
-          borderColor: 'var(--gold)', 
-          background: 'rgba(212, 175, 55, 0.05)',
-          color: 'var(--gold-dark)',
-          fontWeight: 700
+          display: 'flex',
+          alignItems: 'center',
+          gap: 0,
+          background: 'var(--ink-12)',
+          border: '1px solid var(--rule)',
+          borderRadius: '4px',
+          padding: 0,
+          overflow: 'hidden',
+          transition: 'all 0.2s ease',
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
         }}
+        onMouseEnter={(e) => (e.currentTarget.style.borderColor = 'var(--digital-blue)')}
+        onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'var(--rule)')}
       >
-        <LockIcon size={12} color="var(--gold-dark)" />
-        {t.badge}
-        {/* Hash curto visível — prova da prova */}
-        <span style={{
-          fontFamily: 'var(--font-mono)',
-          fontSize: 8,
-          opacity: 0.5,
-          letterSpacing: '0.04em',
+        {/* Glow Icon Section */}
+        <div style={{
+          background: 'var(--ink)',
+          padding: '6px 8px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          borderRight: '1px solid var(--rule)',
+          filter: 'drop-shadow(0 0 4px var(--digital-blue-20))'
         }}>
-          {shortHash}
-        </span>
+          <LockIcon size={14} color="var(--digital-blue)" />
+        </div>
+
+        {/* Label Section */}
+        <div style={{
+          padding: '4px 10px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+        }}>
+          <span style={{
+            fontFamily: 'var(--font-sans)',
+            fontSize: '10px',
+            fontWeight: 800,
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
+            color: 'var(--ink)',
+          }}>
+            {t.badge}
+          </span>
+          <span style={{
+            fontFamily: 'var(--font-mono)',
+            fontSize: '9px',
+            color: 'var(--ink-60)',
+            background: 'var(--ink-06)',
+            padding: '2px 6px',
+            borderRadius: '2px',
+            letterSpacing: '0.02em',
+          }}>
+            {shortHash}
+          </span>
+        </div>
       </button>
 
       {/* MODAL — Cartório Digital */}
@@ -166,11 +205,11 @@ export default function AuthenticityBadge({
           >
             {/* Header */}
             <div className="auth-modal-header">
-              <div className="auth-modal-icon">
-                <LockIcon size={16} color="var(--gold)" />
+              <div className="auth-modal-icon" style={{ background: 'var(--digital-blue-20)', border: '1px solid var(--digital-blue)' }}>
+                <LockIcon size={18} color="var(--digital-blue)" />
               </div>
               <div>
-                <p className="auth-modal-title">{t.title}</p>
+                <p className="auth-modal-title" style={{ color: 'var(--digital-blue)', letterSpacing: '0.05em' }}>{t.title}</p>
                 <p className="auth-modal-subtitle">{t.subtitle}</p>
               </div>
             </div>

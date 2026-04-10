@@ -32,14 +32,16 @@
 
 /* ── DESIGN TOKENS ──────────────────────────────────────── */
 :root {
-  /* Colors */
+  /* Colors - Light (Document Mode) */
   --ink:          #0B1D2E;
+  --ink-90:       rgba(11, 29, 46, 0.90);
   --ink-60:       rgba(11, 29, 46, 0.60);
   --ink-30:       rgba(11, 29, 46, 0.30);
   --ink-12:       rgba(11, 29, 46, 0.12);
   --ink-06:       rgba(11, 29, 46, 0.06);
 
   --paper:        #F5F0E8;
+  --paper-90:     rgba(245, 240, 232, 0.90);
   --paper-80:     rgba(245, 240, 232, 0.80);
   --paper-40:     rgba(245, 240, 232, 0.40);
   --paper-10:     rgba(245, 240, 232, 0.10);
@@ -54,71 +56,74 @@
   --rule-light:   rgba(11, 29, 46, 0.06);
 
   --blue-link:    #2563EB;
-  --green-seal:   #16A34A;
+  --digital-blue: #00D1FF; /* Lacre Blindado */
+  --digital-blue-20: rgba(0, 209, 255, 0.2);
 
-  /* Typography — sem serifa (Máquina) */
+  /* ... rest stay same or become relative ... */
+}
+
+/* ── DARK THEME (Blindagem Digital) ───────────────────────── */
+[data-theme='dark'] {
+  --ink:          #E2E8F0;
+  --ink-90:       rgba(226, 232, 240, 0.90);
+  --ink-60:       rgba(226, 232, 240, 0.60);
+  --ink-30:       rgba(226, 232, 240, 0.30);
+  --ink-12:       rgba(226, 232, 240, 0.12);
+  --ink-06:       rgba(226, 232, 240, 0.06);
+
+  --paper:        #050B10;
+  --paper-90:     rgba(5, 11, 16, 0.90);
+  --paper-80:     rgba(5, 11, 16, 0.80);
+  --paper-40:     rgba(5, 11, 16, 0.40);
+  --paper-10:     rgba(5, 11, 16, 0.10);
+
+  --rule:         rgba(226, 232, 240, 0.12);
+  --rule-light:   rgba(226, 232, 240, 0.06);
+  --gold:         #D4AF37;
+}
+
+:root {
+  /* Typography — same ... */
   --font-sans:    'IBM Plex Sans',  system-ui, sans-serif;
-
-  /* Typography — serifa (Fato) */
   --font-serif:   'Playfair Display', Georgia, serif;
-
-  /* Typography — monospace (Prova criptográfica) */
   --font-mono:    'IBM Plex Mono', 'Courier New', monospace;
 
-  /* Type scale — modular (ratio 1.25) adaptado para Acessibilidade WCAG */
-  --text-3xs:     0.6875rem;  /* 11px */
-  --text-2xs:     0.75rem;    /* 12px */
-  --text-xs:      0.875rem;   /* 14px */
-  --text-sm:      0.9375rem;  /* 15px */
-  --text-base:    1rem;       /* 16px - Base Legal */
-  --text-md:      1rem;       /*  16px */
-  --text-lg:      1.125rem;   /*  18px */
-  --text-xl:      1.25rem;    /*  20px */
-  --text-2xl:     1.5rem;     /*  24px */
-  --text-3xl:     2rem;       /*  32px */
-  --text-4xl:     2.5rem;     /*  40px */
-  --text-5xl:     3.5rem;     /*  56px */
-  --text-hero:    clamp(2.5rem, 5.5vw, 4.5rem);  /* responsive */
+  /* Font Scale Control */
+  --font-multiplier: 1;
 
-  /* Spacing — 4pt grid */
-  --space-1:  0.25rem;   /*  4px */
-  --space-2:  0.5rem;    /*  8px */
-  --space-3:  0.75rem;   /* 12px */
-  --space-4:  1rem;      /* 16px */
-  --space-5:  1.25rem;   /* 20px */
-  --space-6:  1.5rem;    /* 24px */
-  --space-8:  2rem;      /* 32px */
-  --space-10: 2.5rem;    /* 40px */
-  --space-12: 3rem;      /* 48px */
-  --space-16: 4rem;      /* 64px */
-  --space-20: 5rem;      /* 80px */
-  --space-24: 6rem;      /* 96px */
+  --text-3xs:     calc(0.6875rem * var(--font-multiplier));
+  --text-2xs:     calc(0.75rem * var(--font-multiplier));
+  --text-xs:      calc(0.875rem * var(--font-multiplier));
+  --text-sm:      calc(0.9375rem * var(--font-multiplier));
+  --text-base:    calc(1rem * var(--font-multiplier));
+  --text-md:      calc(1rem * var(--font-multiplier));
+  --text-lg:      calc(1.125rem * var(--font-multiplier));
+  --text-xl:      calc(1.25rem * var(--font-multiplier));
+  --text-2xl:     calc(1.5rem * var(--font-multiplier));
+  --text-3xl:     calc(2rem * var(--font-multiplier));
+  --text-4xl:     calc(2.5rem * var(--font-multiplier));
+  --text-5xl:     calc(3.5rem * var(--font-multiplier));
 
   /* Layout */
   --container-max:  1440px;
   --container-pad:  var(--space-16);
-  --navbar-h:       60px;
+  --navbar-h:       68px;
 
-  /* Swiss Grid — compare page */
-  /* Ambos os lados são exatamente iguais. O separador central NÃO consome espaço útil. */
-  --col-a:          1fr;
-  --col-sep:        1px;   /* linha pura — não é coluna, é um rule */
-  --col-b:          1fr;
-
-  /* Borders */
+  /* Borders / Shadows */
   --radius-sm:    2px;
   --radius-md:    4px;
   --radius-lg:    8px;
-
-  /* Shadows */
   --shadow-soft:  0 1px 3px rgba(11, 29, 46, 0.08), 0 4px 12px rgba(11, 29, 46, 0.04);
-  --shadow-modal: 0 24px 64px rgba(11, 29, 46, 0.28);
+  --shadow-modal: 0 24px 64px rgba(0, 0, 0, 0.4);
 
   /* Transitions */
   --ease-swift: cubic-bezier(0.4, 0, 0.2, 1);
-  --dur-quick:  160ms;
   --dur-normal: 240ms;
 }
+
+/* Font Sizing Classes */
+html.font-large { --font-multiplier: 1.2; }
+html.font-small { --font-multiplier: 0.85; }
 
 /* ── BASE ────────────────────────────────────────────────── */
 html {
@@ -202,16 +207,19 @@ img, svg {
   height: var(--navbar-h);
   background: var(--paper);
   border-bottom: 1px solid var(--rule);
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  display: flex;
   align-items: center;
-  padding-inline: var(--container-pad);
+  justify-content: space-between;
+  padding-inline: var(--space-4);
   position: sticky;
   top: 0;
   z-index: 200;
   backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  background: rgba(245, 240, 232, 0.92);
+  background: var(--paper-90);
+}
+
+@media (max-width: 992px) {
+  .hidden-mobile { display: none !important; }
 }
 
 .navbar-brand {
