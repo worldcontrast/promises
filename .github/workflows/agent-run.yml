@@ -1,0 +1,82 @@
+# World Contrast — Agent Scheduler
+# File: .github/workflows/agent-run.yml
+
+name: Agent — Collection Pipeline
+
+on:
+  schedule:
+    - cron: '0 6 */5 * *'
+
+  workflow_dispatch:
+    inputs:
+      country:
+        description: 'Country code (leave empty for all)'
+        required: false
+        default: ''
+      election_id:
+        description: 'Election ID (leave empty for all active)'
+        required: false
+        default: ''
+      dry_run:
+        description: 'Dry run (extract but do not save to DB)'
+        required: false
+        default: 'false'
+        type: boolean
+
+jobs:
+  collect:
+    name: Collect Political Promises
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    permissions:
+      contents: read
+      issues: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install -r agents/requirements.txt
+          playwright install chromium
+
+      - name: Create logs directory
+        run: mkdir -p logs
+
+      - name: Run collection pipeline
+        env:
+          # PYTHONPATH=. faz o Python enxergar a raiz do repo
+          # permitindo `from config.x` e `from agents.x`
+          PYTHONPATH: .
+          # Anthropic — dois nomes para compatibilidade
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          CLAUDE_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          # Supabase
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          # Meta
+          AGENT_VERSION: '1.0.0'
+          LOG_LEVEL: 'INFO'
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+        run: |
+          python agents/scheduler.py \
+            ${{ github.event.inputs.country != '' && format('--country {0}', github.event.inputs.country) || '' }} \
+            ${{ github.event.inputs.election_id != '' && format('--election {0}', github.event.inputs.election_id) || '' }} \
+            ${{ github.event.inputs.dry_run == 'true' && '--dry-run' || '' }}
+
+      - name: Upload run logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: agent-logs-${{ github.run_id }}
+          path: logs/*.log
+          if-no-files-found: warn
+          retention-days: 90

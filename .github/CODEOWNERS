@@ -1,0 +1,45 @@
+# CODEOWNERS — World Contrast
+# Defines who must approve changes to critical files.
+# Every pull request touching these paths requires explicit approval
+# from the listed maintainers before merging into main.
+#
+# Format: path @github-username
+# Documentation: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# ─────────────────────────────────────────────
+# CRITICAL — requires founder approval
+# These files define the soul of the project.
+# Any change here changes what the world sees.
+# ─────────────────────────────────────────────
+
+# The extraction prompt — the most critical file in the project.
+# A single word change here can bias collection for millions of users.
+agents/extraction/prompts/ @rafaelstedile
+
+# The database schema — defines how data is stored and verified.
+backend/db/ @rafaelstedile
+
+# Data standards — defines what counts as a valid promise.
+DATA_STANDARDS.md @rafaelstedile
+
+# Contributing rules — defines who can participate and how.
+CONTRIBUTING.md @rafaelstedile
+
+# The manifesto — the founding document. Never changes silently.
+README.md @rafaelstedile
+
+# Security policy — must never be weakened without public notice.
+SECURITY.md @rafaelstedile
+
+# ─────────────────────────────────────────────
+# HIGH PRIORITY — requires at least 1 maintainer approval
+# ─────────────────────────────────────────────
+
+# All agent code — changes here affect data collection neutrality.
+agents/ @rafaelstedile
+
+# All backend API code — changes here affect data exposure.
+backend/ @rafaelstedile
+
+# Country source registries — adding/changing sources requires verification.
+data/ @rafaelstedile

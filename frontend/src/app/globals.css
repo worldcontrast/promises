@@ -1,0 +1,874 @@
+/*
+ * ============================================================
+ * WORLD CONTRAST — DESIGN SYSTEM
+ * File: frontend/src/app/globals.css
+ *
+ * TIPOGRAFIA EM 3 CAMADAS (redução cognitiva pela forma):
+ *   1. SANS (Máquina)   → IBM Plex Sans    — UI, filtros, metadata
+ *   2. SERIF (Fato)     → Playfair Display — textos das promessas, títulos
+ *   3. MONO (Prova)     → IBM Plex Mono    — hashes, URLs, datas, dados
+ *
+ * GRID SUÍÇO (Simetria milimétrica Lado-a-Lado):
+ *   Colunas idênticas, regula via custom properties.
+ *   Zero favoritismo visual entre candidatos.
+ *
+ * PALETA:
+ *   --ink       Azul-noite institucional (autoridade)
+ *   --paper     Creme neutro (documento impresso)
+ *   --gold      Âmbar-lacre (acento, não hierarquia)
+ *   --rule      Linha de registro (divisão sem peso)
+ * ============================================================
+ */
+
+/* ── RESETS ─────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── FONT IMPORTS ──────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,600&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+/* ── DESIGN TOKENS ──────────────────────────────────────── */
+:root {
+  /* Colors */
+  --ink:          #0B1D2E;
+  --ink-60:       rgba(11, 29, 46, 0.60);
+  --ink-30:       rgba(11, 29, 46, 0.30);
+  --ink-12:       rgba(11, 29, 46, 0.12);
+  --ink-06:       rgba(11, 29, 46, 0.06);
+
+  --paper:        #F5F0E8;
+  --paper-80:     rgba(245, 240, 232, 0.80);
+  --paper-40:     rgba(245, 240, 232, 0.40);
+  --paper-10:     rgba(245, 240, 232, 0.10);
+
+  --gold:         #C8A96E;
+  --gold-deep:    #8B6914;
+  --gold-12:      rgba(200, 169, 110, 0.12);
+  --gold-25:      rgba(200, 169, 110, 0.25);
+  --gold-40:      rgba(200, 169, 110, 0.40);
+
+  --rule:         rgba(11, 29, 46, 0.10);
+  --rule-light:   rgba(11, 29, 46, 0.06);
+
+  --blue-link:    #2563EB;
+  --green-seal:   #16A34A;
+
+  /* Typography — sem serifa (Máquina) */
+  --font-sans:    'IBM Plex Sans',  system-ui, sans-serif;
+
+  /* Typography — serifa (Fato) */
+  --font-serif:   'Playfair Display', Georgia, serif;
+
+  /* Typography — monospace (Prova criptográfica) */
+  --font-mono:    'IBM Plex Mono', 'Courier New', monospace;
+
+  /* Type scale — modular (ratio 1.25) adaptado para Acessibilidade WCAG */
+  --text-3xs:     0.6875rem;  /* 11px */
+  --text-2xs:     0.75rem;    /* 12px */
+  --text-xs:      0.875rem;   /* 14px */
+  --text-sm:      0.9375rem;  /* 15px */
+  --text-base:    1rem;       /* 16px - Base Legal */
+  --text-md:      1rem;       /*  16px */
+  --text-lg:      1.125rem;   /*  18px */
+  --text-xl:      1.25rem;    /*  20px */
+  --text-2xl:     1.5rem;     /*  24px */
+  --text-3xl:     2rem;       /*  32px */
+  --text-4xl:     2.5rem;     /*  40px */
+  --text-5xl:     3.5rem;     /*  56px */
+  --text-hero:    clamp(2.5rem, 5.5vw, 4.5rem);  /* responsive */
+
+  /* Spacing — 4pt grid */
+  --space-1:  0.25rem;   /*  4px */
+  --space-2:  0.5rem;    /*  8px */
+  --space-3:  0.75rem;   /* 12px */
+  --space-4:  1rem;      /* 16px */
+  --space-5:  1.25rem;   /* 20px */
+  --space-6:  1.5rem;    /* 24px */
+  --space-8:  2rem;      /* 32px */
+  --space-10: 2.5rem;    /* 40px */
+  --space-12: 3rem;      /* 48px */
+  --space-16: 4rem;      /* 64px */
+  --space-20: 5rem;      /* 80px */
+  --space-24: 6rem;      /* 96px */
+
+  /* Layout */
+  --container-max:  1440px;
+  --container-pad:  var(--space-16);
+  --navbar-h:       60px;
+
+  /* Swiss Grid — compare page */
+  /* Ambos os lados são exatamente iguais. O separador central NÃO consome espaço útil. */
+  --col-a:          1fr;
+  --col-sep:        1px;   /* linha pura — não é coluna, é um rule */
+  --col-b:          1fr;
+
+  /* Borders */
+  --radius-sm:    2px;
+  --radius-md:    4px;
+  --radius-lg:    8px;
+
+  /* Shadows */
+  --shadow-soft:  0 1px 3px rgba(11, 29, 46, 0.08), 0 4px 12px rgba(11, 29, 46, 0.04);
+  --shadow-modal: 0 24px 64px rgba(11, 29, 46, 0.28);
+
+  /* Transitions */
+  --ease-swift: cubic-bezier(0.4, 0, 0.2, 1);
+  --dur-quick:  160ms;
+  --dur-normal: 240ms;
+}
+
+/* ── BASE ────────────────────────────────────────────────── */
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--paper);
+  color: var(--ink);
+  overflow-x: hidden;
+  font-size: var(--text-base);
+  line-height: 1.6;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img, svg {
+  display: block;
+  max-width: 100%;
+}
+
+/* ── UTILITY CLASSES — TIPOGRAFIA ────────────────────────── */
+
+/* Máquina (sans) — rótulos, metadata, filtros, UI */
+.t-machine {
+  font-family: var(--font-sans);
+}
+
+/* Fato (serif) — promessas, títulos editoriais */
+.t-fact {
+  font-family: var(--font-serif);
+}
+
+/* Prova (mono) — hashes SHA-256, URLs, datas ISO, dados técnicos */
+.t-proof {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
+/* Eyebrow — número de seção, categoria */
+.t-eyebrow {
+  font-family: var(--font-sans);
+  font-size: var(--text-3xs);
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-60);
+}
+
+/* ── LAYOUT UTILITÁRIOS ──────────────────────────────────── */
+.container {
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--container-pad);
+}
+
+/* Swiss Divider — rule horizontal ou vertical puro */
+.rule-h {
+  height: 1px;
+  background: var(--rule);
+  border: none;
+}
+
+.rule-v {
+  width: 1px;
+  background: var(--rule);
+  align-self: stretch;
+}
+
+/* ── NAVBAR ──────────────────────────────────────────────── */
+.navbar {
+  height: var(--navbar-h);
+  background: var(--paper);
+  border-bottom: 1px solid var(--rule);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding-inline: var(--container-pad);
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background: rgba(245, 240, 232, 0.92);
+}
+
+.navbar-brand {
+  font-family: var(--font-serif);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+}
+
+.navbar-brand em {
+  color: var(--gold);
+  font-style: normal;
+}
+
+.navbar-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.navbar-link {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  color: var(--ink-60);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  transition: color var(--dur-quick) var(--ease-swift);
+}
+
+.navbar-link:hover {
+  color: var(--ink);
+}
+
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  justify-content: flex-end;
+}
+
+.navbar-cta {
+  font-family: var(--font-sans);
+  font-size: var(--text-2xs);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--paper);
+  background: var(--ink);
+  padding: var(--space-2) var(--space-5);
+  border-radius: var(--radius-sm);
+  transition: background var(--dur-quick) var(--ease-swift);
+}
+
+.navbar-cta:hover {
+  background: var(--gold-deep);
+}
+
+/* ── COMPARE PAGE — SWISS GRID ───────────────────────────── */
+
+/*
+ * O Grid Suíço Lado-a-Lado:
+ * Princípio: neutralidade absoluta visual.
+ * Nenhum candidato tem mais espaço, mais peso, mais cor de destaque.
+ * O separador central é uma linha (1px) — não uma coluna.
+ * Ambas as colunas recebem exatamente o mesmo padding, a mesma tipografia.
+ */
+
+.compare-layout {
+  background: var(--paper);
+  min-height: 100vh;
+}
+
+/* Breadcrumb + Election header */
+.compare-header {
+  background: var(--paper);
+  border-bottom: 1px solid var(--rule);
+  padding: var(--space-6) var(--container-pad);
+}
+
+.compare-breadcrumb {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  color: var(--ink-60);
+  margin-bottom: var(--space-2);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.compare-breadcrumb a:hover {
+  color: var(--ink);
+}
+
+.compare-election-name {
+  font-family: var(--font-serif);
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.1;
+  margin-bottom: var(--space-2);
+}
+
+.compare-meta {
+  font-family: var(--font-mono);
+  font-size: var(--text-3xs);
+  color: var(--ink-30);
+  letter-spacing: 0.06em;
+}
+
+.compare-meta a {
+  color: var(--blue-link);
+  text-underline-offset: 2px;
+  text-decoration: underline;
+}
+
+/* CANDIDATE HEADERS — a seção mais crítica para neutralidade */
+.candidates-bar {
+  display: grid;
+  grid-template-columns: var(--col-a) var(--col-sep) var(--col-b);
+  background: var(--paper);
+  border-bottom: 1px solid var(--rule);
+}
+
+.candidate-col {
+  padding: var(--space-6) var(--space-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* Separador central — puramente estético, sem massa visual */
+.candidate-separator {
+  background: var(--rule);
+  width: 1px;
+}
+
+.candidate-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--paper);
+  flex-shrink: 0;
+}
+
+.candidate-name {
+  font-family: var(--font-serif);
+  font-size: var(--text-md);
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.2;
+}
+
+.candidate-party {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  color: var(--ink-60);
+  letter-spacing: 0.04em;
+}
+
+.candidate-source-link {
+  font-family: var(--font-mono);
+  font-size: var(--text-3xs);
+  color: var(--blue-link);
+  letter-spacing: 0.04em;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* FILTER BAR */
+.filter-bar {
+  padding: var(--space-3) var(--container-pad);
+  background: var(--paper);
+  border-bottom: 1px solid var(--rule);
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  position: sticky;
+  top: var(--navbar-h);
+  z-index: 100;
+  backdrop-filter: blur(6px);
+  background: rgba(245, 240, 232, 0.94);
+}
+
+.filter-pill {
+  font-family: var(--font-sans);
+  font-size: var(--text-3xs);
+  font-weight: 600;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  padding: var(--space-2) var(--space-4);
+  border-radius: 100px;
+  border: 1px solid var(--rule);
+  background: transparent;
+  color: var(--ink-60);
+  transition:
+    background var(--dur-quick) var(--ease-swift),
+    border-color var(--dur-quick) var(--ease-swift),
+    color var(--dur-quick) var(--ease-swift);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.filter-pill:hover {
+  border-color: var(--ink-30);
+  color: var(--ink);
+}
+
+.filter-pill.active {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+
+/* CATEGORY SECTION HEADER */
+.category-header {
+  display: grid;
+  grid-template-columns: var(--col-a) var(--col-sep) var(--col-b);
+  background: rgba(11, 29, 46, 0.03);
+  border-bottom: 1px solid var(--rule);
+}
+
+.category-header-inner {
+  padding: var(--space-2) var(--space-8);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  grid-column: 1 / -1; /* span full width */
+}
+
+.category-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 1px;
+  flex-shrink: 0;
+}
+
+.category-label {
+  font-family: var(--font-sans);
+  font-size: var(--text-3xs);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.category-count {
+  font-family: var(--font-mono);
+  font-size: var(--text-3xs);
+  color: var(--ink-30);
+  margin-left: auto;
+  letter-spacing: 0.06em;
+}
+
+/* PROMISE ROWS — coração do Grid Suíço */
+.promise-row {
+  display: grid;
+  grid-template-columns: var(--col-a) var(--col-sep) var(--col-b);
+  border-bottom: 1px solid var(--rule-light);
+}
+
+.promise-row:last-child {
+  border-bottom: none;
+}
+
+.promise-cell {
+  padding: var(--space-6) var(--space-8);
+  background: var(--paper);
+  transition: background var(--dur-quick) var(--ease-swift);
+}
+
+.promise-cell--empty {
+  background: rgba(11, 29, 46, 0.02);
+}
+
+.promise-cell:hover {
+  background: rgba(245, 240, 232, 0.6);
+}
+
+/* A promessa em si — serifa = FATO */
+.promise-text {
+  font-family: var(--font-serif);
+  font-size: var(--text-base);
+  font-weight: 400;
+  color: var(--ink);
+  line-height: 1.7;
+  margin-bottom: var(--space-3);
+}
+
+/* Citação verbatim em itálico — suavemente distinta do texto editado */
+.promise-quote {
+  font-family: var(--font-serif);
+  font-size: var(--text-sm);
+  font-style: italic;
+  color: var(--ink-60);
+  line-height: 1.6;
+  padding-left: var(--space-4);
+  border-left: 2px solid var(--rule);
+  margin-bottom: var(--space-4);
+}
+
+/* Estado vazio */
+.promise-empty {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-style: italic;
+  color: var(--ink-30);
+}
+
+/* Provenance row — TUDO em mono porque é prova técnica */
+.promise-provenance {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--rule-light);
+}
+
+.provenance-source {
+  font-family: var(--font-mono);
+  font-size: var(--text-3xs);
+  color: var(--ink-30);
+  letter-spacing: 0.04em;
+}
+
+.provenance-date {
+  font-family: var(--font-mono);
+  font-size: var(--text-3xs);
+  color: var(--ink-30);
+}
+
+.provenance-archive {
+  font-family: var(--font-mono);
+  font-size: var(--text-3xs);
+  color: var(--blue-link);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* ── AUTHENTICITY BADGE (LACRE DO CARTÓRIO) ──────────────── */
+
+/* Botão selado — sobrio, não chamariz */
+.auth-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--gold-deep);
+  background: transparent;
+  border: 0.5px solid var(--gold-40);
+  border-radius: var(--radius-sm);
+  padding: 2px var(--space-2);
+  cursor: pointer;
+  transition:
+    background var(--dur-quick) var(--ease-swift),
+    border-color var(--dur-quick) var(--ease-swift);
+}
+
+.auth-badge:hover {
+  background: var(--gold-12);
+  border-color: var(--gold);
+}
+
+/* Modal de verificação — Cartório Digital */
+.auth-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(11, 29, 46, 0.75);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+  backdrop-filter: blur(4px);
+}
+
+.auth-modal {
+  background: var(--ink);
+  border: 1px solid var(--gold-25);
+  border-radius: var(--radius-md);
+  padding: var(--space-10) var(--space-8);
+  max-width: 480px;
+  width: 100%;
+  box-shadow: var(--shadow-modal);
+}
+
+.auth-modal-header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  margin-bottom: var(--space-8);
+  padding-bottom: var(--space-6);
+  border-bottom: 1px solid rgba(200, 169, 110, 0.15);
+}
+
+.auth-modal-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--gold-12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.auth-modal-title {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--paper);
+  margin-bottom: var(--space-1);
+}
+
+.auth-modal-subtitle {
+  font-family: var(--font-mono);
+  font-size: var(--text-3xs);
+  color: var(--paper-40);
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+}
+
+.auth-field {
+  margin-bottom: var(--space-5);
+}
+
+.auth-field-label {
+  font-family: var(--font-sans);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--paper-40);
+  margin-bottom: var(--space-2);
+}
+
+.auth-field-value {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  color: var(--gold);
+  background: var(--gold-12);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  word-break: break-all;
+  line-height: 1.6;
+  display: block;
+}
+
+.auth-field-link {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  color: #60A5FA;
+  word-break: break-all;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.auth-how-to {
+  margin-top: var(--space-5);
+  padding: var(--space-4);
+  background: rgba(245, 240, 232, 0.04);
+  border-left: 2px solid var(--gold-25);
+}
+
+.auth-how-to-label {
+  font-family: var(--font-sans);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: var(--space-2);
+}
+
+.auth-how-to-text {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  color: var(--paper-40);
+  line-height: 1.75;
+}
+
+.auth-modal-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--space-6);
+  padding-top: var(--space-5);
+  border-top: 1px solid rgba(245, 240, 232, 0.06);
+}
+
+.auth-open-source {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--paper-40);
+  letter-spacing: 0.06em;
+}
+
+.auth-close-btn {
+  font-family: var(--font-sans);
+  font-size: var(--text-2xs);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: var(--paper-40);
+  background: rgba(245, 240, 232, 0.06);
+  border: 0.5px solid rgba(245, 240, 232, 0.12);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-5);
+  cursor: pointer;
+  transition: color var(--dur-quick) var(--ease-swift), background var(--dur-quick) var(--ease-swift);
+}
+
+.auth-close-btn:hover {
+  color: var(--paper-80);
+  background: rgba(245, 240, 232, 0.10);
+}
+
+/* ── BUTTONS ─────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-sans);
+  font-size: var(--text-2xs);
+  font-weight: 600;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  border-radius: var(--radius-sm);
+  padding: 10px var(--space-6);
+  cursor: pointer;
+  border: none;
+  transition:
+    background var(--dur-quick) var(--ease-swift),
+    color var(--dur-quick) var(--ease-swift),
+    transform var(--dur-quick) var(--ease-swift);
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn-ink {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.btn-ink:hover {
+  background: #152d45;
+}
+
+.btn-gold {
+  background: var(--gold);
+  color: var(--ink);
+}
+
+.btn-gold:hover {
+  background: #b89355;
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--ink-60);
+  border: 1px solid var(--rule);
+}
+
+.btn-ghost:hover {
+  border-color: var(--ink-30);
+  color: var(--ink);
+}
+
+/* ── RESPONSIVE ──────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  :root {
+    --container-pad: var(--space-8);
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --container-pad: var(--space-5);
+  }
+
+  .navbar {
+    grid-template-columns: 1fr auto;
+  }
+
+  .navbar-nav {
+    display: none;
+  }
+
+  /* Mobile: lado-a-lado vira empilhado */
+  .candidates-bar,
+  .promise-row,
+  .category-header {
+    grid-template-columns: 1fr;
+  }
+
+  .candidate-separator {
+    display: none;
+  }
+
+  .candidate-col:last-of-type {
+    border-top: 1px solid var(--rule);
+  }
+
+  .promise-cell {
+    padding: var(--space-5);
+  }
+
+  .promise-cell + .promise-cell {
+    border-top: 1px solid var(--rule);
+  }
+
+  .filter-bar {
+    padding-inline: var(--space-5);
+  }
+}
+
+/* ── PRINT STYLESHEET — para o Cartório Digital ──────────── */
+@media print {
+  .navbar,
+  .filter-bar,
+  .auth-badge,
+  .auth-modal-overlay {
+    display: none;
+  }
+
+  body {
+    background: white;
+    color: black;
+    font-size: 10pt;
+  }
+
+  .promise-text {
+    font-family: Georgia, serif;
+    font-size: 10pt;
+  }
+
+  .provenance-source,
+  .provenance-date {
+    font-family: 'Courier New', monospace;
+    font-size: 8pt;
+  }
+
+  .promise-row {
+    page-break-inside: avoid;
+  }
+}
