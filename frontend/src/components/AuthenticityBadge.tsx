@@ -1,13 +1,9 @@
 /**
- * World Contrast — AuthenticityBadge
+ * World Contrast — Authenticity Badge v2.0
  * File: frontend/src/components/AuthenticityBadge.tsx
  *
- * Redesenhado como o LACRE DO CARTÓRIO — austero, técnico, definitivo.
- * O botão é propositalmente discreto — não é marketing, é evidência.
- * O modal usa a tríade tipográfica:
- *   - Label → sans (máquina)
- *   - Hash  → mono (prova criptográfica)
- *   - Texto explicativo → sans legível
+ * Selo de autenticidade SHA-256 — "Lacre do Cartório Digital"
+ * Suporta: en, pt, es, fr, de, ar, zh, ja, hi, ru
  */
 'use client'
 
@@ -21,222 +17,236 @@ interface AuthenticityProps {
   locale?: string
 }
 
-const i18n = {
+// ─── TRADUÇÕES COMPLETAS ───────────────────────────────────────
+const COPY: Record<string, {
+  badge: string; title: string; subtitle: string; hash: string
+  collected: string; source: string; archive: string
+  howto: string; howtoText: string; close: string; openSource: string
+}> = {
   en: {
-    badge:       'Authentic',
-    title:       'Verified Data',
-    subtitle:    'POCVA-01 · SHA-256',
-    labelHash:   'SHA-256 Hash',
-    labelDate:   'Collected on',
-    labelSource: 'Original source',
-    labelArchive:'Immutable archive',
-    howTitle:    'How to verify independently',
-    howText:     'Download the original page. Run SHA-256 on the raw content. The result must match the hash above character by character.',
-    openSource:  'Open-source audit ↗',
-    close:       'Close',
+    badge:      'Authentic',
+    title:      'Verified data',
+    subtitle:   'World Contrast · SHA-256 · POCVA-01',
+    hash:       'SHA-256 Hash',
+    collected:  'Collected on',
+    source:     'Original source',
+    archive:    'Immutable archive',
+    howto:      'How to verify',
+    howtoText:  'Download the original page and run SHA-256. The result must match the hash above exactly.',
+    close:      'Close',
+    openSource: 'Open-source audit ↗',
   },
   pt: {
-    badge:       'Autêntico',
-    title:       'Dado Autenticado',
-    subtitle:    'POCVA-01 · SHA-256',
-    labelHash:   'Hash SHA-256',
-    labelDate:   'Coletado em',
-    labelSource: 'Fonte original',
-    labelArchive:'Arquivo imutável',
-    howTitle:    'Como verificar independentemente',
-    howText:     'Baixe a página original. Execute SHA-256 sobre o conteúdo bruto. O resultado deve coincidir com o hash acima caractere a caractere.',
-    openSource:  'Auditoria open-source ↗',
-    close:       'Fechar',
+    badge:      'Autêntico',
+    title:      'Dado autenticado',
+    subtitle:   'World Contrast · SHA-256 · POCVA-01',
+    hash:       'Hash SHA-256',
+    collected:  'Coletado em',
+    source:     'Fonte original',
+    archive:    'Arquivo imutável',
+    howto:      'Como verificar',
+    howtoText:  'Baixe a página original e execute SHA-256. O resultado deve ser idêntico ao hash acima.',
+    close:      'Fechar',
+    openSource: 'Auditoria open-source ↗',
   },
   es: {
-    badge:       'Auténtico',
-    title:       'Dato Autenticado',
-    subtitle:    'POCVA-01 · SHA-256',
-    labelHash:   'Hash SHA-256',
-    labelDate:   'Recopilado el',
-    labelSource: 'Fuente original',
-    labelArchive:'Archivo inmutable',
-    howTitle:    'Cómo verificar de forma independiente',
-    howText:     'Descargue la página original. Ejecute SHA-256 sobre el contenido bruto. El resultado debe coincidir con el hash anterior.',
-    openSource:  'Auditoría open-source ↗',
-    close:       'Cerrar',
+    badge:      'Auténtico',
+    title:      'Dato autenticado',
+    subtitle:   'World Contrast · SHA-256 · POCVA-01',
+    hash:       'Hash SHA-256',
+    collected:  'Recopilado el',
+    source:     'Fuente original',
+    archive:    'Archivo inmutable',
+    howto:      'Cómo verificar',
+    howtoText:  'Descargue la página original y ejecute SHA-256. El resultado debe coincidir exactamente con el hash anterior.',
+    close:      'Cerrar',
+    openSource: 'Auditoría open-source ↗',
+  },
+  fr: {
+    badge:      'Authentique',
+    title:      'Donnée authentifiée',
+    subtitle:   'World Contrast · SHA-256 · POCVA-01',
+    hash:       'Hash SHA-256',
+    collected:  'Collecté le',
+    source:     'Source originale',
+    archive:    'Archive immuable',
+    howto:      'Comment vérifier',
+    howtoText:  'Téléchargez la page originale et exécutez SHA-256. Le résultat doit correspondre exactement au hash ci-dessus.',
+    close:      'Fermer',
+    openSource: 'Audit open-source ↗',
+  },
+  de: {
+    badge:      'Authentisch',
+    title:      'Verifizierte Daten',
+    subtitle:   'World Contrast · SHA-256 · POCVA-01',
+    hash:       'SHA-256-Hash',
+    collected:  'Erfasst am',
+    source:     'Originalquelle',
+    archive:    'Unveränderliches Archiv',
+    howto:      'So verifizieren',
+    howtoText:  'Laden Sie die Originalseite herunter und führen Sie SHA-256 aus. Das Ergebnis muss genau mit dem obigen Hash übereinstimmen.',
+    close:      'Schließen',
+    openSource: 'Open-Source-Prüfung ↗',
+  },
+  ar: {
+    badge:      'موثّق',
+    title:      'بيانات موثّقة',
+    subtitle:   'World Contrast · SHA-256 · POCVA-01',
+    hash:       'تجزئة SHA-256',
+    collected:  'تم جمعه في',
+    source:     'المصدر الأصلي',
+    archive:    'أرشيف غير قابل للتغيير',
+    howto:      'كيفية التحقق',
+    howtoText:  'قم بتنزيل الصفحة الأصلية وتشغيل SHA-256. يجب أن تتطابق النتيجة بالضبط مع التجزئة أعلاه.',
+    close:      'إغلاق',
+    openSource: 'تدقيق مفتوح المصدر ↗',
   },
   zh: {
-    badge:       '正品',
-    title:       '已验证数据',
-    subtitle:    'POCVA-01 · SHA-256',
-    labelHash:   'SHA-256 哈希',
-    labelDate:   '收集日期',
-    labelSource: '原始来源',
-    labelArchive:'不可变存档',
-    howTitle:    '如何独立验证',
-    howText:     '下载原始页面。在原始内容上运行 SHA-256。结果必须与上面的哈希逐字符匹配。',
-    openSource:  '开源审计 ↗',
-    close:       '关闭',
+    badge:      '已验证',
+    title:      '数据已认证',
+    subtitle:   'World Contrast · SHA-256 · POCVA-01',
+    hash:       'SHA-256 哈希值',
+    collected:  '采集于',
+    source:     '原始来源',
+    archive:    '不可变档案',
+    howto:      '如何验证',
+    howtoText:  '下载原始页面并运行 SHA-256。结果必须与上方哈希值完全一致。',
+    close:      '关闭',
+    openSource: '开源审计 ↗',
   },
-  ru: {
-    badge:       'Подлинно',
-    title:       'Проверенные данные',
-    subtitle:    'POCVA-01 · SHA-256',
-    labelHash:   'Хэш SHA-256',
-    labelDate:   'Собрано',
-    labelSource: 'Оригинальный источник',
-    labelArchive:'Неизменяемый архив',
-    howTitle:    'Как проверить самостоятельно',
-    howText:     'Загрузите оригинальную страницу. Запустите SHA-256 для необработанного содержимого. Результат должен посимвольно совпадать с указанным выше хэшем.',
-    openSource:  'Open-source аудит ↗',
-    close:       'Закрыть',
+  ja: {
+    badge:      '認証済み',
+    title:      '認証されたデータ',
+    subtitle:   'World Contrast · SHA-256 · POCVA-01',
+    hash:       'SHA-256ハッシュ',
+    collected:  '収集日',
+    source:     '元のソース',
+    archive:    '不変アーカイブ',
+    howto:      '検証方法',
+    howtoText:  '元のページをダウンロードしてSHA-256を実行してください。結果は上記のハッシュと完全に一致する必要があります。',
+    close:      '閉じる',
+    openSource: 'オープンソース監査 ↗',
   },
   hi: {
-    badge:       'प्रमाणित',
-    title:       'सत्यापित डेटा',
-    subtitle:    'POCVA-01 · SHA-256',
-    labelHash:   'SHA-256 हैश',
-    labelDate:   'संग्रह की तारीख',
-    labelSource: 'आधिकारिक स्रोत',
-    labelArchive:'अपरिवर्तनीय संग्रह',
-    howTitle:    'स्वतंत्र रूप से कैसे सत्यापित करें',
-    howText:     'मूल पेज डाउनलोड करें। कच्चे कंटेंट पर SHA-256 चलाएं। परिणाम ऊपर दिए गए हैश से मेल खाना चाहिए।',
-    openSource:  'ओपन-सोर्स ऑडिट ↗',
-    close:       'बंद करें',
+    badge:      'प्रामाणिक',
+    title:      'सत्यापित डेटा',
+    subtitle:   'World Contrast · SHA-256 · POCVA-01',
+    hash:       'SHA-256 हैश',
+    collected:  'एकत्र किया गया',
+    source:     'मूल स्रोत',
+    archive:    'अपरिवर्तनीय संग्रह',
+    howto:      'कैसे सत्यापित करें',
+    howtoText:  'मूल पृष्ठ डाउनलोड करें और SHA-256 चलाएं। परिणाम ऊपर दिए गए हैश से बिल्कुल मेल खाना चाहिए।',
+    close:      'बंद करें',
+    openSource: 'ओपन-सोर्स ऑडिट ↗',
   },
-} as Record<string, {
-  badge: string; title: string; subtitle: string;
-  labelHash: string; labelDate: string; labelSource: string;
-  labelArchive: string; howTitle: string; howText: string;
-  openSource: string; close: string;
-}>
+  ru: {
+    badge:      'Подлинно',
+    title:      'Данные верифицированы',
+    subtitle:   'World Contrast · SHA-256 · POCVA-01',
+    hash:       'Хеш SHA-256',
+    collected:  'Собрано',
+    source:     'Исходный источник',
+    archive:    'Неизменяемый архив',
+    howto:      'Как проверить',
+    howtoText:  'Скачайте исходную страницу и запустите SHA-256. Результат должен точно совпадать с хешем выше.',
+    close:      'Закрыть',
+    openSource: 'Аудит с открытым кодом ↗',
+  },
+}
 
 export default function AuthenticityBadge({
-  hash, collectedAt, sourceUrl, archiveUrl, locale = 'pt',
+  hash,
+  collectedAt,
+  sourceUrl,
+  archiveUrl,
+  locale = 'en',
 }: AuthenticityProps) {
   const [open, setOpen] = useState(false)
-  const t = i18n[locale] || i18n.en
+
+  // Fallback seguro para locale não suportado
+  const t = COPY[locale] ?? COPY['en']
 
   const dateFormatted = collectedAt
-    ? new Date(collectedAt).toLocaleDateString(locale === 'pt' ? 'pt-BR' : locale === 'es' ? 'es-ES' : 'en-US', {
-        year: 'numeric', month: 'long', day: 'numeric',
-      })
+    ? (() => {
+        try {
+          return new Date(collectedAt).toLocaleDateString(
+            locale === 'ar' ? 'ar-SA'
+            : locale === 'zh' ? 'zh-CN'
+            : locale === 'ja' ? 'ja-JP'
+            : locale === 'hi' ? 'hi-IN'
+            : locale === 'ru' ? 'ru-RU'
+            : locale === 'de' ? 'de-DE'
+            : locale === 'fr' ? 'fr-FR'
+            : locale === 'es' ? 'es-ES'
+            : locale === 'pt' ? 'pt-BR'
+            : 'en-US',
+            { year: 'numeric', month: 'long', day: 'numeric' }
+          )
+        } catch {
+          return collectedAt.slice(0, 10)
+        }
+      })()
     : '—'
 
-  // Exibe o hash truncado no badge para ocupar menos espaço
-  const shortHash = hash ? `${hash.slice(0, 6)}…${hash.slice(-4)}` : '—'
+  const isRTL = locale === 'ar'
 
   return (
     <>
-      {/* BADGE — discreto como um carimbo de cartório */}
+      {/* ── BADGE INLINE ── */}
       <button
-        className="auth-badge"
         onClick={() => setOpen(true)}
+        className="auth-badge"
         title={t.title}
-        id={`auth-badge-${hash?.slice(0, 8)}`}
-        aria-haspopup="dialog"
-        style={{ 
-          display: 'flex',
-          alignItems: 'center',
-          gap: 0,
-          background: 'var(--ink-12)',
-          border: '1px solid var(--rule)',
-          borderRadius: '4px',
-          padding: 0,
-          overflow: 'hidden',
-          transition: 'all 0.2s ease',
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
-        }}
-        onMouseEnter={(e) => (e.currentTarget.style.borderColor = 'var(--digital-blue)')}
-        onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'var(--rule)')}
+        aria-label={t.title}
+        dir={isRTL ? 'rtl' : 'ltr'}
       >
-        {/* Glow Icon Section */}
-        <div style={{
-          background: 'var(--ink)',
-          padding: '6px 8px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          borderRight: '1px solid var(--rule)',
-          filter: 'drop-shadow(0 0 4px var(--digital-blue-20))'
-        }}>
-          <LockIcon size={14} color="var(--digital-blue)" />
-        </div>
-
-        {/* Label Section */}
-        <div style={{
-          padding: '4px 10px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 8,
-        }}>
-          <span style={{
-            fontFamily: 'var(--font-sans)',
-            fontSize: '10px',
-            fontWeight: 800,
-            textTransform: 'uppercase',
-            letterSpacing: '0.05em',
-            color: 'var(--ink)',
-          }}>
-            {t.badge}
-          </span>
-          <span style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: '9px',
-            color: 'var(--ink-60)',
-            background: 'var(--ink-06)',
-            padding: '2px 6px',
-            borderRadius: '2px',
-            letterSpacing: '0.02em',
-          }}>
-            {shortHash}
-          </span>
-        </div>
+        <LockIcon />
+        {t.badge}
       </button>
 
-      {/* MODAL — Cartório Digital */}
+      {/* ── MODAL ── */}
       {open && (
         <div
           className="auth-modal-overlay"
+          onClick={() => setOpen(false)}
           role="dialog"
           aria-modal="true"
           aria-label={t.title}
-          onClick={() => setOpen(false)}
         >
           <div
             className="auth-modal"
             onClick={e => e.stopPropagation()}
+            dir={isRTL ? 'rtl' : 'ltr'}
           >
             {/* Header */}
             <div className="auth-modal-header">
-              <div className="auth-modal-icon" style={{ background: 'var(--digital-blue-20)', border: '1px solid var(--digital-blue)' }}>
-                <LockIcon size={18} color="var(--digital-blue)" />
+              <div className="auth-modal-icon">
+                <LockIcon size={16} color="var(--gold)" />
               </div>
               <div>
-                <p className="auth-modal-title" style={{ color: 'var(--digital-blue)', letterSpacing: '0.05em' }}>{t.title}</p>
+                <p className="auth-modal-title">{t.title}</p>
                 <p className="auth-modal-subtitle">{t.subtitle}</p>
               </div>
             </div>
 
-            {/* Hash — fonte mono = evidência técnica */}
+            {/* Hash */}
             <div className="auth-field">
-              <p className="auth-field-label">{t.labelHash}</p>
-              <code className="auth-field-value">
-                {hash || '—'}
-              </code>
+              <p className="auth-field-label">{t.hash}</p>
+              <code className="auth-field-value">{hash || '—'}</code>
             </div>
 
-            {/* Date — mono porque é dado técnico */}
+            {/* Data */}
             <div className="auth-field">
-              <p className="auth-field-label">{t.labelDate}</p>
-              <span style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: 'var(--text-xs)',
-                color: 'var(--paper-80)',
-              }}>
+              <p className="auth-field-label">{t.collected}</p>
+              <p className="auth-field-value" style={{ color: 'var(--paper-60)' }}>
                 {dateFormatted}
-              </span>
+              </p>
             </div>
 
-            {/* Source */}
+            {/* Fonte */}
             <div className="auth-field">
-              <p className="auth-field-label">{t.labelSource}</p>
+              <p className="auth-field-label">{t.source}</p>
               <a
                 href={sourceUrl}
                 target="_blank"
@@ -247,10 +257,10 @@ export default function AuthenticityBadge({
               </a>
             </div>
 
-            {/* Archive */}
+            {/* Arquivo */}
             {archiveUrl && (
               <div className="auth-field">
-                <p className="auth-field-label">{t.labelArchive}</p>
+                <p className="auth-field-label">{t.archive}</p>
                 <a
                   href={archiveUrl}
                   target="_blank"
@@ -262,10 +272,10 @@ export default function AuthenticityBadge({
               </div>
             )}
 
-            {/* How to verify */}
+            {/* Como verificar */}
             <div className="auth-how-to">
-              <p className="auth-how-to-label">{t.howTitle}</p>
-              <p className="auth-how-to-text">{t.howText}</p>
+              <p className="auth-how-to-label">{t.howto}</p>
+              <p className="auth-how-to-text">{t.howtoText}</p>
             </div>
 
             {/* Footer */}
@@ -279,8 +289,8 @@ export default function AuthenticityBadge({
                 {t.openSource}
               </a>
               <button
-                className="auth-close-btn"
                 onClick={() => setOpen(false)}
+                className="auth-close-btn"
               >
                 {t.close}
               </button>
@@ -302,9 +312,9 @@ function LockIcon({ size = 10, color = 'currentColor' }: { size?: number; color?
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
     >
-      <rect x="1" y="6" width="10" height="7" rx="1.5" stroke={color} strokeWidth="1.2"/>
-      <path d="M3.5 6V4.5a2.5 2.5 0 0 1 5 0V6" stroke={color} strokeWidth="1.2" strokeLinecap="round"/>
-      <circle cx="6" cy="9.5" r="1" fill={color}/>
+      <rect x="1" y="6" width="10" height="7" rx="1.5" stroke={color} strokeWidth="1.2" />
+      <path d="M3.5 6V4.5a2.5 2.5 0 0 1 5 0V6" stroke={color} strokeWidth="1.2" strokeLinecap="round" />
+      <circle cx="6" cy="9.5" r="1" fill={color} />
     </svg>
   )
 }
