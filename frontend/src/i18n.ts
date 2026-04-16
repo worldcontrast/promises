@@ -1,8 +1,8 @@
-// src/i18n.ts
 import { getRequestConfig } from 'next-intl/server'
 import { notFound } from 'next/navigation'
 
-export const locales = ['en', 'pt', 'es', 'fr', 'de', 'ar', 'zh', 'ja', 'hi', 'ru'] as const
+// Definição estrita dos idiomas ativos para garantir o sucesso do build
+export const locales = ['en', 'pt', 'es', 'fr', 'de', 'ar'] as const
 export type Locale = typeof locales[number]
 export const defaultLocale: Locale = 'pt'
 
@@ -18,18 +18,13 @@ export const localeConfig: Record<Locale, {
   fr: { name: 'Français',   nativeName: 'Français',   flag: '🇫🇷', dir: 'ltr' },
   de: { name: 'Deutsch',    nativeName: 'Deutsch',    flag: '🇩🇪', dir: 'ltr' },
   ar: { name: 'Arabic',     nativeName: 'العربية',    flag: '🇸🇦', dir: 'rtl' },
-  zh: { name: 'Chinese',    nativeName: '中文',        flag: '🇨🇳', dir: 'ltr' },
-  ja: { name: 'Japanese',   nativeName: '日本語',      flag: '🇯🇵', dir: 'ltr' },
-  hi: { name: 'Hindi',      nativeName: 'हिन्दी',      flag: '🇮🇳', dir: 'ltr' },
-  ru: { name: 'Russian',    nativeName: 'Русский',    flag: '🇷🇺', dir: 'ltr' },
 }
 
-export default getRequestConfig(async ({ requestLocale }) => {
-  const locale = await requestLocale
-  if (!locales.includes(locale as Locale)) notFound()
+export default getRequestConfig(async ({locale}) => {
+  // Bloqueio de segurança: se o idioma não estiver na lista, para a execução
+  if (!locales.includes(locale as any)) notFound();
 
   return {
-    locale,
-    messages: (await import(`../messages/${locale}.json`)).default,
-  }
-})
+    messages: (await import(`./messages/${locale}.json`)).default
+  };
+});
