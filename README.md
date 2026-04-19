@@ -1,6 +1,3 @@
-# Script para gerar o arquivo README.md FINAL e COMPLETO
-# Este arquivo contém a estrutura exata para o GitHub, misturando texto e blocos de código.
-
 full_readme_text = """<div align="center">
 
 # World Contrast 🌍
