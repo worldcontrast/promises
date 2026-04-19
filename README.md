@@ -1,4 +1,4 @@
-full_readme_text = """<div align="center">
+
 
 # World Contrast 🌍
 
