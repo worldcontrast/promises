@@ -15,9 +15,9 @@ Democracy produces an irreducible tension: candidates must make promises to win 
 
 World Contrast was founded on a single premise:
 
-> **The comparison of political commitments is too important to be left to anyone with an opinion.**
+> **A political promise is far too important a matter to be left to the whims of any opinion.**
 
-We are not journalists. We are not academics. We are not activists. We are archivists — operating a permanent, cryptographically sealed public ledger of what candidates promised, verbatim, to the citizens who will hold them accountable.
+We are not journalists. We are not academics. We are archivists — we maintain a permanent, cryptographically sealed public record of what the candidates promised, word for word, to the citizens of the world.
 
 ---
 
