@@ -1,151 +1,268 @@
 # Contributing to World Contrast
 
-Thank you for your interest in contributing to World Contrast. This project exists to serve citizens around the world with transparent, neutral political information. Every contribution must uphold that mission without compromise.
+Thank you for your interest in contributing to a neutral, cryptographically auditable record of political promises.
+
+Before contributing, please read this document in full. Contributions that do not meet these standards will be declined — not because we doubt your intentions, but because the institutional integrity of this project depends on a process that is verifiable and defensible.
 
 ---
 
-## Before you contribute
+## Table of Contents
 
-### Eligibility
+- [What we need most](#what-we-need-most)
+- [Who can contribute](#who-can-contribute)
+- [Who cannot contribute](#who-cannot-contribute)
+- [How to contribute](#how-to-contribute)
+- [Country data files](#country-data-files)
+- [Source verification standards](#source-verification-standards)
+- [Code contributions](#code-contributions)
+- [The separation of concerns rule](#the-separation-of-concerns-rule)
+- [Pull request process](#pull-request-process)
+- [What we will never accept](#what-we-will-never-accept)
 
-You may NOT contribute to this project if you are currently, or have been within the last 24 months:
-- An employee, contractor, or paid consultant of any political party
-- A member of any candidate's campaign staff or advisory team
-- An elected official or government appointee in any jurisdiction
-- A registered lobbyist in any jurisdiction
+---
 
-If you have any doubt, open an issue and ask before contributing.
+## What we need most
 
-### Declaration
+Listed in order of institutional impact:
 
-By submitting a pull request, you declare that you meet the eligibility criteria above and that your contribution is made independently, without instruction or compensation from any political actor.
+1. **Country data files** — add a new election to `/data/countries/`
+2. **Source verification** — verify and update official candidate URLs
+3. **Language support** — add or improve translations for a new locale
+4. **Agent improvements** — better PDF parsing, social media text extraction
+5. **Frontend** — accessibility, performance, mobile experience
+6. **Documentation** — corrections, translations, clarity improvements
+
+---
+
+## Who can contribute
+
+Anyone who:
+
+- Has no current affiliation with any political party, campaign, or government electoral body
+- Has had no such affiliation in the last **2 years**
+- Can commit to strict political neutrality for the duration of their contribution
+- Understands that their contribution will be publicly attributed in the git history
+
+---
+
+## Who cannot contribute
+
+The following individuals are **permanently ineligible** to contribute to World Contrast:
+
+- Current employees, contractors, or volunteers of any political party or campaign
+- Current or former employees of any government electoral authority (in the last 2 years)
+- Anyone who has received compensation from a political actor in the last 2 years
+- Anyone with a financial interest in the electoral outcome of any election in our database
+
+If you are unsure whether you qualify, open an Issue and ask before investing time in a contribution. We will give you a direct answer.
 
 ---
 
 ## How to contribute
 
-### 1. Add a new country or election
+```text
+1. Fork the repository
+2. Create a branch with a descriptive name:
+   feature/country-argentina-2027
+   fix/pdf-parser-encoding-utf8
+   data/brazil-2026-update-sources
+3. Make your changes
+4. Run the test suite (see below)
+5. Open a Pull Request with a clear description
+6. Wait for 2 maintainer approvals
+7. Merge
+```
 
-The highest-value contribution is expanding coverage to new countries.
+---
 
-Create a file in `/data/countries/[country-code].json` following this template:
+## Country data files
+
+Adding a new election is the highest-impact contribution you can make.
+
+### File location
+
+```text
+data/countries/[country-code]-[year].json
+```
+
+Example: `data/countries/argentina-2027.json`
+
+### Required structure
 
 ```json
 {
-  "country_code": "MX",
-  "country_name_en": "Mexico",
-  "country_name_local": "México",
-  "tribunal": {
-    "name": "Instituto Nacional Electoral",
-    "url": "https://www.ine.mx",
-    "filings_url": "https://candidaturas.ine.mx"
+  "id": "argentina-2027",
+  "country": "AR",
+  "countryName": {
+    "en": "Argentina",
+    "pt": "Argentina",
+    "es": "Argentina"
   },
-  "elections": [
-    {
-      "id": "mx-presidential-2024",
-      "name": "Presidential Election 2024",
-      "type": "presidential",
-      "election_date": "2024-06-02",
-      "campaign_start": "2024-03-01",
-      "candidates": [
-        {
-          "id": "claudia-sheinbaum-mx",
-          "full_legal_name": "Claudia Sheinbaum Pardo",
-          "display_name": "Claudia Sheinbaum",
-          "party_name": "Morena",
-          "electoral_number": "1",
-          "electoral_filing_url": "https://candidaturas.ine.mx/...",
-          "official_site_url": "https://claudiasheinbaum.com",
-          "instagram_url": "https://instagram.com/claudia_shein",
-          "facebook_url": "https://facebook.com/claudiasheinbaum",
-          "youtube_url": "https://youtube.com/@claudiasheinbaum",
-          "twitter_url": "https://twitter.com/claudiashein",
-          "tiktok_url": null
-        }
-      ]
-    }
-  ]
+  "flag": "🇦🇷",
+  "electionName": {
+    "en": "Presidential Election 2027",
+    "pt": "Eleição Presidencial 2027",
+    "es": "Elección Presidencial 2027"
+  },
+  "electionDate": "2027-10-24",
+  "electionType": "presidential",
+  "status": "scheduled",
+  "lastUpdated": "2026-04-10",
+  "tribunal": {
+    "name": "Cámara Nacional Electoral",
+    "url": "https://www.electoral.gob.ar"
+  },
+  "candidates": []
 }
 ```
 
-**Verification requirement**: All source URLs must be verified as official before merging. Include in your PR:
-- Screenshot of the electoral tribunal page confirming this candidate's registration
-- Screenshot confirming the social media accounts are official (verified badge or stated on official site)
+### Candidate source format
 
-Two maintainers must independently verify before merge.
-
-### 2. Improve agent code
-
-- Better PDF extraction for electoral filings
-- Improved social media content extraction
-- New language support for translation
-- Performance optimizations
-- Test coverage improvements
-
-### 3. Frontend improvements
-
-- Accessibility (WCAG 2.1 AA compliance is a goal)
-- Performance
-- New language UI translations (i18n strings in `/frontend/messages/`)
-- Mobile experience improvements
-- Data visualization improvements
-
-### 4. Report a data quality issue
-
-If you find an incorrect, missing, or wrongly categorized promise, open a GitHub Issue with:
-- The candidate ID
-- The promise ID (if applicable)
-- The correct source URL
-- A screenshot of the official source
-
-Do not report issues by contacting candidates or parties. All corrections go through GitHub.
-
----
-
-## What we will never merge
-
-- Code that applies different collection logic to different candidates
-- Code that adds any editorial framing to promise display
-- Promises sourced from unofficial accounts, fan pages, or secondary reporting
-- Any feature that would allow candidates or parties to submit, edit, or remove their data
-- Analytics or tracking code of any kind
-- Advertising infrastructure
-
----
-
-## The extraction prompt is protected
-
-The file `/agents/extraction/prompts/extraction_prompt.txt` is the most critical file in the project. It defines what gets collected and what gets rejected.
-
-Changes to this file require:
-1. An Issue opened for discussion (minimum 7-day comment period)
-2. Two maintainer approvals
-3. A documented rationale in `PROMPT_CHANGELOG.md`
-4. A test run on a sample dataset with before/after comparison
-
-No exceptions.
-
----
-
-## Commit message format
-
-```
-type(scope): short description
-
-Types: feat | fix | data | docs | test | refactor | chore
-Scopes: agents | frontend | backend | data | schema | prompt | infra
-
-Examples:
-feat(data): add Mexico 2024 presidential election sources
-fix(agents): handle PDF encoding errors for French documents
-data(brazil): update TSE filing URLs for 2026 election
-docs: clarify collection rules for YouTube transcripts
+```json
+{
+  "id": "candidate-001",
+  "fullName": "Full Legal Name As Filed",
+  "displayName": "Common Name",
+  "party": "Party Abbreviation",
+  "partyFullName": "Full Party Name",
+  "electoralNumber": "00",
+  "initials": "FL",
+  "color": "#000000",
+  "photoUrl": "/assets/candidates/candidate-001.jpg",
+  "sources": {
+    "electoralFiling": "https://tribunal.gov/filing/candidate-001",
+    "officialSite": "https://candidatewebsite.com",
+    "instagram": "https://instagram.com/officialaccount",
+    "facebook": "https://facebook.com/officialpage",
+    "twitter": "https://twitter.com/officialhandle",
+    "youtube": "https://youtube.com/@officialchannel",
+    "tiktok": "https://tiktok.com/@officialaccount"
+  }
+}
 ```
 
 ---
 
-## Questions?
+## Source verification standards
 
-Open a GitHub Discussion — not an Issue (Issues are for bugs and data problems, Discussions are for questions and ideas).
+Every URL submitted in a country data file must meet **all** of the following criteria:
 
-*Thank you for helping make political information more transparent, neutral, and accessible.*
+| Criterion | Requirement |
+|---|---|
+| **Officiality** | Must be the candidate's own official source, not a news article about them |
+| **Verification** | Social media accounts must be verified (blue check) or officially registered with the electoral tribunal |
+| **Accessibility** | URL must be publicly accessible without login |
+| **Stability** | URL must resolve at the time of PR submission |
+| **Primary source** | No aggregators, no fan pages, no unofficial mirrors |
+
+**Ineligible sources** — the following will never be accepted:
+
+- News articles or editorials about the candidate
+- Fan pages or parody accounts
+- Unofficial party websites
+- URLs that require authentication
+- Social media posts (only official profile pages, not individual posts)
+
+Data contributions require **two independent verifications** — your PR must reference a second contributor who has independently confirmed each URL.
+
+---
+
+## Code contributions
+
+### Before you start
+
+- Open an Issue describing what you intend to change
+- Wait for a maintainer to confirm the approach before writing code
+- This prevents wasted effort and ensures alignment
+
+### Testing
+
+```bash
+# Run the full test suite
+pytest agents/tests/ -v
+
+# Run frontend tests
+cd frontend && npm test
+
+# Run a dry-run agent cycle (no DB writes)
+python agents/scheduler.py --country BR --dry-run
+```
+
+All tests must pass before a PR will be reviewed.
+
+### Code style
+
+- Python: follow PEP 8, use type hints throughout
+- TypeScript: strict mode, no `any` types in new code
+- All new functions must have docstrings / JSDoc comments
+
+---
+
+## The separation of concerns rule
+
+**No single contributor may modify both the extraction prompt and the validation layer in the same Pull Request.**
+
+These two components are the core institutional safeguards of World Contrast:
+
+- `agents/extraction/prompts/extraction_prompt.txt` — defines what qualifies as a promise
+- `agents/validation/validator.py` — enforces the Promise Equation
+
+Any PR that touches both files simultaneously will be automatically declined, regardless of content. This is not a technical rule — it is a governance rule. It ensures that no single actor can change both what is accepted and how it is validated in one unreviewed action.
+
+Changes to the extraction prompt also require:
+
+1. Documented rationale in the PR description
+2. Two maintainer approvals (not one)
+3. A before/after test run with real data showing the impact
+4. An entry in `PROMPT_CHANGELOG.md`
+
+---
+
+## Pull request process
+
+```text
+1. Title format:    [type]: brief description
+   Examples:        feat: add Argentina 2027 election data
+                    fix: correct Brazil tribunal URL
+                    docs: improve CONTRIBUTING.md clarity
+
+2. Description must include:
+   - What changed and why
+   - How you verified the change
+   - Test results (paste the relevant output)
+   - For data PRs: confirmation of two independent source verifications
+
+3. Checklist (all must be checked before review):
+   □ I have no affiliation with any political party in the last 2 years
+   □ All URLs in my data file are publicly accessible
+   □ Tests pass locally
+   □ I have not modified both extraction prompt and validator in this PR
+   □ I have not received compensation from any political actor
+
+4. Review: 2 approvals required to merge
+5. Merge: squash merge, maintainer performs
+```
+
+---
+
+## What we will never accept
+
+The following contributions will be declined immediately and permanently:
+
+- Any code or data that advantages or disadvantages a specific candidate
+- Changes to the extraction algorithm that reduce the rejection rate without documented justification
+- Sources that are not official primary sources
+- Contributions from individuals with undisclosed political affiliations
+- Any modification that removes or weakens the audit trail
+- Changes to the `audit_log` append-only enforcement
+- Anything that makes the system less transparent or less verifiable
+
+---
+
+<div align="center">
+
+*"We provide the tools. You provide the judgment."*
+
+Questions? Open an Issue or reach us at [worldcontrast.org/contact](https://worldcontrast.org/contact)
+
+</div>
