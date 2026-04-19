@@ -23,7 +23,7 @@ World Contrast is **not** a media outlet.
 It is **not** an opinion platform.  
 It is **not** a fact-checker.
 
-It is a **public record** — a mirror that reflects what candidates officially promised, without editorial judgment, without bias, and without the ability to be altered after the fact.
+It is a **public record** — just reflects what candidates officially promised, without editorial judgment, without bias, and without the ability to be altered after the fact.
 
 We copy only from official sources. We never contact candidates or parties. We never editorialize. We only compare.
 
