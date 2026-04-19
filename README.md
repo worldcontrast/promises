@@ -11,7 +11,7 @@ for comparing political campaign promises — in any country, in any language.**
 
 ---
 
-*"The truth emerges from contrast — not from repetition."*
+*""We are not the truth. We are the record."*
 
 </div>
 
