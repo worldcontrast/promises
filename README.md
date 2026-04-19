@@ -1,6 +1,4 @@
-Python# Gerando o arquivo README.md final com tabelas rigorosamente alinhadas
-
-readme_content = """<div align="center">
+<div align="center">
 
 # World Contrast 🌍
 
