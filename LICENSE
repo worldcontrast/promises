@@ -1,37 +1,138 @@
-MIT License
+WORLD CONTRAST ORGANIZATION — REPOSITORY LICENSE AND TERMS
+Version 2.0 — April 2026
+=======================================================================
 
-Copyright (c) 2025 WorldContrast
+This repository is governed by a three-part license structure that
+separates source code, public data, and live infrastructure access.
+Read all three parts before using any component of this repository.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+=======================================================================
+PART 1: SOFTWARE SOURCE CODE — GNU AGPLv3
+=======================================================================
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+Copyright (C) 2026 World Contrast Organization
+contact@worldcontrast.org — https://worldcontrast.org
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
 
----
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU Affero General Public License for more details.
 
-IMPORTANT NOTICE — DATA AND API
+You should have received a copy of the GNU Affero General Public
+License along with this program.
+If not, see: https://www.gnu.org/licenses/agpl-3.0.html
 
-This license applies exclusively to the software source code in this
-repository. It does NOT apply to the WorldContrast database, API, or
-any data accessed through the official WorldContrast infrastructure.
+WHY AGPL AND NOT MIT:
+The AGPLv3 was chosen deliberately. Unlike MIT, AGPLv3 requires that
+anyone who runs a modified version of this software as a network
+service must also release their modifications as open source under
+the same license. This ensures that improvements to the World Contrast
+infrastructure remain public and auditable — permanently.
 
-Access to WorldContrast data is governed separately by the
-API Terms of Use located at /TERMS_API.md and at
+TRADEMARK RESTRICTION (applies regardless of license):
+The AGPLv3 grant does NOT include permission to use the name
+"World Contrast", "WorldContrast", the logo, or the domain
+worldcontrast.org in any fork, derivative work, or competing service.
+Forks must clearly identify themselves as independent projects and
+may not imply affiliation with, endorsement by, or origin from
+the World Contrast Organization.
+
+=======================================================================
+PART 2: HISTORICAL DATA AND PUBLIC LEDGER — CC BY 4.0
+=======================================================================
+
+The verified political promises, cryptographic hashes, provenance
+metadata, source URLs, archive links, and rejection logs (collectively,
+the "Historical Data") extracted and validated by the World Contrast
+infrastructure are licensed under the Creative Commons Attribution 4.0
+International License.
+
+Full license text: https://creativecommons.org/licenses/by/4.0/
+
+You are free to:
+  — Share: copy and redistribute the Historical Data in any medium
+  — Adapt: remix, transform, and build upon the data
+  — Use commercially: including for journalism, research, and analysis
+
+Under the following conditions:
+  — Attribution: you must credit "World Contrast Organization" as the
+    definitive authenticated source, with a link to worldcontrast.org
+  — Hash Integrity: any redistribution of the data must preserve the
+    original SHA-256 content hashes. Any alteration that invalidates
+    a cryptographic hash nullifies the World Contrast authentication
+    and must not be attributed to this organization.
+  — No Misrepresentation: you may not present altered, filtered, or
+    selectively curated subsets of the data as the "complete"
+    World Contrast record.
+
+The CC BY 4.0 license applies to static database dumps, public API
+responses, and data rendered on the public frontend. It does NOT
+apply to real-time API streams, webhooks, or live infrastructure
+access (see Part 3).
+
+=======================================================================
+PART 3: LIVE API AND INFRASTRUCTURE — PROPRIETARY
+=======================================================================
+
+The licenses granted in Parts 1 and 2 DO NOT extend to:
+
+  — The live Enterprise API and real-time data pipelines
+  — Webhooks and low-latency streaming endpoints
+  — The POCVA-01 extraction engine running in production
+    (the protocol specification is open; the production instance
+    is not)
+  — The Supabase production database and its direct access
+  — Any authentication tokens, API keys, or service credentials
+
+Access to the live infrastructure is strictly governed by commercial
+agreements and the API Terms of Use at:
 https://worldcontrast.org/terms
 
-The WorldContrast database is a governed, auditable, and centralized
-record. It is not covered by this MIT License and may not be replicated,
-forked, or redistributed as an "official" data source.
+PROHIBITION ON IMPERSONATION:
+No entity — individual, organization, or automated system — may:
+  — Replicate or mirror the live data stream and present it as an
+    official or real-time World Contrast node
+  — Claim to be an authorized World Contrast data provider without
+    explicit written authorization from the World Contrast Organization
+  — Use the World Contrast authentication seal, hash verification
+    interface, or POCVA-01 branding in any unauthorized system
+
+Violations of this section may constitute trademark infringement,
+unfair competition, and misrepresentation under applicable law.
+
+=======================================================================
+PART 4: DATA PROTECTION AND JURISDICTION
+=======================================================================
+
+All data collected and processed by World Contrast relates exclusively
+to public figures acting in their public capacity as political
+candidates. Collection is performed under:
+
+  — GDPR Article 85, Recital 153 (public interest / journalism)
+  — GDPR Article 9(2)(e) (data manifestly made public by the subject)
+  — LGPD Brazil Art. 7º, IX (legitimate interest, electoral transparency)
+
+World Contrast operates as a non-profit independent initiative.
+It accepts no advertising, no political funding, and no compensation
+from any candidate, party, or government entity.
+
+Jurisdiction for disputes: Brazil (LGPD) and, where applicable,
+the European Union (GDPR).
+
+=======================================================================
+SUMMARY
+=======================================================================
+
+  Source code    → AGPLv3    (open, but modifications must stay open)
+  Public data    → CC BY 4.0 (free to use with attribution + hash integrity)
+  Live API       → Proprietary (commercial agreement required)
+  Brand/Name     → All rights reserved (not covered by any open license)
+
+"We are not the truth. We are the record."
+— World Contrast Organization, 2026
+
