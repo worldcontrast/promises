@@ -5,7 +5,7 @@
 ### The world is clearer in contrast.
 
 **An open, neutral, and cryptographically auditable infrastructure  
-for comparing political campaign promises — in any country, in any language.**
+for record political campaign promises - side by side — in any country, in any language.**
 
 [worldcontrast.org](https://worldcontrast.org) · [API Terms](./TERMS_API.md) · [License](./LICENSE) · [Manifesto](./MANIFESTO.md)
 
@@ -23,9 +23,9 @@ World Contrast is **not** a media outlet.
 It is **not** an opinion platform.  
 It is **not** a fact-checker.
 
-It is a **public record** — a mirror that reflects what candidates officially promised, without editorial judgment, without bias, and without the ability to be altered after the fact.
+It is a **public record** — that reflects what candidates officially promised, without editorial judgment, without bias, and without the ability to be altered after the fact.
 
-We copy only from official sources. We never contact candidates or parties. We never editorialize. We only compare.
+We copy only from official sources. We never contact candidates or parties. We never editorialize.
 
 > **The engine is open. The historical record is public. The live infrastructure is governed.**  
 > **Code:** AGPL v3.0 — free to inspect and fork, required to stay open.  
