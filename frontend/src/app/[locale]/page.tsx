@@ -7,7 +7,7 @@
  *
  * NARRATIVA APROVADA:
  *   "Promessas dos Candidatos Lado a Lado."
- *   "Com Registro, Autenticação e Armazenamento Permanente."
+ *   "Com Registro e Armazenamento Permanente."
  *   "Registramos, autenticamos e armazenamos permanentemente..."
  *   "Ipsis litteris. Com fonte. Com data. Com hash."
  *   "Nós não somos a verdade. Nós somos o registro." → footer apenas
@@ -46,10 +46,10 @@ export default async function HomePage({ params }: Props) {
 
     // ── PORTUGUÊS ──────────────────────────────────────────────
     pt: {
-      tagA: 'Registro Oficial · Candidato A',
-      tagB: 'Registro Oficial · Candidato B',
+      tagA: 'Candidato A',
+      tagB: 'Candidato B',
       hedA: <>Promessas<br />dos Candidatos<br />Lado a Lado.</>,
-      hedB: <>Com Registro,<br />Autenticação e<br />Armazenamento Permanente.</>,
+      hedB: <>Com Registro e<br />Armazenamento Permanente.</>,
       dekA: 'O WorldContrast é o armazenamento histórico autenticado das promessas de campanha política. Registramos, ipsis litteris, o que foi prometido — com fonte, data e selo criptográfico.',
       dekB: 'Cada compromisso documentado nesta plataforma é extraído diretamente de fontes primárias oficiais, sob um algoritmo neutro e orientado por regras, sem interferência humana.',
       ctaA: 'Acessar o Registro',
