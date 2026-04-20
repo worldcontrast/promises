@@ -8,7 +8,7 @@
  * NARRATIVA APROVADA:
  *   "Promessas dos Candidatos Lado a Lado."
  *   "Com Registro e Armazenamento Permanente."
- *   "Registramos, autenticamos e armazenamos permanentemente..."
+ *   "Registradas e Armazenadas Permanentemente..."
  *   "Ipsis litteris. Com fonte. Com data. Com hash."
  *   "Nós não somos a verdade. Nós somos o registro." → footer apenas
  *
@@ -49,9 +49,9 @@ export default async function HomePage({ params }: Props) {
       tagA: 'Candidato A',
       tagB: 'Candidato B',
       hedA: <>Promessas<br />dos Candidatos<br />Lado a Lado.</>,
-      hedB: <>Com Registro e<br />Armazenamento Permanente.</>,
-      dekA: 'O WorldContrast é o armazenamento histórico autenticado das promessas de campanha política. Registramos, ipsis litteris, o que foi prometido — com fonte, data e selo criptográfico.',
-      dekB: 'Cada compromisso documentado nesta plataforma é extraído diretamente de fontes primárias oficiais, sob um algoritmo neutro e orientado por regras, sem interferência humana.',
+      hedB: <>Registrado e <br />Armazenado Permanentemente.</>,
+      dekA: 'O WorldContrast é o armazenamento histórico das promessas de campanha política. Autenticamos, ipsis litteris, o que foi prometido — com fonte, data e selo criptográfico.',
+      dekB: 'Cada compromisso documentado aqui foi extraído diretamente de fontes primárias oficiais, sob algoritmo neutro e orientado por regras open-source, sem interferência humana.',
       ctaA: 'Acessar o Registro',
       ctaB: 'Selecionar Jurisdição',
       manifesto: 'Ler as Regras Operacionais',
@@ -65,17 +65,17 @@ export default async function HomePage({ params }: Props) {
         highlight: 'Ipsis litteris.',
         after: ' Com fonte. Com data. Com Hash."',
       },
-      mbandP1: 'Durante períodos eleitorais, discursos e narrativas fragmentadas dificultam a análise objetiva. O WorldContrast não analisa. Não interpreta. Não editorializa. Registramos as promessas — exclusivamente de canais oficiais verificados: planos de governo submetidos a tribunais, sites oficiais, declarações públicas institucionais e redes públicas.',
-      mbandP2: 'Nunca destacamos candidatos. Nunca aceitamos financiamento de atores políticos. Cada compromisso extraído recebe um selo criptográfico de autenticidade (SHA-256) e é arquivado permanentemente para escrutínio civil, acadêmico e jornalístico — em 142 países.',
+      mbandP1: 'Em períodos eleitorais, discursos e narrativas fragmentadas na web dificultam a análise objetiva. O WorldContrast não analisa. Não interpreta. Não editorializa. Registramos as promessas — exclusivamente de canais oficiais verificados: planos de governo submetidos a tribunais, sites oficiais, declarações institucionais e redes públicas.',
+      mbandP2: 'Não destacamos candidatos. Não aceitamos financiamento de partidos políticos. Cada compromisso extraído recebe um selo criptográfico de autenticidade (SHA-256) e é arquivado para apuração civil, acadêmico e jornalístico — em 142 países.',
       pillarsEye: '01 — Arquitetura Fundacional',
       pillarsHed: 'Os Oito Pilares Institucionais',
       catsLabel: '9 categorias de promessas — aplicadas identicamente a qualquer candidato em qualquer país.',
       elecEye: '02 — Registro Ativo',
       elecHed: 'Selecione a Jurisdição',
       footTagline: 'Registro histórico autenticado, fiel e permanente das promessas de campanha política.',
-      footRecord: 'Nós não somos a verdade. Nós somos o registro.',
+      footRecord: 'Não somos a verdade. Somos o registro.',
       footCopy: '© 2026 WorldContrast — Iniciativa independente. Todos os dados em domínio público.',
-      footNeutral: 'Zero viés · Zero contato · Zero agenda editorial',
+      footNeutral: 'Zero viés · Zero agenda editorial',
       footPlatform: 'A Plataforma',
       footMission: 'Política Institucional',
       howItWorks: 'Metodologia de Extração',
