@@ -35,7 +35,7 @@ export default async function HomePage({ params }: Props) {
       h1a: 'Candidatos à Eleição:',
       h1b: 'Veja as promessas',
       h1c: 'de Campanha',
-      h1d: 'Lado a Lado.'
+      h1d: 'Lado a Lado.',
       sub: 'Registro histórico autenticado, fiel e permanente.',
       ctaRegistry: 'Acessar o Registro',
       ctaProtocol: 'Protocolo POCVA-01',
@@ -66,7 +66,7 @@ export default async function HomePage({ params }: Props) {
       h1a: 'Election Candidates:',
       h1b: 'See the Campaign',
       h1c: 'Promises',
-      h1d: 'Side by Side.'
+      h1d: 'Side by Side.',
       sub: 'Authenticated, faithful, and permanent historical record.',
       ctaRegistry: 'Access the Registry',
       ctaProtocol: 'POCVA-01 Protocol',
@@ -97,7 +97,7 @@ export default async function HomePage({ params }: Props) {
       h1a: 'Candidatos a Elección:',
       h1b: 'Vea las promesas',
       h1c: 'de Campaña',
-      h1d: 'Lado a Lado.'
+      h1d: 'Lado a Lado.',
       sub: 'Registro histórico autenticado, fiel y permanente.',
       ctaRegistry: 'Acceder al Registro',
       ctaProtocol: 'Protocolo POCVA-01',
@@ -128,7 +128,7 @@ export default async function HomePage({ params }: Props) {
       h1a: 'Candidats aux Élections:',
       h1b: 'Voir les promesses',
       h1c: 'de Campagne',
-      h1d: 'Côte à Côte.'
+      h1d: 'Côte à Côte.',
       sub: 'Registre historique authentifié, fidèle et permanent.',
       ctaRegistry: 'Accéder au Registre',
       ctaProtocol: 'Protocole POCVA-01',
@@ -159,7 +159,7 @@ export default async function HomePage({ params }: Props) {
       h1a: 'Kandidaten zur Wahl:',
       h1b: 'Sehen Sie die',
       h1c: 'Wahlversprechen',
-      h1d: 'Seite an Seite.'
+      h1d: 'Seite an Seite.',
       sub: 'Authentifiziertes, getreues und permanentes historisches Register.',
       ctaRegistry: 'Register aufrufen',
       ctaProtocol: 'POCVA-01 Protokoll',
@@ -190,7 +190,7 @@ export default async function HomePage({ params }: Props) {
       h1a: 'المرشحون للانتخابات:',
       h1b: 'شاهد الوعود',
       h1c: 'الانتخابية',
-      h1d: 'جنباً إلى جنب.'
+      h1d: 'جنباً إلى جنب.',
       sub: 'سجل تاريخي موثّق وأمين ودائم.',
       ctaRegistry: 'الوصول إلى السجل',
       ctaProtocol: 'بروتوكول POCVA-01',
@@ -791,13 +791,16 @@ export default async function HomePage({ params }: Props) {
             {c.ctaEnterprise}
           </Link>
           {/* Mobile hamburger — links to enterprise in mobile nav */}
-          <Link
-            href={`/${locale}/enterprise`}
+          <button
             className="wc-hamburger"
             aria-label="Menu"
+            onClick={() => {
+              const dest = `/${locale}/enterprise`
+              window.location.href = dest
+            }}
           >
             <span /><span /><span />
-          </Link>
+          </button>
         </header>
 
         {/* ── HERO — DATA-FIRST ──────────────────────────── */}
