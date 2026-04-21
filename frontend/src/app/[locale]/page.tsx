@@ -33,7 +33,7 @@ export default async function HomePage({ params }: Props) {
     pt: {
       eyebrow: 'POCVA-01 · Sistema Ativo',
       h1a: 'Eleições:',
-      h1b: 'Promessas dos Candidatos —',
+      h1b: 'Promessas dos Candidatos.',
       h1c: 'Lado a Lado.',
       sub: 'Registro histórico autenticado, fiel e permanente.',
       ctaRegistry: 'Acessar o Registro',
@@ -63,7 +63,7 @@ export default async function HomePage({ params }: Props) {
     en: {
       eyebrow: 'POCVA-01 · System Active',
       h1a: 'Elections:',
-      h1b: 'Campaign Promises —',
+      h1b: 'Campaign Promises.',
       h1c: 'Side by Side.',
       sub: 'Authenticated, faithful, and permanent historical record.',
       ctaRegistry: 'Access the Registry',
@@ -93,7 +93,7 @@ export default async function HomePage({ params }: Props) {
     es: {
       eyebrow: 'POCVA-01 · Sistema Activo',
       h1a: 'Elecciones:',
-      h1b: 'Promesas de los Candidatos —',
+      h1b: 'Promesas de los Candidatos.',
       h1c: 'Lado a Lado.',
       sub: 'Registro histórico autenticado, fiel y permanente.',
       ctaRegistry: 'Acceder al Registro',
@@ -123,7 +123,7 @@ export default async function HomePage({ params }: Props) {
     fr: {
       eyebrow: 'POCVA-01 · Système Actif',
       h1a: 'Élections:',
-      h1b: 'Promesses des Candidats —',
+      h1b: 'Promesses des Candidats.',
       h1c: 'Côte à Côte.',
       sub: 'Registre historique authentifié, fidèle et permanent.',
       ctaRegistry: 'Accéder au Registre',
@@ -153,7 +153,7 @@ export default async function HomePage({ params }: Props) {
     de: {
       eyebrow: 'POCVA-01 · System Aktiv',
       h1a: 'Wahlen:',
-      h1b: 'Wahlversprechen der Kandidaten —',
+      h1b: 'Wahlversprechen der Kandidaten.',
       h1c: 'Seite an Seite.',
       sub: 'Authentifiziertes, getreues und permanentes historisches Register.',
       ctaRegistry: 'Register aufrufen',
@@ -183,7 +183,7 @@ export default async function HomePage({ params }: Props) {
     ar: {
       eyebrow: 'POCVA-01 · النظام نشط',
       h1a: 'انتخابات:',
-      h1b: 'وعود المرشحين —',
+      h1b: 'وعود المرشحين.',
       h1c: 'جنباً إلى جنب.',
       sub: 'سجل تاريخي موثّق وأمين ودائم.',
       ctaRegistry: 'الوصول إلى السجل',
@@ -389,43 +389,54 @@ export default async function HomePage({ params }: Props) {
 
         .hero-inner { position: relative; z-index: 1; }
 
-        /* Eyebrow is now part of the headline — reads as one phrase */
+        /* h1a guide label — Gold, uppercase, large tracking */
         .hero-eyebrow {
-          font-size: 14px; font-weight: 700;
-          letter-spacing: -0.2px; color: var(--platinum);
-          margin-bottom: 8px;        /* tight — sentence continues below */
-          display: flex; align-items: center; gap: 8px;
-          opacity: 0.55;
+          font-family: var(--font-mono);
+          font-size: 18px; font-weight: 500;
+          letter-spacing: 4px; text-transform: uppercase;
+          color: var(--gold);
+          margin-bottom: 0; /* zero — next line is direct continuation */
+          line-height: 1;
         }
 
-        /* Typographic scale — the central statement */
+        /* Single flex-col container: h1a + h1b + h1c = one phrase */
+        .hero-title-group {
+          display: flex; flex-direction: column;
+          gap: 0;
+          margin-bottom: 80px; /* Fix 3: breathing room before subtitle */
+        }
+
+        /* h1b — main body of the phrase, Platinum */
         .hero-h1 {
-          font-size: clamp(52px, 9vw, 120px);
+          font-size: clamp(48px, 8.5vw, 112px);
           font-weight: 800;
           color: var(--platinum);
-          line-height: 0.92;
-          letter-spacing: -3px;
-          margin-bottom: 4px;
+          line-height: 0.94;
+          letter-spacing: -2.5px;
+          white-space: nowrap;  /* prevents mid-word breaks */
         }
+        /* unused but kept for compatibility */
         .hero-h1-light {
-          font-size: clamp(52px, 9vw, 120px);
+          font-size: clamp(48px, 8.5vw, 112px);
           font-weight: 200;
           color: var(--plat-muted);
-          line-height: 0.92;
-          letter-spacing: -3px;
-          margin-bottom: 4px;
-        }
-        .hero-h1-accent {
-          font-size: clamp(52px, 9vw, 120px);
-          font-weight: 800;
-          color: var(--gold);
-          line-height: 0.92;
-          letter-spacing: -3px;
-          margin-bottom: 64px;
+          line-height: 0.94;
+          letter-spacing: -2.5px;
         }
 
+        /* h1c — Gold accent, closes the phrase */
+        .hero-h1-accent {
+          font-size: clamp(48px, 8.5vw, 112px);
+          font-weight: 800;
+          color: var(--gold);
+          line-height: 0.94;
+          letter-spacing: -2.5px;
+          white-space: nowrap;
+        }
+
+        /* Fix 3: subtitle separated generously from the big title block */
         .hero-sub {
-          font-size: clamp(16px, 1.8vw, 18px);   /* 16px floor for mobile */
+          font-size: clamp(16px, 1.6vw, 18px);
           font-weight: 300;
           color: var(--plat-muted);
           line-height: 1.9;
@@ -468,8 +479,9 @@ export default async function HomePage({ params }: Props) {
         .ctr-suffix { font-size: 0.45em; font-weight: 300; vertical-align: super; color: var(--gold); }
         .ctr-label {
           font-family: var(--font-mono);
-          font-size: 12px; letter-spacing: 0.8px;  /* 12px minimum, WCAG AA */
-          text-transform: uppercase; color: var(--plat-muted); /* #71717A → readable */
+          font-size: 13px; letter-spacing: 0.6px;
+          text-transform: uppercase;
+          color: #A1A1AA; /* Fix 2: visible against Onyx — WCAG AA 4.8:1 */
         }
 
         /* ── CTA ROW ─────────────────────────────────────── */
@@ -775,23 +787,28 @@ export default async function HomePage({ params }: Props) {
             {c.ctaEnterprise}
           </Link>
           {/* Mobile hamburger — links to enterprise in mobile nav */}
-          <Link
-            href={`/${locale}/enterprise`}
+          <button
             className="wc-hamburger"
             aria-label="Menu"
+            onClick={() => {
+              const dest = `/${locale}/enterprise`
+              window.location.href = dest
+            }}
           >
             <span /><span /><span />
-          </Link>
+          </button>
         </header>
 
         {/* ── HERO — DATA-FIRST ──────────────────────────── */}
         <section className="wc-hero" aria-label="Registry overview">
           <div className="hero-inner">
 
-            {/* h1a is "Eleições:" — tight eyebrow, sentence reads together */}
-            <p className="hero-eyebrow">{c.h1a}</p>
-            <div className="hero-h1">{c.h1b}</div>
-            <div className="hero-h1-accent">{c.h1c}</div>
+            {/* ── TITLE GROUP — single phrase, no floated dash ── */}
+            <div className="hero-title-group">
+              <p className="hero-eyebrow">{c.h1a}</p>
+              <div className="hero-h1">{c.h1b}</div>
+              <div className="hero-h1-accent">{c.h1c}</div>
+            </div>
 
             <p className="hero-sub">{c.sub}</p>
 
