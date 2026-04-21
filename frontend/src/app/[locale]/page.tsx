@@ -786,17 +786,14 @@ export default async function HomePage({ params }: Props) {
           <Link href={`/${locale}/enterprise`} className="wc-header-ent">
             {c.ctaEnterprise}
           </Link>
-          {/* Mobile hamburger — links to enterprise in mobile nav */}
-          <button
+         {/* Mobile hamburger — links to enterprise in mobile nav */}
+          <Link
+            href={`/${locale}/enterprise`}
             className="wc-hamburger"
             aria-label="Menu"
-            onClick={() => {
-              const dest = `/${locale}/enterprise`
-              window.location.href = dest
-            }}
           >
             <span /><span /><span />
-          </button>
+          </Link>
         </header>
 
         {/* ── HERO — DATA-FIRST ──────────────────────────── */}
