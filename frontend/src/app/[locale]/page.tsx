@@ -32,8 +32,8 @@ export default async function HomePage({ params }: Props) {
   const copy: Record<string, any> = {
     pt: {
       eyebrow: 'POCVA-01 · Sistema Ativo',
-      h1a: 'Promessas dos',
-      h1b: 'Candidatos —',
+      h1a: 'Eleições',
+      h1b: 'Promessas dos Candidatos',
       h1c: 'Lado a Lado.',
       sub: 'Registro histórico autenticado, fiel e permanente.',
       ctaRegistry: 'Acessar o Registro',
@@ -62,8 +62,8 @@ export default async function HomePage({ params }: Props) {
     },
     en: {
       eyebrow: 'POCVA-01 · System Active',
-      h1a: 'Campaign',
-      h1b: 'Promises —',
+      h1a: 'Elections',
+      h1b: 'Candidates Promisses',
       h1c: 'Side by Side.',
       sub: 'Authenticated, faithful, and permanent historical record.',
       ctaRegistry: 'Access the Registry',
@@ -92,9 +92,9 @@ export default async function HomePage({ params }: Props) {
     },
     es: {
       eyebrow: 'POCVA-01 · Sistema Activo',
-      h1a: 'Promesas de los',
-      h1b: 'Candidatos —',
-      h1c: 'Lado a Lado.',
+      h1a: 'Elecciones',
+      h1b: 'Promesas de los candidatos',
+      h1c: 'Comparadas'.
       sub: 'Registro histórico autenticado, fiel y permanente.',
       ctaRegistry: 'Acceder al Registro',
       ctaProtocol: 'Protocolo POCVA-01',
@@ -122,9 +122,9 @@ export default async function HomePage({ params }: Props) {
     },
     fr: {
       eyebrow: 'POCVA-01 · Système Actif',
-      h1a: 'Promesses des',
-      h1b: 'Candidats —',
-      h1c: 'Côte à Côte.',
+      h1a: 'Élections',
+      h1b: 'Promesses des candidats',
+      h1c: 'Côte à côte.',
       sub: 'Registre historique authentifié, fidèle et permanent.',
       ctaRegistry: 'Accéder au Registre',
       ctaProtocol: 'Protocole POCVA-01',
@@ -152,8 +152,8 @@ export default async function HomePage({ params }: Props) {
     },
     de: {
       eyebrow: 'POCVA-01 · System Aktiv',
-      h1a: 'Wahlversprechen',
-      h1b: 'der Kandidaten —',
+      h1a: 'Wahlen',
+      h1b: 'Versprechen der Kandidaten',
       h1c: 'Seite an Seite.',
       sub: 'Authentifiziertes, getreues und permanentes historisches Register.',
       ctaRegistry: 'Register aufrufen',
