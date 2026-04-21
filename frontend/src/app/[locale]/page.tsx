@@ -32,8 +32,8 @@ export default async function HomePage({ params }: Props) {
   const copy: Record<string, any> = {
     pt: {
       eyebrow: 'POCVA-01 · Sistema Ativo',
-      h1a: 'Promessas dos',
-      h1b: 'Candidatos —',
+      h1a: 'Eleições:',
+      h1b: 'Promessas dos Candidatos —',
       h1c: 'Lado a Lado.',
       sub: 'Registro histórico autenticado, fiel e permanente.',
       ctaRegistry: 'Acessar o Registro',
@@ -62,8 +62,8 @@ export default async function HomePage({ params }: Props) {
     },
     en: {
       eyebrow: 'POCVA-01 · System Active',
-      h1a: 'Campaign',
-      h1b: 'Promises —',
+      h1a: 'Elections:',
+      h1b: 'Campaign Promises —',
       h1c: 'Side by Side.',
       sub: 'Authenticated, faithful, and permanent historical record.',
       ctaRegistry: 'Access the Registry',
@@ -92,8 +92,8 @@ export default async function HomePage({ params }: Props) {
     },
     es: {
       eyebrow: 'POCVA-01 · Sistema Activo',
-      h1a: 'Promesas de los',
-      h1b: 'Candidatos —',
+      h1a: 'Elecciones:',
+      h1b: 'Promesas de los Candidatos —',
       h1c: 'Lado a Lado.',
       sub: 'Registro histórico autenticado, fiel y permanente.',
       ctaRegistry: 'Acceder al Registro',
@@ -122,8 +122,8 @@ export default async function HomePage({ params }: Props) {
     },
     fr: {
       eyebrow: 'POCVA-01 · Système Actif',
-      h1a: 'Promesses des',
-      h1b: 'Candidats —',
+      h1a: 'Élections:',
+      h1b: 'Promesses des Candidats —',
       h1c: 'Côte à Côte.',
       sub: 'Registre historique authentifié, fidèle et permanent.',
       ctaRegistry: 'Accéder au Registre',
@@ -152,8 +152,8 @@ export default async function HomePage({ params }: Props) {
     },
     de: {
       eyebrow: 'POCVA-01 · System Aktiv',
-      h1a: 'Wahlversprechen',
-      h1b: 'der Kandidaten —',
+      h1a: 'Wahlen:',
+      h1b: 'Wahlversprechen der Kandidaten —',
       h1c: 'Seite an Seite.',
       sub: 'Authentifiziertes, getreues und permanentes historisches Register.',
       ctaRegistry: 'Register aufrufen',
@@ -182,8 +182,8 @@ export default async function HomePage({ params }: Props) {
     },
     ar: {
       eyebrow: 'POCVA-01 · النظام نشط',
-      h1a: 'وعود',
-      h1b: 'المرشحين —',
+      h1a: 'انتخابات:',
+      h1b: 'وعود المرشحين —',
       h1c: 'جنباً إلى جنب.',
       sub: 'سجل تاريخي موثّق وأمين ودائم.',
       ctaRegistry: 'الوصول إلى السجل',
@@ -304,19 +304,32 @@ export default async function HomePage({ params }: Props) {
         .wc-logo-gold { color: var(--gold); }
         .wc-header-status {
           font-family: var(--font-mono);
-          font-size: 9px; letter-spacing: 2px;
+          font-size: 12px; letter-spacing: 1.5px;
           text-transform: uppercase; color: var(--emerald);
           display: flex; align-items: center; gap: 6px;
+          white-space: nowrap;
         }
+        /* On mobile: hide the POCVA label, keep only dot + "Ativo" */
+        .wc-header-status-label {
+          display: inline;
+        }
+        @media(max-width: 768px) {
+          .wc-header-status-label { display: none; }
+          .wc-header-status-short { display: inline !important; }
+        }
+        .wc-header-status-short { display: none; }
+
         .pulse-dot {
-          width: 5px; height: 5px; border-radius: 50%;
-          background: var(--emerald);
+          width: 6px; height: 6px; border-radius: 50%;
+          background: var(--emerald); flex-shrink: 0;
           animation: blink 2.4s ease-in-out infinite;
         }
         @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
         .wc-header-spacer { flex: 1; }
+
+        /* Enterprise button — hidden on mobile, icon shown instead */
         .wc-header-ent {
-          font-family: var(--font-mono); font-size: 9px;
+          font-family: var(--font-mono); font-size: 11px;
           letter-spacing: 2px; text-transform: uppercase;
           color: var(--gold);
           border: 1px solid var(--gold-bdr);
@@ -325,6 +338,24 @@ export default async function HomePage({ params }: Props) {
           transition: background 0.18s;
         }
         .wc-header-ent:hover { background: var(--gold-dim); }
+        @media(max-width: 768px) { .wc-header-ent { display: none; } }
+
+        /* Hamburger — mobile only */
+        .wc-hamburger {
+          display: none;
+          flex-direction: column; justify-content: center;
+          gap: 5px; width: 44px; height: 44px;
+          align-items: center;
+          background: none; border: none; cursor: pointer;
+          padding: 4px;
+        }
+        .wc-hamburger span {
+          display: block; width: 20px; height: 1.5px;
+          background: var(--platinum); border-radius: 1px;
+          transition: opacity 0.2s;
+        }
+        .wc-hamburger:hover span { opacity: 0.6; }
+        @media(max-width: 768px) { .wc-hamburger { display: flex; } }
 
         /* ── HERO ────────────────────────────────────────── */
         .wc-hero {
@@ -358,17 +389,13 @@ export default async function HomePage({ params }: Props) {
 
         .hero-inner { position: relative; z-index: 1; }
 
+        /* Eyebrow is now part of the headline — reads as one phrase */
         .hero-eyebrow {
-          font-family: var(--font-mono);
-          font-size: 9px; letter-spacing: 3.5px;
-          text-transform: uppercase; color: var(--gold);
-          margin-bottom: 40px;
+          font-size: 14px; font-weight: 700;
+          letter-spacing: -0.2px; color: var(--platinum);
+          margin-bottom: 8px;        /* tight — sentence continues below */
           display: flex; align-items: center; gap: 8px;
-        }
-        .hero-eyebrow::before {
-          content: ''; display: inline-block;
-          width: 24px; height: 1px; background: var(--gold);
-          opacity: 0.5;
+          opacity: 0.55;
         }
 
         /* Typographic scale — the central statement */
@@ -398,11 +425,11 @@ export default async function HomePage({ params }: Props) {
         }
 
         .hero-sub {
-          font-size: clamp(13px, 1.6vw, 16px);
+          font-size: clamp(16px, 1.8vw, 18px);   /* 16px floor for mobile */
           font-weight: 300;
           color: var(--plat-muted);
           line-height: 1.9;
-          max-width: 480px;
+          max-width: 520px;
           margin-bottom: 56px;
           letter-spacing: 0.01em;
         }
@@ -441,8 +468,8 @@ export default async function HomePage({ params }: Props) {
         .ctr-suffix { font-size: 0.45em; font-weight: 300; vertical-align: super; color: var(--gold); }
         .ctr-label {
           font-family: var(--font-mono);
-          font-size: 9px; letter-spacing: 1.5px;
-          text-transform: uppercase; color: var(--plat-faint);
+          font-size: 12px; letter-spacing: 0.8px;  /* 12px minimum, WCAG AA */
+          text-transform: uppercase; color: var(--plat-muted); /* #71717A → readable */
         }
 
         /* ── CTA ROW ─────────────────────────────────────── */
@@ -451,7 +478,7 @@ export default async function HomePage({ params }: Props) {
         }
         .btn-primary {
           font-family: var(--font-mono);
-          font-size: 10px; font-weight: 500;
+          font-size: 12px; font-weight: 500;
           letter-spacing: 2px; text-transform: uppercase;
           background: var(--gold); color: var(--onyx);
           border: none; padding: 16px 28px; cursor: pointer;
@@ -463,7 +490,7 @@ export default async function HomePage({ params }: Props) {
         .btn-primary:hover { opacity: 0.85; }
         .btn-ghost {
           font-family: var(--font-mono);
-          font-size: 10px; font-weight: 400;
+          font-size: 12px; font-weight: 400;
           letter-spacing: 1.5px; text-transform: uppercase;
           color: var(--plat-muted);
           background: transparent;
@@ -480,6 +507,10 @@ export default async function HomePage({ params }: Props) {
         .wc-sec {
           padding: var(--section-gap) var(--px);
         }
+        /* Mobile: extra bottom padding so sticky filter bar doesn't cover content */
+        @media(max-width: 768px) {
+          .wc-sec#elections { padding-bottom: calc(var(--section-gap) + 72px); }
+        }
         .wc-sec.alt { background: var(--onyx-2); }
         .wc-sec.alt2 { background: var(--onyx-3); }
 
@@ -487,7 +518,7 @@ export default async function HomePage({ params }: Props) {
 
         .sec-eyebrow {
           font-family: var(--font-mono);
-          font-size: 9px; letter-spacing: 3.5px;
+          font-size: 12px; letter-spacing: 2.5px;    /* 12px — WCAG min */
           text-transform: uppercase; color: var(--gold);
           opacity: 0.7; margin-bottom: 16px;
         }
@@ -531,7 +562,7 @@ export default async function HomePage({ params }: Props) {
         .pillar:hover { background: var(--onyx-3); }
         .p-num {
           font-family: var(--font-mono);
-          font-size: 9px; letter-spacing: 2px;
+          font-size: 12px; letter-spacing: 1.5px;
           color: var(--gold); opacity: 0.6;
           margin-bottom: 20px;
         }
@@ -592,8 +623,8 @@ export default async function HomePage({ params }: Props) {
         .cat-box:hover { background: var(--onyx-3); }
         .cat-emoji { font-size: 20px; display: block; margin-bottom: 10px; }
         .cat-name {
-          font-family: var(--font-mono); font-size: 8px;
-          letter-spacing: 0.5px; color: var(--plat-faint);
+          font-family: var(--font-mono); font-size: 12px;
+          letter-spacing: 0.3px; color: var(--plat-muted);
           line-height: 1.5;
         }
 
@@ -625,14 +656,14 @@ export default async function HomePage({ params }: Props) {
           max-width: 300px;
         }
         .foot-record {
-          font-family: var(--font-mono); font-size: 9px;
+          font-family: var(--font-mono); font-size: 12px;
           color: var(--gold); margin-top: 16px;
-          letter-spacing: 0.5px; opacity: 0.6;
+          letter-spacing: 0.3px; opacity: 0.65;
         }
         .foot-col-label {
-          font-family: var(--font-mono); font-size: 8px;
-          letter-spacing: 2.5px; text-transform: uppercase;
-          color: var(--gold); opacity: 0.6; margin-bottom: 20px;
+          font-family: var(--font-mono); font-size: 12px;
+          letter-spacing: 2px; text-transform: uppercase;
+          color: var(--gold); opacity: 0.65; margin-bottom: 20px;
         }
         .foot-links { list-style: none; }
         .foot-links li { margin-bottom: 0; }
@@ -650,17 +681,76 @@ export default async function HomePage({ params }: Props) {
           align-items: center; flex-wrap: wrap; gap: 12px;
         }
         .foot-copy {
-          font-family: var(--font-mono); font-size: 9px;
-          color: var(--plat-faint); letter-spacing: 0.04em;
+          font-family: var(--font-mono); font-size: 12px;
+          color: var(--plat-muted); letter-spacing: 0.03em; /* plat-muted not plat-faint */
         }
         .foot-neutral {
-          font-family: var(--font-mono); font-size: 9px;
-          color: var(--plat-faint); display: flex;
+          font-family: var(--font-mono); font-size: 12px;
+          color: var(--plat-muted); display: flex;
           align-items: center; gap: 8px;
         }
         .gold-pip {
           width: 3px; height: 3px; border-radius: 50%;
           background: var(--gold); opacity: 0.5;
+        }
+
+        /* ── STICKY BOTTOM FILTER BAR — mobile Thumb Zone ── */
+        /* Desktop: hidden. Mobile: full-width glassmorphism bar */
+        .sticky-filter-bar {
+          display: none;  /* hidden on desktop */
+        }
+        @media(max-width: 768px) {
+          .sticky-filter-bar {
+            display: block;
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            z-index: 300;
+            /* Safe area for iPhone home indicator */
+            padding-bottom: env(safe-area-inset-bottom, 0px);
+            /* Glassmorphism */
+            background: rgba(10, 10, 11, 0.72);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-top: 1px solid rgba(255,255,255,0.07);
+          }
+        }
+        .sticky-filter-inner {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
+          padding: 14px 24px;
+          min-height: 56px; /* Thumb zone target */
+          text-decoration: none;
+          cursor: pointer;
+        }
+        .sticky-filter-icon {
+          font-size: 16px;
+          color: var(--gold);
+          line-height: 1;
+        }
+        .sticky-filter-label {
+          font-family: var(--font-mono);
+          font-size: 12px;           /* 12px minimum — WCAG */
+          letter-spacing: 2px;
+          text-transform: uppercase;
+          color: var(--platinum);
+        }
+        .sticky-filter-pill {
+          font-family: var(--font-mono);
+          font-size: 12px;
+          font-weight: 600;
+          color: var(--onyx);
+          background: var(--gold);
+          border-radius: 10px;
+          padding: 2px 8px;
+          line-height: 1.6;
+          min-width: 24px;
+          text-align: center;
+        }
+        /* Push content above the bar when it's visible */
+        @media(max-width: 768px) {
+          .wc-root { padding-bottom: 72px; }
         }
       `}</style>
 
@@ -673,20 +763,36 @@ export default async function HomePage({ params }: Props) {
           </div>
           <div className="wc-header-status">
             <div className="pulse-dot" aria-hidden="true" />
-            {c.eyebrow}
+            {/* Desktop: full POCVA label */}
+            <span className="wc-header-status-label">{c.eyebrow}</span>
+            {/* Mobile: abbreviated */}
+            <span className="wc-header-status-short">
+              {locale === 'pt' ? 'Ativo' : locale === 'es' ? 'Activo' : locale === 'fr' ? 'Actif' : locale === 'de' ? 'Aktiv' : locale === 'ar' ? 'نشط' : 'Active'}
+            </span>
           </div>
           <div className="wc-header-spacer" />
           <Link href={`/${locale}/enterprise`} className="wc-header-ent">
             {c.ctaEnterprise}
           </Link>
+          {/* Mobile hamburger — links to enterprise in mobile nav */}
+          <button
+            className="wc-hamburger"
+            aria-label="Menu"
+            onClick={() => {
+              const dest = `/${locale}/enterprise`
+              window.location.href = dest
+            }}
+          >
+            <span /><span /><span />
+          </button>
         </header>
 
         {/* ── HERO — DATA-FIRST ──────────────────────────── */}
         <section className="wc-hero" aria-label="Registry overview">
           <div className="hero-inner">
 
+            {/* h1a is "Eleições:" — tight eyebrow, sentence reads together */}
             <p className="hero-eyebrow">{c.h1a}</p>
-
             <div className="hero-h1">{c.h1b}</div>
             <div className="hero-h1-accent">{c.h1c}</div>
 
@@ -735,6 +841,35 @@ export default async function HomePage({ params }: Props) {
           <h2 className="sec-title">{c.sElecTitle}</h2>
           <ElectionGrid elections={elections} locale={locale} />
         </section>
+
+        {/*
+          ── STICKY BOTTOM FILTER BAR (mobile only) ──────────────
+          Rendered at root level so it doesn't inherit section padding.
+          ElectionGrid's own filter state is controlled inside that
+          component; this bar is the mobile *trigger* only.
+          On desktop: display:none.
+          On mobile: fixed bottom, full width, glassmorphism.
+        */}
+        <div
+          className="sticky-filter-bar"
+          role="complementary"
+          aria-label={locale === 'pt' ? 'Filtros de jurisdição' : 'Jurisdiction filters'}
+        >
+          <a href="#elections" className="sticky-filter-inner">
+            <span className="sticky-filter-icon" aria-hidden="true">⊞</span>
+            <span className="sticky-filter-label">
+              {locale === 'pt' ? 'Filtrar jurisdições'
+               : locale === 'es' ? 'Filtrar jurisdicciones'
+               : locale === 'fr' ? 'Filtrer les juridictions'
+               : locale === 'de' ? 'Zuständigkeiten filtern'
+               : locale === 'ar' ? 'تصفية الولايات'
+               : 'Filter jurisdictions'}
+            </span>
+            <span className="sticky-filter-pill">
+              {totalElections}
+            </span>
+          </a>
+        </div>
 
         {/* ── POCVA-01 ───────────────────────────────────── */}
         <section className="wc-sec" id="pocva" aria-label={c.sPocvaTitle}>
