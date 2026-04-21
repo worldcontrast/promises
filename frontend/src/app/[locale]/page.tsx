@@ -32,9 +32,10 @@ export default async function HomePage({ params }: Props) {
   const copy: Record<string, any> = {
     pt: {
       eyebrow: 'POCVA-01 · Sistema Ativo',
-      h1a: 'Eleições:',
-      h1b: 'Promessas dos Candidatos.',
-      h1c: 'Lado a Lado.',
+      h1a: 'Candidatos à Eleição:',
+      h1b: 'Veja as promessas',
+      h1c: 'de Campanha',
+      h1d: 'Lado a Lado.'
       sub: 'Registro histórico autenticado, fiel e permanente.',
       ctaRegistry: 'Acessar o Registro',
       ctaProtocol: 'Protocolo POCVA-01',
@@ -62,9 +63,10 @@ export default async function HomePage({ params }: Props) {
     },
     en: {
       eyebrow: 'POCVA-01 · System Active',
-      h1a: 'Elections:',
-      h1b: 'Campaign Promises.',
-      h1c: 'Side by Side.',
+      h1a: 'Election Candidates:',
+      h1b: 'See the Campaign',
+      h1c: 'Promises',
+      h1d: 'Side by Side.'
       sub: 'Authenticated, faithful, and permanent historical record.',
       ctaRegistry: 'Access the Registry',
       ctaProtocol: 'POCVA-01 Protocol',
@@ -92,9 +94,10 @@ export default async function HomePage({ params }: Props) {
     },
     es: {
       eyebrow: 'POCVA-01 · Sistema Activo',
-      h1a: 'Elecciones:',
-      h1b: 'Promesas de los Candidatos.',
-      h1c: 'Lado a Lado.',
+      h1a: 'Candidatos a Elección:',
+      h1b: 'Vea las promesas',
+      h1c: 'de Campaña',
+      h1d: 'Lado a Lado.'
       sub: 'Registro histórico autenticado, fiel y permanente.',
       ctaRegistry: 'Acceder al Registro',
       ctaProtocol: 'Protocolo POCVA-01',
@@ -122,9 +125,10 @@ export default async function HomePage({ params }: Props) {
     },
     fr: {
       eyebrow: 'POCVA-01 · Système Actif',
-      h1a: 'Élections:',
-      h1b: 'Promesses des Candidats.',
-      h1c: 'Côte à Côte.',
+      h1a: 'Candidats aux Élections:',
+      h1b: 'Voir les promesses',
+      h1c: 'de Campagne',
+      h1d: 'Côte à Côte.'
       sub: 'Registre historique authentifié, fidèle et permanent.',
       ctaRegistry: 'Accéder au Registre',
       ctaProtocol: 'Protocole POCVA-01',
@@ -152,9 +156,10 @@ export default async function HomePage({ params }: Props) {
     },
     de: {
       eyebrow: 'POCVA-01 · System Aktiv',
-      h1a: 'Wahlen:',
-      h1b: 'Wahlversprechen der Kandidaten.',
-      h1c: 'Seite an Seite.',
+      h1a: 'Kandidaten zur Wahl:',
+      h1b: 'Sehen Sie die',
+      h1c: 'Wahlversprechen',
+      h1d: 'Seite an Seite.'
       sub: 'Authentifiziertes, getreues und permanentes historisches Register.',
       ctaRegistry: 'Register aufrufen',
       ctaProtocol: 'POCVA-01 Protokoll',
@@ -182,9 +187,10 @@ export default async function HomePage({ params }: Props) {
     },
     ar: {
       eyebrow: 'POCVA-01 · النظام نشط',
-      h1a: 'انتخابات:',
-      h1b: 'وعود المرشحين.',
-      h1c: 'جنباً إلى جنب.',
+      h1a: 'المرشحون للانتخابات:',
+      h1b: 'شاهد الوعود',
+      h1c: 'الانتخابية',
+      h1d: 'جنباً إلى جنب.'
       sub: 'سجل تاريخي موثّق وأمين ودائم.',
       ctaRegistry: 'الوصول إلى السجل',
       ctaProtocol: 'بروتوكول POCVA-01',
@@ -406,32 +412,30 @@ export default async function HomePage({ params }: Props) {
           margin-bottom: 80px; /* Fix 3: breathing room before subtitle */
         }
 
-        /* h1b — main body of the phrase, Platinum */
+        /* h1b + h1c — main body, wraps naturally on small screens */
         .hero-h1 {
-          font-size: clamp(48px, 8.5vw, 112px);
+          font-size: clamp(36px, 6vw, 84px);
           font-weight: 800;
           color: var(--platinum);
-          line-height: 0.94;
-          letter-spacing: -2.5px;
-          white-space: nowrap;  /* prevents mid-word breaks */
+          line-height: 1.05;
+          letter-spacing: -1.5px;
         }
         /* unused but kept for compatibility */
         .hero-h1-light {
-          font-size: clamp(48px, 8.5vw, 112px);
+          font-size: clamp(36px, 6vw, 84px);
           font-weight: 200;
           color: var(--plat-muted);
-          line-height: 0.94;
-          letter-spacing: -2.5px;
+          line-height: 1.05;
+          letter-spacing: -1.5px;
         }
 
-        /* h1c — Gold accent, closes the phrase */
+        /* h1d — Gold accent, closes the phrase */
         .hero-h1-accent {
-          font-size: clamp(48px, 8.5vw, 112px);
+          font-size: clamp(36px, 6vw, 84px);
           font-weight: 800;
           color: var(--gold);
-          line-height: 0.94;
-          letter-spacing: -2.5px;
-          white-space: nowrap;
+          line-height: 1.05;
+          letter-spacing: -1.5px;
         }
 
         /* Fix 3: subtitle separated generously from the big title block */
@@ -786,25 +790,29 @@ export default async function HomePage({ params }: Props) {
           <Link href={`/${locale}/enterprise`} className="wc-header-ent">
             {c.ctaEnterprise}
           </Link>
-         {/* Mobile hamburger — links to enterprise in mobile nav */}
-          <Link
-            href={`/${locale}/enterprise`}
+          {/* Mobile hamburger — links to enterprise in mobile nav */}
+          <button
             className="wc-hamburger"
             aria-label="Menu"
+            onClick={() => {
+              const dest = `/${locale}/enterprise`
+              window.location.href = dest
+            }}
           >
             <span /><span /><span />
-          </Link>
+          </button>
         </header>
 
         {/* ── HERO — DATA-FIRST ──────────────────────────── */}
         <section className="wc-hero" aria-label="Registry overview">
           <div className="hero-inner">
 
-            {/* ── TITLE GROUP — single phrase, no floated dash ── */}
+            {/* ── TITLE GROUP — 4 stacked lines, wraps naturally ── */}
             <div className="hero-title-group">
               <p className="hero-eyebrow">{c.h1a}</p>
               <div className="hero-h1">{c.h1b}</div>
-              <div className="hero-h1-accent">{c.h1c}</div>
+              <div className="hero-h1">{c.h1c}</div>
+              <div className="hero-h1-accent">{c.h1d}</div>
             </div>
 
             <p className="hero-sub">{c.sub}</p>
