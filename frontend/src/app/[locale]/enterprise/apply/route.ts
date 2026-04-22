@@ -1,44 +1,46 @@
 import { NextResponse } from 'next/server';
+import nodemailer from 'nodemailer';
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { org, email, use_case, countries } = body;
 
-    // Disparo via Resend API
-    const res = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.RESEND_API_KEY}`
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_APP_PASSWORD,
       },
-      body: JSON.stringify({
-        from: 'World Contrast <onboarding@resend.dev>', // E-mail de disparo (padrão de teste do Resend)
-        to: 'rafaelstedile@gmail.com', // O seu e-mail de destino
-        subject: `[WC-ENTERPRISE] Nova solicitação: ${org}`,
-        html: `
-          <div style="font-family: sans-serif; color: #111;">
-            <h2>Nova Solicitação de Acesso Enterprise</h2>
-            <p><strong>Organização:</strong> ${org}</p>
-            <p><strong>Email Institucional:</strong> ${email}</p>
-            <p><strong>Caso de Uso:</strong> ${use_case}</p>
-            <p><strong>Países de Interesse:</strong> ${countries || 'Não informado'}</p>
-            <hr style="border: none; border-top: 1px solid #eaeaea; margin: 24px 0;" />
-            <p style="font-size: 12px; color: #666;">Gerado automaticamente via worldcontrast.org</p>
-          </div>
-        `
-      })
     });
 
-    if (res.ok) {
-      return NextResponse.json({ success: true });
-    } else {
-      const errorData = await res.json();
-      console.error('Resend Error:', errorData);
-      return NextResponse.json({ error: 'Failed to send email' }, { status: 500 });
-    }
+    const mailOptions = {
+      from: `"World Contrast API" <${process.env.GMAIL_USER}>`,
+      to: process.env.GMAIL_USER,
+      replyTo: email,
+      subject: `[WC-ENTERPRISE] Nova solicitação: ${org}`,
+      html: `
+        <div style="font-family: sans-serif; color: #111; max-width: 600px; padding: 20px;">
+          <h2 style="color: #C8A96E; margin-bottom: 24px;">Nova Solicitação de Acesso Enterprise</h2>
+          
+          <div style="background: #f4f4f5; padding: 16px; border-radius: 4px;">
+            <p style="margin: 8px 0;"><strong>Organização:</strong> ${org}</p>
+            <p style="margin: 8px 0;"><strong>Email Institucional:</strong> ${email}</p>
+            <p style="margin: 8px 0;"><strong>Caso de Uso:</strong> ${use_case}</p>
+            <p style="margin: 8px 0;"><strong>Países de Interesse:</strong> ${countries || 'Não informado'}</p>
+          </div>
+          
+          <hr style="border: none; border-top: 1px solid #eaeaea; margin: 24px 0;" />
+          <p style="font-size: 12px; color: #666;">Enviado automaticamente via worldcontrast.org</p>
+        </div>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('API Route Error:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    console.error('Nodemailer Error:', error);
+    return NextResponse.json({ error: 'Failed to send email' }, { status: 500 });
   }
 }
