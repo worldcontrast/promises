@@ -3,14 +3,14 @@
  * File: frontend/src/app/[locale]/compare/[electionId]/page.tsx
  *
  * ARCHITECTURE: N-candidate matrix scroll
- *   - Horizontal scroll: overflow-x + scroll-snap
- *   - Each column: min-width 340px (mobile) / 400px (desktop)
- *   - Candidate header: position sticky top (never lost on vertical scroll)
- *   - Round segmented control (1st / 2nd round)
- *   - Design System: Onyx/Platinum/Gold — identical to homepage + enterprise
+ * - Horizontal scroll: overflow-x + scroll-snap
+ * - Each column: min-width 340px (mobile) / 400px (desktop)
+ * - Candidate header: position sticky top (never lost on vertical scroll)
+ * - Round segmented control (1st / 2nd round)
+ * - Design System: Onyx/Platinum/Gold — identical to homepage + enterprise
  *
  * SCALABILITY: Works for 2 candidates (Brazil 2026 current)
- *   and for 10+ candidates (first-round multiparty elections)
+ * and for 10+ candidates (first-round multiparty elections)
  */
 
 import { notFound } from 'next/navigation'
@@ -356,6 +356,11 @@ export default async function ComparePage({ params, searchParams }: Props) {
           border-color: rgba(200,169,110,0.45);
         }
 
+        /* NEW: Wrapper for column content to prevent overlapping with sticky header */
+        .cp-col-content {
+          padding-top: 16px;
+        }
+
         /* ── CATEGORY HEADER ROW ─────────────────────────── */
         /* Repeats per column, aligned via grid inside each section */
         .cp-cat-header {
@@ -542,7 +547,20 @@ export default async function ComparePage({ params, searchParams }: Props) {
             --col-max: 340px;
             --nav-h: 56px;
           }
-          .cp-cand-header { padding: 16px 16px 12px; }
+          
+          /* Ajuste do top com a nav mobile menor */
+          .cp-filter-bar {
+            top: 56px;
+          }
+          .cp-cand-header {
+            /* Enxugar padding e recalcular top (56 + 52) */
+            padding: 12px 16px 10px;
+            top: 108px;
+          }
+          .cp-avatar {
+            width: 36px; height: 36px; font-size: 12px;
+          }
+          
           .cp-promise { padding: 20px 16px 18px; }
           .cp-promise--empty { padding: 20px 16px; }
           .cp-cat-header { padding: 10px 16px 6px; }
@@ -689,51 +707,54 @@ export default async function ComparePage({ params, searchParams }: Props) {
                       )}
                     </div>
 
-                    {/* ── PROMISE CARDS PER CATEGORY ── */}
-                    {candRows.map((section: any) => {
-                      const cfg = CATEGORY_CONFIG[section.category as Category]
-                      return (
-                        <div key={section.category}>
-                          {/* Category label header */}
-                          <div className="cp-cat-header">
-                            <div
-                              className="cp-cat-dot"
-                              style={{ background: cfg.color }}
-                              aria-hidden="true"
-                            />
-                            <span className="cp-cat-label">
-                              <span aria-hidden="true">{cfg.emoji} </span>
-                              {cfg.label[locale] || cfg.label['en']}
-                            </span>
-                            <span className="cp-cat-count">
-                              {section.promises.length} {t('entries')}
-                            </span>
-                          </div>
-
-                          {/* Individual promise cards */}
-                          {section.promises.length === 0 ? (
-                            <div className="cp-promise--empty">
-                              <p className="cp-promise-empty">{t('noPromise')}</p>
+                    {/* ── WRAPPER DE CONTEÚDO (Evita colapso no mobile) ── */}
+                    <div className="cp-col-content">
+                      {/* ── PROMISE CARDS PER CATEGORY ── */}
+                      {candRows.map((section: any) => {
+                        const cfg = CATEGORY_CONFIG[section.category as Category]
+                        return (
+                          <div key={section.category}>
+                            {/* Category label header */}
+                            <div className="cp-cat-header">
+                              <div
+                                className="cp-cat-dot"
+                                style={{ background: cfg.color }}
+                                aria-hidden="true"
+                              />
+                              <span className="cp-cat-label">
+                                <span aria-hidden="true">{cfg.emoji} </span>
+                                {cfg.label[locale] || cfg.label['en']}
+                              </span>
+                              <span className="cp-cat-count">
+                                {section.promises.length} {t('entries')}
+                              </span>
                             </div>
-                          ) : section.promises.map((p: any, idx: number) => (
-                            <PromiseCard
-                              key={idx}
-                              p={p}
-                              cfg={cfg}
-                              locale={locale}
-                              t={t}
-                            />
-                          ))}
-                        </div>
-                      )
-                    })}
 
-                    {/* Sources footer per column */}
-                    <div className="cp-sources-row">
-                      <p className="cp-sources-title">
-                        {locale === 'pt' ? 'Fontes Verificadas' : 'Verified Sources'}
-                      </p>
-                      <SocialLinks sources={cand.sources} t={t} />
+                            {/* Individual promise cards */}
+                            {section.promises.length === 0 ? (
+                              <div className="cp-promise--empty">
+                                <p className="cp-promise-empty">{t('noPromise')}</p>
+                              </div>
+                            ) : section.promises.map((p: any, idx: number) => (
+                              <PromiseCard
+                                key={idx}
+                                p={p}
+                                cfg={cfg}
+                                locale={locale}
+                                t={t}
+                              />
+                            ))}
+                          </div>
+                        )
+                      })}
+
+                      {/* Sources footer per column */}
+                      <div className="cp-sources-row">
+                        <p className="cp-sources-title">
+                          {locale === 'pt' ? 'Fontes Verificadas' : 'Verified Sources'}
+                        </p>
+                        <SocialLinks sources={cand.sources} t={t} />
+                      </div>
                     </div>
 
                   </div>
