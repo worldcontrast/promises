@@ -266,6 +266,16 @@ export default async function ComparePage({ params, searchParams }: Props) {
         }
         .cp-filter-emoji { font-size: 13px; }
 
+        /* ── RESET MARGIN/PADDING TOP ────────────────────── */
+        /* Mata qualquer "buraco" entre filtros e cabeçalhos */
+        main,
+        .cp-matrix-outer,
+        .cp-matrix-inner,
+        .cp-col {
+          margin-top: 0;
+          padding-top: 0;
+        }
+
         /* ── MATRIX SCROLL CONTAINER ─────────────────────── */
         /* The outer wrapper clips; inner scrolls horizontally */
         .cp-matrix-outer {
@@ -356,9 +366,12 @@ export default async function ComparePage({ params, searchParams }: Props) {
           border-color: rgba(200,169,110,0.45);
         }
 
-        /* NEW: Wrapper for column content to prevent overlapping with sticky header */
+        /* Wrapper for column content to prevent overlapping and allow Flexbox fill */
         .cp-col-content {
           padding-top: 16px;
+          display: flex;
+          flex-direction: column;
+          flex: 1; /* Preenche toda a altura restante da coluna */
         }
 
         /* ── CATEGORY HEADER ROW ─────────────────────────── */
@@ -481,6 +494,7 @@ export default async function ComparePage({ params, searchParams }: Props) {
           padding: 24px;
           border-top: 1px solid var(--rule);
           background: var(--onyx-3);
+          margin-top: auto; /* Ancorado à base absoluta do card (graças ao flex: 1 no content) */
         }
         .cp-sources-title {
           font-family: var(--font-m);
