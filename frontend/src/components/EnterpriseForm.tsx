@@ -10,12 +10,10 @@ export default function EnterpriseForm({ locale }: { locale: string }) {
     e.preventDefault()
     setIsSubmitting(true)
 
-    // Captura todos os dados preenchidos no formulário
     const formData = new FormData(e.currentTarget)
     const data = Object.fromEntries(formData)
 
     try {
-      // Envia os dados para a nossa API interna
       const response = await fetch('/api/enterprise/apply', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -25,8 +23,7 @@ export default function EnterpriseForm({ locale }: { locale: string }) {
       if (response.ok) {
         setIsSubmitted(true)
       } else {
-        console.error('Falha ao enviar solicitação.')
-        // Aqui você poderia adicionar um estado de erro visual no futuro
+        console.error('Erro ao enviar solicitação.')
       }
     } catch (error) {
       console.error('Erro de conexão:', error)
