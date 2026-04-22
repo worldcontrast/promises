@@ -2,8 +2,8 @@
  * World Contrast — Compare Page v2.0
  * File: frontend/src/app/[locale]/compare/[electionId]/page.tsx
  *
- * ARCHITECTURE: N-candidate matrix scroll
- * - Horizontal scroll: overflow-x + scroll-snap
+ * ARCHITECTURE: N-candidate matrix scroll (Viewport Canvas Mode)
+ * - Horizontal scroll: overflow-x at the root level (no sticky traps)
  * - Each column: min-width 340px (mobile) / 400px (desktop)
  * - Candidate header: position sticky top (never lost on vertical scroll)
  * - Round segmented control (1st / 2nd round)
@@ -80,7 +80,7 @@ export default async function ComparePage({ params, searchParams }: Props) {
         /* ═══════════════════════════════════════════════════
            COMPARE PAGE v2 — DESIGN SYSTEM SYNC
            Onyx / Platinum / Gold — identical to homepage
-           N-Candidate Matrix Scroll Architecture
+           N-Candidate Matrix Scroll Architecture (Viewport Canvas)
            ═══════════════════════════════════════════════════ */
 
         :root {
@@ -120,18 +120,24 @@ export default async function ComparePage({ params, searchParams }: Props) {
 
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+        /* ── VIEWPORT CANVAS (Rolagem Global) ──────────────── */
         .cp-root {
           font-family: var(--font-d);
           background: var(--onyx);
           color: var(--platinum);
           min-height: 100vh;
           -webkit-font-smoothing: antialiased;
+          width: max-content; /* Força a página a abraçar as colunas */
+          min-width: 100vw;
         }
 
         /* ── PAGE HEADER ─────────────────────────────────── */
-        /* Fix 1: title scrolls away — frees vertical space for data */
+        /* Fix: Title scrolls away vertically, but stays anchored horizontally */
         .cp-page-header {
-          position: relative;
+          position: sticky;
+          left: 0;
+          width: 100vw; /* Ancorado à largura da janela */
+          box-sizing: border-box;
           background: var(--onyx);
           border-bottom: 1px solid var(--rule-faint);
           padding: 0 clamp(16px, 4vw, 48px);
@@ -220,15 +226,22 @@ export default async function ComparePage({ params, searchParams }: Props) {
           display: flex; align-items: center; gap: 6px;
           animation: fade-out 4s ease forwards;
           animation-delay: 3s;
+          position: sticky;
+          left: 0;
+          width: 100vw;
+          box-sizing: border-box;
         }
         @keyframes fade-out { to { opacity: 0; pointer-events: none; } }
         .cp-scroll-arrow { color: var(--gold); font-size: 14px; }
 
         /* ── CATEGORY FILTER BAR ─────────────────────────── */
-        /* Fix 2a: filter bar — first sticky layer, always visible */
+        /* Fix: filter bar — first sticky layer, anchored left */
         .cp-filter-bar {
           position: sticky;
           top: 60px;           /* exactly: global nav height */
+          left: 0;             /* Ancorado horizontalmente */
+          width: 100vw;        /* Ancorado à largura da janela */
+          box-sizing: border-box;
           z-index: 100;
           background: #0A0A0B; /* solid — no opacity gaps that break layering */
           border-bottom: 1px solid var(--rule-faint);
@@ -277,17 +290,10 @@ export default async function ComparePage({ params, searchParams }: Props) {
         }
 
         /* ── MATRIX SCROLL CONTAINER ─────────────────────── */
-        /* The outer wrapper clips; inner scrolls horizontally */
+        /* LIBERTAR O STICKY: Nenhuma restrição de overflow aqui! */
         .cp-matrix-outer {
           width: 100%;
-          overflow-x: auto;
-          overflow-y: visible;
-          scroll-snap-type: x mandatory;
-          -webkit-overflow-scrolling: touch;
-          /* Hide scrollbar — touch + mouse still work */
-          scrollbar-width: none;
         }
-        .cp-matrix-outer::-webkit-scrollbar { display: none; }
 
         /* Inner table: N columns side by side */
         .cp-matrix-inner {
@@ -308,7 +314,8 @@ export default async function ComparePage({ params, searchParams }: Props) {
         }
         .cp-col:last-child { border-right: none; }
 
-        /* Fix 2b: candidate header — second sticky layer, slides under filter bar */
+        /* Fix: candidate header — second sticky layer, slides under filter bar */
+        /* Agora funciona porque o pai não tem overflow: hidden/auto */
         .cp-cand-header {
           position: sticky;
           top: 112px;          /* 60px nav + 52px filter bar */
@@ -526,7 +533,13 @@ export default async function ComparePage({ params, searchParams }: Props) {
         }
 
         /* ── PAGE FOOTER ─────────────────────────────────── */
+        /* Fix: Footer anchored horizontally so it doesn't scroll away */
         .cp-footer {
+          position: sticky;
+          left: 0;
+          width: 100vw;
+          box-sizing: border-box;
+          background: var(--onyx);
           padding: 32px clamp(16px, 4vw, 48px);
           border-top: 1px solid var(--rule-faint);
           display: flex; flex-direction: column; gap: 10px;
