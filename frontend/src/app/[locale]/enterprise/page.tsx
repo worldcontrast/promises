@@ -258,6 +258,11 @@ export default async function EnterprisePage({ params }: Props) {
           border-radius: 16px;
           border: 1px solid rgba(255,255,255,0.08);
           position: relative;
+          transition: transform 0.22s ease, border-color 0.22s ease;
+        }
+        .tier-card:hover {
+          transform: translateY(-4px);
+          border-color: rgba(255,255,255,0.14);
         }
 
         /* Fix 3: Enterprise highlight — gradient + outer glow + floating badge */
@@ -265,6 +270,11 @@ export default async function EnterprisePage({ params }: Props) {
           background: linear-gradient(180deg, var(--onyx-3) 0%, var(--onyx-2) 100%);
           border: 1px solid var(--gold-bdr);
           box-shadow: 0 0 80px rgba(200,169,110,0.08);
+          transition: transform 0.22s ease, box-shadow 0.22s ease;
+        }
+        .tier-card.highlight:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 0 120px rgba(200,169,110,0.14);
         }
         .tier-card.highlight::before {
           content: 'RECOMMENDED';
@@ -326,12 +336,19 @@ export default async function EnterprisePage({ params }: Props) {
         .tier-cli {
           font-family: var(--font-m); font-size: 11px;
           color: var(--emerald);
-          background: #000000;    /* pure black — brutal contrast inside grey card */
+          background: #000000;
           padding: 16px;
           border-radius: 6px;
           border: 1px solid rgba(16,185,129,0.12);
-          word-break: break-all; line-height: 1.7;
+          line-height: 1.7;
+          /* Terminal behaviour: scroll horizontally, never break mid-param */
+          white-space: nowrap;
+          overflow-x: auto;
+          /* Invisible scrollbar — functional but silent */
+          scrollbar-width: none;          /* Firefox */
+          -ms-overflow-style: none;       /* IE / Edge legacy */
         }
+        .tier-cli::-webkit-scrollbar { display: none; } /* Chrome / Safari / new Edge */
 
         /* API ENDPOINTS */
         .api-table { width: 100%; border-collapse: collapse; }
@@ -347,9 +364,21 @@ export default async function EnterprisePage({ params }: Props) {
         .api-table td {
           padding: 12px; border-bottom: 1px solid var(--rule);
           font-size: 12px;
+          /* transition for hover lift */
+          transition: background 0.18s;
         }
         .api-table tr:last-child td { border-bottom: none; }
-        .api-table tr:hover td { background: var(--onyx-3); }
+        /* Row hover: background lift + left gold accent on first cell */
+        .api-table tbody tr { position: relative; }
+        .api-table tbody tr:hover td { background: rgba(200,169,110,0.04); }
+        .api-table tbody tr:hover td:first-child {
+          border-left: 2px solid var(--gold);
+          padding-left: 10px; /* compensate for the 2px border */
+        }
+        .api-table tbody tr td:first-child {
+          border-left: 2px solid transparent;
+          transition: border-left-color 0.18s, padding-left 0.18s;
+        }
         .method-badge {
           font-family: var(--font-m); font-size: 8px;
           font-weight: 600; padding: 2px 6px;
@@ -448,20 +477,34 @@ export default async function EnterprisePage({ params }: Props) {
           width: 100%; padding: 12px 14px;
           background: var(--onyx-3);
           border: 1px solid var(--rule);
+          border-left: 2px solid transparent; /* reserved for focus accent */
           border-radius: 2px; color: var(--platinum);
           font-family: var(--font-d); font-size: 13px;
-          outline: none; transition: border-color 0.2s;
+          outline: none;
+          transition: border-color 0.22s, background 0.22s, border-left-color 0.22s;
         }
-        .form-input:focus { border-color: var(--gold-bdr); }
+        .form-input:focus {
+          border-color: var(--gold-bdr);
+          border-left-color: var(--gold);   /* gold left-bar — notarial stamp */
+          background: var(--onyx-4);        /* subtle lift from the page */
+        }
         .form-input::placeholder { color: var(--plat-low); }
+
         .form-select {
           width: 100%; padding: 12px 14px;
           background: var(--onyx-3);
           border: 1px solid var(--rule);
+          border-left: 2px solid transparent;
           border-radius: 2px; color: var(--platinum);
           font-family: var(--font-d); font-size: 13px;
           outline: none; cursor: pointer;
           appearance: none;
+          transition: border-color 0.22s, background 0.22s, border-left-color 0.22s;
+        }
+        .form-select:focus {
+          border-color: var(--gold-bdr);
+          border-left-color: var(--gold);
+          background: var(--onyx-4);
         }
         .form-note {
           font-size: 11px; color: var(--plat-low);
