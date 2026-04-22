@@ -72,7 +72,7 @@ export default async function ComparePage({ params, searchParams }: Props) {
   function t(k: string) { return L[k]?.[locale] ?? L[k]?.['en'] ?? k }
 
   const candidateCount = candidates.length
-  const hasMultipleRounds = (election as any).hasRounds ?? false
+  const hasMultipleRounds = election.hasRounds ?? false
 
   return (
     <>
@@ -129,12 +129,10 @@ export default async function ComparePage({ params, searchParams }: Props) {
         }
 
         /* ── PAGE HEADER ─────────────────────────────────── */
+        /* Fix 1: title scrolls away — frees vertical space for data */
         .cp-page-header {
-          position: sticky;
-          top: var(--nav-h);
-          z-index: 100;
-          background: rgba(10,10,11,0.94);
-          backdrop-filter: blur(16px) saturate(180%);
+          position: relative;
+          background: var(--onyx);
           border-bottom: 1px solid var(--rule-faint);
           padding: 0 clamp(16px, 4vw, 48px);
         }
@@ -227,12 +225,12 @@ export default async function ComparePage({ params, searchParams }: Props) {
         .cp-scroll-arrow { color: var(--gold); font-size: 14px; }
 
         /* ── CATEGORY FILTER BAR ─────────────────────────── */
+        /* Fix 2a: filter bar — first sticky layer, always visible */
         .cp-filter-bar {
           position: sticky;
-          top: calc(var(--nav-h) + var(--elect-h));
-          z-index: 90;
-          background: rgba(10,10,11,0.92);
-          backdrop-filter: blur(12px);
+          top: 60px;           /* exactly: global nav height */
+          z-index: 100;
+          background: #0A0A0B; /* solid — no opacity gaps that break layering */
           border-bottom: 1px solid var(--rule-faint);
           padding: 0 clamp(16px, 4vw, 48px);
           display: flex;
@@ -300,18 +298,19 @@ export default async function ComparePage({ params, searchParams }: Props) {
         }
         .cp-col:last-child { border-right: none; }
 
-        /* ── STICKY CANDIDATE HEADER (per column) ────────── */
-        /* Stays at top as user scrolls down through promises */
+        /* Fix 2b: candidate header — second sticky layer, slides under filter bar */
         .cp-cand-header {
           position: sticky;
-          top: var(--cand-stick);
-          z-index: 80;
-          background: var(--onyx-2);
+          top: 112px;          /* 60px nav + 52px filter bar */
+          z-index: 90;
+          background: #111113; /* solid onyx-2 — no gaps */
           border-bottom: 1px solid var(--rule-gold);
           padding: 20px 24px 16px;
           display: flex;
           flex-direction: column;
           gap: 12px;
+          /* Heavy shadow — content scrolls invisibly underneath */
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
         }
 
         .cp-cand-identity { display: flex; align-items: center; gap: 12px; }
