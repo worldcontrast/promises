@@ -240,71 +240,97 @@ export default async function EnterprisePage({ params }: Props) {
         }
 
         /* TIERS */
+        /* Fix 1: gap 32px, transparent background — cards float individually */
         .tiers-grid {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
-          gap: 1px; background: var(--rule);
-          border: 1px solid var(--rule);
+          gap: 32px;
+          background: transparent;
         }
-        @media(max-width: 900px) { .tiers-grid { grid-template-columns: 1fr; } }
+        @media(max-width: 900px) {
+          .tiers-grid { grid-template-columns: 1fr; gap: 20px; }
+        }
 
+        /* Fix 2: card elevation — radius, individual border, generous padding */
         .tier-card {
           background: var(--onyx-2);
-          padding: 28px 24px;
+          padding: 40px 32px;
+          border-radius: 16px;
+          border: 1px solid rgba(255,255,255,0.08);
           position: relative;
         }
+
+        /* Fix 3: Enterprise highlight — gradient + outer glow + floating badge */
         .tier-card.highlight {
-          background: var(--onyx-3);
+          background: linear-gradient(180deg, var(--onyx-3) 0%, var(--onyx-2) 100%);
           border: 1px solid var(--gold-bdr);
+          box-shadow: 0 0 80px rgba(200,169,110,0.08);
         }
         .tier-card.highlight::before {
           content: 'RECOMMENDED';
-          position: absolute; top: -1px; left: 24px;
-          font-family: var(--font-m); font-size: 7px;
-          letter-spacing: 2px; background: var(--gold);
-          color: var(--onyx); padding: 3px 8px;
-          font-weight: 600;
+          position: absolute;
+          top: -14px;              /* floats above the card edge */
+          left: 32px;
+          font-family: var(--font-m); font-size: 10px;
+          letter-spacing: 2px;
+          background: var(--gold); color: var(--onyx);
+          padding: 4px 12px;
+          border-radius: 4px;     /* Fix 3: not hard-edged */
+          font-weight: 700;
         }
+
         .tier-id {
-          font-family: var(--font-m); font-size: 8px;
+          font-family: var(--font-m); font-size: 12px;
           letter-spacing: 3px; color: var(--plat-low);
-          margin-bottom: 6px;
+          margin-bottom: 8px;
         }
         .tier-id.gold { color: var(--gold); }
+
         .tier-name {
-          font-size: 20px; font-weight: 700;
-          color: var(--platinum); margin-bottom: 4px;
+          font-size: 22px; font-weight: 700;
+          color: var(--platinum); margin-bottom: 6px;
         }
         .tier-target {
-          font-size: 11px; color: var(--plat-dim);
-          line-height: 1.5; margin-bottom: 16px;
+          font-size: 13px; color: var(--plat-dim);
+          line-height: 1.6; margin-bottom: 20px;
         }
+
+        /* Fix 4a: price anchor — 18px, visually dominant */
         .tier-cost {
-          font-family: var(--font-m); font-size: 13px;
-          font-weight: 500; color: var(--gold);
-          margin-bottom: 20px; padding-bottom: 20px;
-          border-bottom: 1px solid var(--rule);
+          font-family: var(--font-m); font-size: 18px;
+          font-weight: 600; color: var(--gold);
+          margin-bottom: 24px; padding-bottom: 24px;
+          border-bottom: 1px solid rgba(255,255,255,0.06);
         }
-        .tier-features { list-style: none; margin-bottom: 20px; }
+
+        .tier-features { list-style: none; margin-bottom: 28px; }
         .tier-features li {
-          font-size: 12px; color: var(--plat-dim);
-          padding: 5px 0; border-bottom: 1px solid var(--rule);
-          display: flex; align-items: flex-start; gap: 8px;
-          line-height: 1.4;
+          font-size: 13px; color: var(--plat-dim);
+          padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+          display: flex; align-items: flex-start; gap: 10px;
+          line-height: 1.5;
         }
         .tier-features li:last-child { border-bottom: none; }
-        .tier-check { color: var(--emerald); font-size: 11px; flex-shrink: 0; margin-top: 1px; }
-        .tier-cli {
-          font-family: var(--font-m); font-size: 9px;
-          color: var(--emerald); background: var(--onyx-4);
-          padding: 10px 12px; border-radius: 2px;
-          border: 1px solid rgba(16,185,129,0.15);
-          word-break: break-all; line-height: 1.5;
+        .tier-check {
+          color: var(--emerald); font-size: 12px;
+          flex-shrink: 0; margin-top: 2px;
         }
+
         .tier-cli-label {
-          font-family: var(--font-m); font-size: 8px;
-          color: var(--plat-low); letter-spacing: 1.5px;
-          text-transform: uppercase; margin-bottom: 5px;
+          font-family: var(--font-m); font-size: 10px;
+          color: var(--plat-low); letter-spacing: 2px;
+          text-transform: uppercase; margin-bottom: 8px;
+        }
+
+        /* Fix 4b: black bg for terminal depth, radius, better padding */
+        .tier-cli {
+          font-family: var(--font-m); font-size: 11px;
+          color: var(--emerald);
+          background: #000000;    /* pure black — brutal contrast inside grey card */
+          padding: 16px;
+          border-radius: 6px;
+          border: 1px solid rgba(16,185,129,0.12);
+          word-break: break-all; line-height: 1.7;
         }
 
         /* API ENDPOINTS */
