@@ -9,6 +9,7 @@
 
 import Link from 'next/link'
 import { setRequestLocale } from 'next-intl/server'
+import EnterpriseForm from '@/components/EnterpriseForm'
 
 interface Props {
   params: Promise<{ locale: string }>
@@ -687,55 +688,9 @@ export default async function EnterprisePage({ params }: Props) {
                 : 'Enterprise access is granted only to verified organizations. We review each application individually. Average response time: 5 business days.'}
             </p>
 
-            <form action="https://worldcontrast.org/api/enterprise/apply" method="POST">
-              <div className="form-field">
-                <label className="form-label" htmlFor="org">
-                  {locale === 'pt' ? 'Organização' : 'Organization'}
-                </label>
-                <input className="form-input" id="org" name="org" type="text"
-                  placeholder={locale === 'pt' ? 'Reuters · Bloomberg · IMF...' : 'Reuters · Bloomberg · IMF...'} required />
-              </div>
+            {/* Injetamos o Client Component aqui */}
+            <EnterpriseForm locale={locale} />
 
-              <div className="form-field">
-                <label className="form-label" htmlFor="email">
-                  {locale === 'pt' ? 'Email institucional' : 'Institutional email'}
-                </label>
-                <input className="form-input" id="email" name="email" type="email"
-                  placeholder="name@organization.com" required />
-              </div>
-
-              <div className="form-field">
-                <label className="form-label" htmlFor="use-case">
-                  {locale === 'pt' ? 'Caso de uso' : 'Use case'}
-                </label>
-                <select className="form-select" id="use-case" name="use_case" required>
-                  <option value="">{locale === 'pt' ? 'Selecione...' : 'Select...'}</option>
-                  <option value="news_agency">{locale === 'pt' ? 'Agência de notícias' : 'News agency'}</option>
-                  <option value="sovereign_fund">{locale === 'pt' ? 'Fundo soberano / Risco político' : 'Sovereign fund / Political risk'}</option>
-                  <option value="academic">{locale === 'pt' ? 'Pesquisa acadêmica' : 'Academic research'}</option>
-                  <option value="ngo">{locale === 'pt' ? 'ONG / Sociedade civil' : 'NGO / Civil society'}</option>
-                  <option value="other">{locale === 'pt' ? 'Outro' : 'Other'}</option>
-                </select>
-              </div>
-
-              <div className="form-field">
-                <label className="form-label" htmlFor="countries">
-                  {locale === 'pt' ? 'Países de interesse' : 'Countries of interest'}
-                </label>
-                <input className="form-input" id="countries" name="countries" type="text"
-                  placeholder={locale === 'pt' ? 'Brasil, Argentina, EUA...' : 'Brazil, Argentina, USA...'} />
-              </div>
-
-              <button type="submit" className="ent-btn" style={{marginTop: 8}}>
-                {locale === 'pt' ? 'Enviar solicitação' : 'Submit application'}
-              </button>
-
-              <p className="form-note">
-                {locale === 'pt'
-                  ? 'Ao enviar, você confirma que a organização não está afiliada a nenhum partido político, campanha eleitoral ou governo. Ver TERMS_API.md.'
-                  : 'By submitting, you confirm that the organization has no affiliation with any political party, electoral campaign, or government. See TERMS_API.md.'}
-              </p>
-            </form>
           </div>
         </section>
 
