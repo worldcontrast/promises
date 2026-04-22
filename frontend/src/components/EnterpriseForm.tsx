@@ -4,11 +4,35 @@ import { useState } from 'react'
 
 export default function EnterpriseForm({ locale }: { locale: string }) {
   const [isSubmitted, setIsSubmitted] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    // Aqui no futuro conectaremos a API real. Por enquanto, sucesso instantâneo!
-    setIsSubmitted(true)
+    setIsSubmitting(true)
+
+    // Captura todos os dados preenchidos no formulário
+    const formData = new FormData(e.currentTarget)
+    const data = Object.fromEntries(formData)
+
+    try {
+      // Envia os dados para a nossa API interna
+      const response = await fetch('/api/enterprise/apply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      })
+
+      if (response.ok) {
+        setIsSubmitted(true)
+      } else {
+        console.error('Falha ao enviar solicitação.')
+        // Aqui você poderia adicionar um estado de erro visual no futuro
+      }
+    } catch (error) {
+      console.error('Erro de conexão:', error)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   if (isSubmitted) {
@@ -73,8 +97,10 @@ export default function EnterpriseForm({ locale }: { locale: string }) {
           placeholder={locale === 'pt' ? 'Brasil, Argentina, EUA...' : 'Brazil, Argentina, USA...'} />
       </div>
 
-      <button type="submit" className="ent-btn" style={{marginTop: 8}}>
-        {locale === 'pt' ? 'Enviar solicitação' : 'Submit application'}
+      <button type="submit" className="ent-btn" style={{marginTop: 8, opacity: isSubmitting ? 0.7 : 1}} disabled={isSubmitting}>
+        {isSubmitting 
+          ? (locale === 'pt' ? 'Enviando...' : 'Submitting...') 
+          : (locale === 'pt' ? 'Enviar solicitação' : 'Submit application')}
       </button>
 
       <p className="form-note">
