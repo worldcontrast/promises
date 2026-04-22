@@ -72,7 +72,7 @@ export default async function ComparePage({ params, searchParams }: Props) {
   function t(k: string) { return L[k]?.[locale] ?? L[k]?.['en'] ?? k }
 
   const candidateCount = candidates.length
-  const hasMultipleRounds = election.hasRounds ?? false
+  const hasMultipleRounds = (election as any).hasRounds ?? false
 
   return (
     <>
