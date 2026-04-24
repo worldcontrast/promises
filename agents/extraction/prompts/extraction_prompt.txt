@@ -3,7 +3,7 @@ WORLD CONTRAST — EXTRACTION PROMPT
 File: agents/extraction/prompts/extraction_prompt.txt
 
 Protocol: POCVA-01 (Autonomous Collection and Validation Protocol)
-Version:  1.0.0
+Version:  1.1.0 (HITL & Anti-Hallucination Routing Update)
 Date:     April 2026
 
 CHANGE POLICY:
@@ -79,17 +79,20 @@ Immediately reject and log ANY statement that contains:
   - Anything from unofficial, fan, or parody accounts
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-RULE 3 — VERBATIM EXTRACTION
+RULE 3 — EXACT QUOTE AND VERBATIM EXTRACTION (CRITICAL)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-You MUST extract the original text verbatim. You may NOT:
-  - Paraphrase or summarize the promise
+You MUST extract the original text verbatim into two fields:
+1. 'text_original': The full actionable promise extracted from the text.
+2. 'quote': This is a life-or-death rule. The value in 'quote' MUST BE an EXACT, contiguous substring copied and pasted directly from the source text. Do not change a single letter, comma, or whitespace. 
+
+You may NOT:
+  - Paraphrase or summarize the promise in the quote
   - Change the semantic meaning in any translation
   - Add context, commentary, or interpretation
   - Merge two separate statements into one promise
 
-Each promise must be a direct quotation or the closest
-faithful representation of the original text.
+If you cannot find a direct, exact substring quote to prove the promise, DO NOT extract it.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 RULE 4 — REJECTION LOGGING (mandatory)
@@ -145,15 +148,14 @@ If the original is already in one of these languages, copy it verbatim
 for that language field.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-CONFIDENCE SCORE
+CONFIDENCE SCORE (ROUTING GATEWAY)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Assign a confidence score (0.0 to 1.0) to each accepted promise:
+Assign a confidence score (0.00 to 1.00) to each accepted promise. This score routes the data:
 
-  1.0  — Verbatim quote with complete Actor + Verb + Metric
-  0.9  — Clear promise, minor ambiguity in metric
-  0.75 — Promise implied but metric requires inference
-  < 0.75 → Do not include. Log in extraction_rejections instead.
+  >= 0.95 — Undeniable, highly specific, actionable policy with an exact verbatim quote. (Bypasses human review).
+  0.70 to 0.94 — Clear promise, but metric requires minor inference or context. (Flagged for human review).
+  < 0.70 — Vague rhetoric, relies heavily on subjective interpretation. → DO NOT INCLUDE. Log in extraction_rejections instead.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 INSTITUTIONAL REMINDER
@@ -193,6 +195,7 @@ Do not include any text, explanation, or markdown outside the JSON.
       "category": "economy",
       "secondary_category": null,
       "text_original": "exact verbatim text from source",
+      "quote": "exact literal substring copied from the content",
       "language_original": "pt",
       "text_pt": "portuguese translation or original",
       "text_en": "english translation",
