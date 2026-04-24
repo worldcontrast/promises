@@ -128,7 +128,7 @@ class PromiseValidator:
 
         Args:
             promise:      Raw promise dict from the extractor.
-                          Must contain 'text_original' and 'confidence'.
+                          Must contain 'text_original', 'quote', and 'confidence'.
             candidate_id: Logical candidate id (string slug).
             election_id:  Election id.
             page:         Crawled page dict.  Must contain 'text' (raw HTML/text)
@@ -192,14 +192,9 @@ class PromiseValidator:
 
         Mutates promise['confidence'] in-place with a penalty if the
         quote cannot be found.  Returns the (possibly modified) promise.
-
-        Match levels (in order):
-          1. Verbatim substring          → no penalty
-          2. Unicode-normalised casefold → QUOTE_FUZZY_PENALTY
-          3. 30-char chunk partial match → QUOTE_FUZZY_PENALTY
-          4. Complete absence            → QUOTE_MISMATCH_PENALTY
         """
-        quote = promise.get('text_original', '').strip()
+        # CORREÇÃO: Buscando a variável 'quote' em vez de 'text_original'
+        quote = promise.get('quote', '').strip()
         original_conf = float(promise.get('confidence', 0.0))
 
         if not quote or not raw_text:
@@ -320,6 +315,7 @@ class PromiseValidator:
             'category':             promise.get('category', 'governance'),
             'secondary_category':   promise.get('secondary_category'),
             'text_original':        promise.get('text_original', ''),
+            'quote':                promise.get('quote', ''),  # CORREÇÃO: Faltava este campo!
             'language_original':    promise.get('language_original', 'pt'),
             'verbatim':             promise.get('verbatim', True),
             'ambiguous':            promise.get('ambiguous', False),
