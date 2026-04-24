@@ -157,6 +157,7 @@ CREATE TABLE promises (
 
     -- Original text (verbatim)
     text_original       TEXT NOT NULL,
+    quote               TEXT,                   -- NEW: Citação exata (Anti-Alucinação)
     language_original   CHAR(2) NOT NULL,       -- ISO 639-1 language code
 
     -- Translations (auto-generated, human-reviewable)
@@ -178,6 +179,10 @@ CREATE TABLE promises (
     ambiguous           BOOLEAN DEFAULT false,
     confidence          NUMERIC(4,3) CHECK (confidence BETWEEN 0 AND 1),
     agent_version       TEXT NOT NULL,
+
+    -- HITL (Human-in-the-Loop) Routing & Review
+    flagged_for_review  BOOLEAN DEFAULT FALSE,  -- NEW: Trava de envio para o Telegram
+    flag_reason         TEXT,                   -- NEW: Motivo do flag (Confidence ou Exact Match)
 
     -- Status tracking
     status              TEXT DEFAULT 'stated' CHECK (status IN (
