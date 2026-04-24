@@ -1,0 +1,42 @@
+name: Scout — Discovery Agent
+
+on:
+  workflow_dispatch:
+    inputs:
+      country:
+        description: 'Sigla do País (Ex: BR, FR, US)'
+        required: true
+        default: 'BR'
+      election:
+        description: 'Nome da Eleição (Ex: Presidential 2026)'
+        required: true
+        default: 'Presidential 2026'
+
+jobs:
+  run-scout:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Dependencies
+        run: pip install httpx anthropic
+
+      - name: Run Scout Agent
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          python agents/scout.py --country "${{ github.event.inputs.country }}" --election "${{ github.event.inputs.election }}"
+
+      - name: Commit and Push JSON (O Carimbo Humano)
+        run: |
+          git config --global user.name "Scout Agent"
+          git config --global user.email "scout@worldcontrast.org"
+          git add data/countries/
+          git commit -m "🤖 Scout: Novos candidatos adicionados para ${{ github.event.inputs.country }} - ${{ github.event.inputs.election }}" || echo "Nenhuma mudança encontrada"
+          git push
