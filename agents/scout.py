@@ -205,6 +205,7 @@ async def call_llm(
     async with _ANTHROPIC_SEM:
         for attempt, wait_s in enumerate(RETRY_BACKOFF):
             try:
+                # FIX: Limpeza cirúrgica para remover eventuais espaços invisíveis do copy-paste
                 clean_url = ANTHROPIC_API_URL.strip(" \r\n\t\u200b\ufeff")
                 resp = await client.post(
                     clean_url,
@@ -242,6 +243,8 @@ async def call_llm(
 # ═════════════════════════════════════════════════════════════════════════════
 
 def extract_json(raw: str) -> Any:
+    # SAFE STRING PARSING: Uses multipliers instead of literal backticks
+    # to avoid breaking markdown parsers in chat interfaces.
     clean = re.sub(r"`{3}(?:json)?\s*", "", raw, flags=re.IGNORECASE)
     clean = clean.replace("`" * 3, "").strip()
 
@@ -346,6 +349,7 @@ class Scout:
         self.output_path = OUTPUT_DIR / f"{slug}.json"
 
     async def run(self) -> dict:
+        # FIX: trust_env=False blinda o robô contra proxies defeituosos do GitHub Actions
         async with httpx.AsyncClient(follow_redirects=True, trust_env=False) as http:
             log.info(f"PASS 1 — Discovering candidates: {self.country} / {self.election}")
             candidates_or_sentinel = await self._discover_candidates(http)
@@ -544,6 +548,7 @@ async def main() -> None:
     global _ANTHROPIC_SEM
     _ANTHROPIC_SEM = asyncio.Semaphore(4)
 
+    # FIX: Limpeza agressiva de aspas e quebras de linha na API Key
     api_key = os.environ.get("ANTHROPIC_API_KEY", "").strip(" \r\n\t'\"")
     if not api_key:
         log.error("ANTHROPIC_API_KEY not set.")
