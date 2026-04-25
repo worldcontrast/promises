@@ -1,17 +1,5 @@
 # World Contrast — Scout Discovery Agent
 # File: .github/workflows/scout-discovery.yml
-#
-# JOB: Descobre candidatos e URLs oficiais para uma eleição.
-#      Escreve o JSON em data/countries/ e faz commit no repo.
-#      O pipeline de coleta (agent-run.yml) lê esse JSON.
-#
-# FIXES v2:
-#   - pip cache via requirements hash (mais rápido que sem cache)
-#   - git pull --rebase ANTES do push (evita conflito de push rejeitado)
-#   - output do JSON validado com python -c antes do commit
-#   - token GITHUB_TOKEN explícito no checkout (necessário para push)
-#   - --scheduled flag para eleições sem candidatos ainda
-#   - timeout aumentado para 20min (Tavily + 3 passes LLM demoram)
 
 name: Scout — Discovery Agent
 
@@ -41,49 +29,37 @@ on:
         type: boolean
 
 permissions:
-  # write é necessário para git push do JSON gerado
   contents: write
 
 jobs:
   run-scout:
     name: OSINT Scout Runner
     runs-on: ubuntu-latest
-    timeout-minutes: 20        # 3 passes LLM + Tavily podem levar ~12 min
+    timeout-minutes: 20
 
     steps:
-      # ── 1. Checkout com token para permitir push posterior ──────────────
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          # GITHUB_TOKEN dá permissão de escrita ao runner
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      # ── 2. Python com cache por hash do requirements ────────────────────
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
           cache: 'pip'
-          # cache-dependency-path garante rebuild quando requirements muda
           cache-dependency-path: agents/requirements.txt
 
-      # ── 3. Instalar apenas o necessário para o scout ────────────────────
+      # ── FIX: Dependências diretas sem lógicas condicionais ────────────
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          # Instala a partir do requirements se existir, senão inline
-          if [ -f agents/requirements.txt ]; then
-            pip install -r agents/requirements.txt
-          else
-            pip install httpx anthropic tavily-python duckduckgo-search
-          fi
+          pip install httpx anthropic tavily-python duckduckgo-search
 
-      # ── 4. Criar estrutura de pastas ────────────────────────────────────
       - name: Create output directories
         run: mkdir -p data/countries logs
 
-      # ── 5. Executar Scout ───────────────────────────────────────────────
       - name: Run Scout Agent
         env:
           PYTHONPATH: .
@@ -92,10 +68,8 @@ jobs:
         run: |
           EXTRA_FLAGS=""
 
-          # --scheduled: emite JSON com status=scheduled quando sem candidatos
           EXTRA_FLAGS="$EXTRA_FLAGS --scheduled"
 
-          # --dry-run: apenas imprime, não salva
           if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
             EXTRA_FLAGS="$EXTRA_FLAGS --dry-run"
           fi
@@ -106,11 +80,9 @@ jobs:
             --search   "${{ github.event.inputs.search_backend }}" \
             $EXTRA_FLAGS
 
-      # ── 6. Validar JSON gerado antes de commitar ────────────────────────
       - name: Validate generated JSON
         if: ${{ github.event.inputs.dry_run != 'true' }}
         run: |
-          # Encontra o JSON recém-criado (modificado nos últimos 5 min)
           JSON_FILE=$(find data/countries -name "*.json" \
             -newer agents/scout.py 2>/dev/null | head -1)
 
@@ -121,7 +93,6 @@ jobs:
 
           echo "Validating: $JSON_FILE"
 
-          # Valida estrutura mínima do schema v2
           python3 - "$JSON_FILE" << 'PYEOF'
           import json, sys
           path = sys.argv[1]
@@ -146,7 +117,6 @@ jobs:
               print(f"  · {c['fullName']} ({c.get('party','?')}) — {len(filled)} fonte(s)")
           PYEOF
 
-      # ── 7. Commit e push ────────────────────────────────────────────────
       - name: Commit and Push JSON
         if: ${{ github.event.inputs.dry_run != 'true' }}
         run: |
@@ -157,7 +127,6 @@ jobs:
           if git diff-index --quiet HEAD --; then
             echo "Sem alterações para commitar."
           else
-            # Rebase antes do push para evitar conflito se outro job commitou
             git pull --rebase origin main
 
             git commit -m \
@@ -167,7 +136,6 @@ jobs:
             echo "✓ JSON publicado em data/countries/"
           fi
 
-      # ── 8. Upload logs ──────────────────────────────────────────────────
       - name: Upload Scout Logs
         if: always()
         uses: actions/upload-artifact@v4
