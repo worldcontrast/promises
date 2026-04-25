@@ -1,7 +1,7 @@
 {
   "country": "BR",
   "election": "Presidential 2026",
-  "generated": "2026-04-25T04:55:19.749619+00:00",
+  "generated": "2026-04-25T13:35:05.261211+00:00",
   "scout_version": "1.0.0",
   "candidates": [
     {
@@ -10,7 +10,7 @@
       "sources": {
         "electoral_filing": null,
         "official_site": null,
-        "instagram": "https://instagram.com/lulaoficial",
+        "instagram": "https://www.instagram.com/lulaoficial",
         "twitter": null,
         "youtube": null,
         "facebook": null,
@@ -18,12 +18,12 @@
       }
     },
     {
-      "fullName": "Flávio Bolsonaro",
-      "party": "PL",
+      "fullName": "Tarcísio de Freitas",
+      "party": "Republicanos",
       "sources": {
         "electoral_filing": null,
-        "official_site": "https://www.flaviobolsonaro.net",
-        "instagram": "https://instagram.com/flaviobolsonaro",
+        "official_site": null,
+        "instagram": "https://instagram.com/tarcisiogdf",
         "twitter": null,
         "youtube": null,
         "facebook": null,
