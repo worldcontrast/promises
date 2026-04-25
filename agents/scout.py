@@ -245,7 +245,7 @@ async def call_llm(
 def extract_json(raw: str) -> Any:
     # SAFE STRING PARSING: Uses multipliers instead of literal backticks
     # to avoid breaking markdown parsers in chat interfaces.
-    clean = re.sub(r"`{3}(?:json)?", "", raw)
+    clean = re.sub(r"`{3}(?:json)?\s*", "", raw, flags=re.IGNORECASE)
     clean = clean.replace("`" * 3, "").strip()
 
     try:
