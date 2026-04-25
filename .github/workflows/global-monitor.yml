@@ -1,0 +1,75 @@
+# World Contrast — Global Election Monitor
+# File: .github/workflows/global-monitor.yml
+
+name: World Contrast — Global Monitor
+
+on:
+  # Roda AUTOMATICAMENTE todos os Domingos à meia-noite (UTC)
+  schedule:
+    - cron: '0 0 * * 0'
+  # Permite que você clique num botão para rodar manualmente se quiser
+  workflow_dispatch:
+    inputs:
+      search_backend:
+        description: 'Backend de busca'
+        required: false
+        default: 'tavily'
+        type: choice
+        options:
+          - tavily
+          - duckduckgo
+
+permissions:
+  contents: write
+
+jobs:
+  run-global-monitor:
+    name: Global Monitor Runner
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: agents/requirements.txt
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install httpx==0.27.2 anthropic tavily-python duckduckgo-search
+
+      - name: Create output directories
+        run: mkdir -p data/countries logs
+
+      - name: Run Global Monitor
+        env:
+          PYTHONPATH: .
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          TAVILY_API_KEY:    ${{ secrets.TAVILY_API_KEY }}
+        run: |
+          BACKEND="${{ github.event.inputs.search_backend || 'tavily' }}"
+          python agents/global_monitor.py --search "$BACKEND"
+
+      - name: Commit and Push Maps
+        run: |
+          git config --global user.name  "World Contrast Global Monitor"
+          git config --global user.email "monitor@worldcontrast.org"
+          git add data/countries/
+          
+          if git diff --staged --quiet; then
+            echo "Nenhuma eleição nova encontrada no mundo hoje."
+          else
+            git commit -m "🌐 Global Monitor: Novos mapas eleitorais descobertos"
+            git stash --include-untracked
+            git pull --rebase origin main
+            git push origin main
+            echo "✓ Mapas globais atualizados com sucesso!"
+          fi
