@@ -79,53 +79,58 @@ class Database:
 
     async def upsert_candidate(self, candidate: dict, election_id: str) -> str | None:
         """
-        Upsert a candidate row. Returns the candidate UUID.
-
-        candidate dict keys (from data/countries/*.json):
-          id, name, party, electoral_number, sources{}
-
-        The 'id' field in the JSON is used as electoral_number.
-        Upsert key: electoral_number + election_id (avoids duplicates across runs).
+        Smart Upsert sem depender de UNIQUE CONSTRAINTS (como o electoral_number).
+        Verifica primeiro se o candidato existe pelo nome e eleição.
         """
         try:
+            full_name = candidate.get('fullName') or candidate.get('name', '')
+            sources = candidate.get('sources', {})
+            
+            # Compatibilidade com formatos JSON antigos (camelCase) e novos (snake_case)
             record = {
                 'election_id':           election_id,
-                'full_legal_name':       candidate.get('fullName') or candidate.get('name', ''),
-                'display_name':          candidate.get('name', ''),
+                'full_legal_name':       full_name,
+                'display_name':          candidate.get('displayName') or full_name,
                 'party_name':            candidate.get('party', ''),
                 'electoral_number':      str(candidate.get('electoralNumber') or candidate.get('id', '')),
-                'electoral_filing_url':  candidate.get('sources', {}).get('electoralFiling', ''),
-                'official_site_url':     candidate.get('sources', {}).get('officialSite', ''),
-                'instagram_url':         candidate.get('sources', {}).get('instagram', ''),
-                'facebook_url':          candidate.get('sources', {}).get('facebook', ''),
-                'twitter_url':           candidate.get('sources', {}).get('twitter', ''),
+                'electoral_filing_url':  sources.get('electoral_filing') or sources.get('electoralFiling', ''),
+                'official_site_url':     sources.get('official_site') or sources.get('officialSite', ''),
+                'instagram_url':         sources.get('instagram', ''),
+                'facebook_url':          sources.get('facebook', ''),
+                'twitter_url':           sources.get('twitter', ''),
                 'updated_at':            datetime.now(timezone.utc).isoformat(),
             }
 
-            result = (
+            # 1. Pergunta à base de dados se o candidato já existe nesta eleição
+            res = (
                 self.client.table('candidates')
-                .upsert(record, on_conflict='electoral_number,election_id')
+                .select('id')
+                .eq('election_id', election_id)
+                .eq('full_legal_name', full_name)
                 .execute()
             )
-            candidate_uuid = result.data[0]['id']
-            log.debug(f"Candidate upserted: {record['display_name']} → {candidate_uuid}")
-            return candidate_uuid
+
+            # 2. Se já existir, faz um UPDATE seguro
+            if res.data and len(res.data) > 0:
+                cand_id = res.data[0]['id']
+                self.client.table('candidates').update(record).eq('id', cand_id).execute()
+                log.debug(f"Candidate updated: {record['display_name']} → {cand_id}")
+                return cand_id
+                
+            # 3. Se não existir, faz INSERT (criação de um novo)
+            else:
+                ins_res = self.client.table('candidates').insert(record).execute()
+                cand_id = ins_res.data[0]['id']
+                log.debug(f"Candidate inserted: {record['display_name']} → {cand_id}")
+                return cand_id
 
         except Exception as e:
-            log.error(f"Failed to upsert candidate {candidate.get('name')}: {e}")
+            log.error(f"Failed to upsert candidate {candidate.get('fullName')}: {e}")
             return None
 
     # ── CRAWLED PAGES ─────────────────────────────────────────
 
     async def save_crawled_page(self, page: dict, candidate_id: str) -> str | None:
-        """
-        Insert a crawled_pages row. Returns the page UUID.
-        This UUID becomes crawled_page_id in promises.
-
-        page dict keys (from WebCrawler.fetch):
-          url, archive_url, content_hash, http_status,
-          content_type, content_length, error
-        """
         if not self.run_id:
             log.warning("save_crawled_page called but no run_id — call start_run() first")
             return None
@@ -160,29 +165,12 @@ class Database:
     # ── PROMISES ──────────────────────────────────────────────
 
     async def save_promise(self, promise: dict) -> dict | None:
-        """
-        Insert a validated promise into the `promises` table.
-        Requires promise['candidate_id'] and promise['crawled_page_id']
-        to already exist in their respective tables.
-
-        promise dict keys (from PromiseValidator.validate):
-          candidate_id, crawled_page_id, category,
-          text_original, language_original,
-          text_pt, text_en, text_es, text_fr, text_ar,
-          source_url, archive_url, content_hash,
-          collected_at, confidence, verbatim, ambiguous
-        """
         try:
             record = {
-                # Foreign keys — MUST exist before insert
                 'candidate_id':      promise['candidate_id'],
                 'crawled_page_id':   promise['crawled_page_id'],
-
-                # Category (must match CHECK constraint in schema)
                 'category':          promise.get('category', 'governance'),
                 'secondary_category': promise.get('secondary_category'),
-
-                # Content
                 'text_original':     promise.get('text_original', ''),
                 'language_original': promise.get('language_original', 'pt'),
                 'text_pt':           promise.get('text', {}).get('pt', ''),
@@ -190,23 +178,16 @@ class Database:
                 'text_es':           promise.get('text', {}).get('es', ''),
                 'text_fr':           promise.get('text', {}).get('fr', ''),
                 'text_ar':           promise.get('text', {}).get('ar', ''),
-
-                # Provenance
                 'source_url':        promise.get('source_url', ''),
                 'archive_url':       promise.get('archive_url', ''),
                 'content_hash':      promise.get('content_hash', ''),
                 'text_hash':         promise.get('text_hash', ''),
                 'prompt_hash':       promise.get('prompt_hash', ''),
-                'collected_at':      promise.get('collected_at',
-                                        datetime.now(timezone.utc).isoformat()),
-
-                # Quality
+                'collected_at':      promise.get('collected_at', datetime.now(timezone.utc).isoformat()),
                 'confidence':        promise.get('confidence', 0.0),
                 'verbatim':          promise.get('verbatim', True),
                 'ambiguous':         promise.get('ambiguous', False),
                 'agent_version':     self.agent_version,
-
-                # Status (default from schema)
                 'status':            'stated',
             }
 
@@ -227,10 +208,6 @@ class Database:
     # ── AUDIT & DEDUPLICATION ─────────────────────────────────
 
     async def promise_hash_exists(self, text_hash: str, candidate_id: str) -> bool:
-        """
-        Verifica criptograficamente se uma promessa já existe no banco.
-        Proteção absoluta contra duplicação de dados, aliviando o frontend.
-        """
         try:
             res = (
                 self.client.table('promises')
@@ -246,10 +223,6 @@ class Database:
             return False
 
     async def log_rejection_real(self, candidate_id: str, text: str, reason: str, source_url: str):
-        """
-        Grava fisicamente o log de rejeição no banco de dados e cria arquivo de fallback.
-        Nenhuma exclusão editorial é silenciada - base da doutrina POCVA-01.
-        """
         try:
             record = {
                 'candidate_id':     candidate_id,
