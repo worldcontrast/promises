@@ -15,6 +15,7 @@ import Link from 'next/link'
 import { setRequestLocale } from 'next-intl/server'
 import { getAllElections } from '@/lib/data'
 import ElectionGrid from '@/components/ElectionGrid'
+export const dynamic = 'force-dynamic'
 
 interface Props {
   params: Promise<{ locale: string }>
