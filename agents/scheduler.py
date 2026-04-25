@@ -1,5 +1,5 @@
 """
-World Contrast — Main Scheduler
+World Contrast — Main Scheduler v2.0
 File: agents/scheduler.py
 
 Pipeline order (respects FK constraints in schema.sql):
@@ -9,25 +9,25 @@ Pipeline order (respects FK constraints in schema.sql):
   4. db.save_crawled_page()   → INSERT crawled_pages
   5. extractor.extract()      → Claude API → promises[]
   6. validator.validate()     → filter + enrich
-  7. db.save_promise()        → INSERT promises (needs candidate_id + crawled_page_id)
+  7. db.save_promise()        → INSERT promises
   8. db.finish_run()          → UPDATE collection_runs
 """
 
 import sys
 import os
 
-# Insere a RAIZ do repo no path — permite `from config.x` e `from agents.x`
-# os.getcwd() no GitHub Actions é sempre a raiz após o checkout.
+# Insere a RAIZ do repo no path
 sys.path.insert(0, os.getcwd())
 
 import asyncio
 import argparse
 import logging
 import uuid
+import re
+import unicodedata
 from datetime import datetime, timezone
 from pathlib import Path
 
-# Cria logs/ antes do FileHandler tentar abrir o arquivo
 Path('logs').mkdir(exist_ok=True)
 
 logging.basicConfig(
@@ -48,6 +48,10 @@ from agents.pipeline_runner import PipelineRunner
 from config.settings import Settings
 from config.database import Database
 
+def slugify(text: str) -> str:
+    text = unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode("ascii")
+    text = re.sub(r"[^\w\s-]", "", text).strip().lower()
+    return re.sub(r"[\s_]+", "-", text)
 
 async def run_pipeline(
     country_filter: str | None = None,
@@ -60,38 +64,32 @@ async def run_pipeline(
 
     log.info("═══════════════════════════════════════")
     log.info(f"World Contrast Agent — Run {run_id[:8]}")
-    log.info(f"Started:        {started_at.isoformat()}")
-    log.info(f"Country filter: {country_filter or 'all'}")
-    log.info(f"Dry run:        {dry_run}")
     log.info("═══════════════════════════════════════")
 
     settings = Settings()
-
     stats = {
-        'run_id': run_id,
-        'started_at': started_at.isoformat(),
-        'country_filter': country_filter,
-        'dry_run': dry_run,
-        'elections_processed': 0,
-        'sources_visited': 0,
-        'pages_archived': 0,
-        'promises_extracted': 0,
-        'promises_rejected': 0,
-        'promises_saved': 0,
-        'errors': [],
+        'run_id': run_id, 'started_at': started_at.isoformat(),
+        'country_filter': country_filter, 'dry_run': dry_run,
+        'elections_processed': 0, 'sources_visited': 0,
+        'pages_archived': 0, 'promises_extracted': 0,
+        'promises_rejected': 0, 'promises_saved': 0, 'errors': [],
     }
 
-    # ── STEP 1: Open DB + start run ───────────────────────────
     db = None
     if not dry_run:
         db = Database(settings)
         trigger = 'scheduled' if os.environ.get('GITHUB_EVENT_NAME') == 'schedule' else 'manual'
         await db.start_run(trigger=trigger)
 
-    # ── STEP 2: Load registry ─────────────────────────────────
     log.info("Step 1/5: Loading source registry...")
     registry = load_source_registry(country_filter, election_id)
     log.info(f"  Found {len(registry)} elections to process")
+
+    if not registry:
+        log.warning("No elections found. Check if the JSON files have the correct schema.")
+        if not dry_run and db:
+            await db.finish_run(stats)
+        return stats
 
     crawler   = WebCrawler(settings)
     extractor = PromiseExtractor(settings)
@@ -101,19 +99,12 @@ async def run_pipeline(
     runner = PipelineRunner(crawler, extractor, validator, archiver, db, dry_run=dry_run)
     stats = await runner.run_parallel(registry, stats)
 
-    # ── FINALIZE ─────────────────────────────────────────────
     stats['completed_at'] = datetime.now(timezone.utc).isoformat()
     stats['status'] = 'completed' if not stats['errors'] else 'completed_with_errors'
 
     log.info("\n═══════════════════════════════════════")
     log.info(f"Run complete:        {run_id[:8]}")
-    log.info(f"Elections processed: {stats['elections_processed']}")
-    log.info(f"Sources visited:     {stats['sources_visited']}")
-    log.info(f"Pages archived:      {stats['pages_archived']}")
-    log.info(f"Promises extracted:  {stats['promises_extracted']}")
-    log.info(f"Promises rejected:   {stats['promises_rejected']}")
     log.info(f"Promises saved:      {stats['promises_saved']}")
-    log.info(f"Errors:              {len(stats['errors'])}")
     log.info("═══════════════════════════════════════")
 
     if not dry_run and db:
@@ -122,10 +113,7 @@ async def run_pipeline(
     return stats
 
 
-def load_source_registry(
-    country_filter: str | None = None,
-    election_id: str | None = None,
-) -> list[dict]:
+def load_source_registry(country_filter: str | None = None, election_id: str | None = None) -> list[dict]:
     import json
     data_dir = Path(os.getcwd()) / 'data' / 'countries'
 
@@ -138,36 +126,45 @@ def load_source_registry(
         with open(filepath) as f:
             data = json.load(f)
 
-        if country_filter and data.get('country_code') != country_filter:
+        country = data.get('country') or data.get('country_code')
+        if country_filter and country != country_filter:
             continue
 
-        country_elections = data.get('elections', [])
-        if election_id:
-            country_elections = [e for e in country_elections if e['id'] == election_id]
+        # ── V2 Format (Generated by new Scout) ──
+        if 'candidates' in data and 'election' in data:
+            el_id = slugify(f"{country}-{data['election']}")
+            if election_id and el_id != election_id:
+                continue
+            
+            # Só adicionamos se o status for "live" ou tiver candidatos
+            if data.get('status') == 'scheduled' and not data.get('candidates'):
+                log.info(f"  Skipping {el_id}: Election is scheduled (no candidates yet).")
+                continue
 
-        for election in country_elections:
             elections.append({
-                'id':           election['id'],
-                'country':      data['country_code'],
-                'tribunal_url': data.get('tribunal', {}).get('url'),
-                'candidates':   election.get('candidates', []),
+                'id':           el_id,
+                'country':      country,
+                'tribunal_url': None,
+                'candidates':   data.get('candidates', []),
             })
+            
+        # ── V1 Format (Legacy) ──
+        elif 'elections' in data:
+            for election in data['elections']:
+                if election_id and election['id'] != election_id:
+                    continue
+                elections.append({
+                    'id':           election['id'],
+                    'country':      country,
+                    'tribunal_url': data.get('tribunal', {}).get('url'),
+                    'candidates':   election.get('candidates', []),
+                })
 
     return elections
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description='World Contrast Agent — Collection Pipeline',
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
-Examples:
-  python agents/scheduler.py                          # all countries
-  python agents/scheduler.py --country BR             # Brazil only
-  python agents/scheduler.py --country BR --dry-run   # test, no DB writes
-  python agents/scheduler.py --election brazil-2026   # specific election
-        """
-    )
+    parser = argparse.ArgumentParser(description='World Contrast Agent')
     parser.add_argument('--country',  help='ISO country code (e.g. BR)')
     parser.add_argument('--election', help='Election ID (e.g. brazil-2026)')
     parser.add_argument('--dry-run',  action='store_true')
@@ -178,9 +175,7 @@ Examples:
         dry_run=args.dry_run,
         election_id=args.election,
     ))
-
     sys.exit(1 if stats.get('errors') else 0)
-
 
 if __name__ == '__main__':
     main()
