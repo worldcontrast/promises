@@ -1,10 +1,18 @@
 #!/usr/bin/env python3
 """
-World Contrast — Discovery Scout (OSINT Agent)
+World Contrast — Discovery Scout v2.0
 File: agents/scout.py
 
-Standalone script that discovers official candidate sources for any election
-and writes a strictly-formatted JSON seed file for the main extraction pipeline.
+CHANGES FROM v1
+───────────────
+1. Rate-limiting  — asyncio.Semaphore on all Anthropic API calls + exponential
+   back-off on HTTP 429.  Prevents cloud-function bans.
+
+2. Source Triangulation — social-media handles are only accepted when they are
+   explicitly cross-referenced by TWO independent signals in the search results.
+
+3. Scheduled-election scaffolding — can emit `status: "scheduled"` records for
+   elections where candidates are not yet declared.
 """
 
 from __future__ import annotations
@@ -19,13 +27,13 @@ import re
 import sys
 import unicodedata
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, Literal
 
 import httpx
 
-# ── Optional Tavily import (graceful degradation) ─────────────────────────────
+# ── Optional Tavily ───────────────────────────────────────────────────────────
 try:
-    from tavily import TavilyClient          # type: ignore
+    from tavily import TavilyClient   # type: ignore
     HAS_TAVILY = True
 except ImportError:
     HAS_TAVILY = False
@@ -38,79 +46,108 @@ logging.basicConfig(
 log = logging.getLogger("scout")
 
 # ── Constants ─────────────────────────────────────────────────────────────────
-
 ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages"
 ANTHROPIC_MODEL   = "claude-sonnet-4-20250514"
-MAX_TOKENS        = 4096
+MAX_TOKENS        = 2048
+
+_ANTHROPIC_SEM: asyncio.Semaphore | None = None
+
+MAX_RETRIES   = 4
+RETRY_BACKOFF = [1, 2, 4, 8]
 
 OUTPUT_DIR = pathlib.Path("data/countries")
 
-# ── System prompts ────────────────────────────────────────────────────────────
+SCHEDULED_PLACEHOLDER = "__SCHEDULED__"
 
-# Pass 1: extract candidate list from search results
+_REJECT_DOMAINS: frozenset[str] = frozenset({
+    "wikipedia.org", "wikimedia.org",
+    "g1.globo.com", "folha.uol.com.br", "uol.com.br",
+    "bbc.com", "bbc.co.uk", "cnn.com",
+    "reuters.com", "apnews.com",
+    "politico.com", "allsides.com",
+    "reddit.com", "twitter.com/search",
+    "google.com", "bing.com", "duckduckgo.com",
+    "youtube.com/results",
+})
+
+_CORROBORATION_SOURCES: frozenset[str] = frozenset({
+    "tse.jus.br", "cne.gob.ve", "inec.gob.ec", "fec.gov",
+    "electoralcommission.org.uk", "conseil-constitutionnel.fr",
+    "bbc.com", "reuters.com", "apnews.com", "nytimes.com",
+    "theguardian.com", "lemonde.fr", "elcorreo.com",
+    "folha.uol.com.br", "estadao.com.br", "valor.com.br",
+    "g1.globo.com",
+})
+
+# ═════════════════════════════════════════════════════════════════════════════
+# System prompts
+# ═════════════════════════════════════════════════════════════════════════════
+
 SYSTEM_CANDIDATES = """\
-You are an expert political analyst and OSINT data extraction agent for World Contrast.
+You are an expert political analyst and OSINT data-extraction agent for
+World Contrast, a cryptographically sealed political-promise registry.
 
-YOUR JOB:
-Extract the list of confirmed candidates OR officially declared pre-candidates for a specific political election from the web search snippets provided.
+TASK
+Extract the list of officially declared candidates or pre-candidates for the
+requested election from the search snippets provided.
 
-CRITICAL INSTRUCTION - THE "EXPERT" RULE:
-You must use your broad internal knowledge of global politics to FACT-CHECK the search snippets. The internet is full of rumors, clickbait, and click-driven journalism. You must filter out the noise.
-
-STRICT REJECTION RULES (DO NOT INCLUDE THESE):
-1. INELIGIBLE POLITICIANS: Exclude anyone who is legally barred from running, disqualified by courts, or facing term limits (e.g., in Brazil, Jair Bolsonaro is legally ineligible).
-2. WRONG OFFICE: Exclude politicians who are prominent in the news but are running for a DIFFERENT office (e.g., Senate, Congress, Mayor). Do not confuse family members (e.g., Eduardo Bolsonaro or Flávio Bolsonaro are not running for President).
-3. RUMORS & SPECULATION: Exclude people who have explicitly denied running, or names thrown around purely as opinion pieces.
+EXPERT FACT-CHECK RULES (apply your internal political knowledge):
+1. INELIGIBLE: Exclude anyone legally barred (court disqualification, term
+   limits, age requirements). In Brazil 2026, Jair Bolsonaro is legally
+   ineligible and MUST NOT appear.
+2. WRONG OFFICE: Exclude politicians who are prominent but running for a
+   different office or seat.
+3. RUMOURS: Exclude names that appear only in speculative opinion pieces or
+   that the person has publicly denied.
+4. NO CANDIDATES YET: If the election is real but it is too early for
+   official declarations, return the special string "SCHEDULED" (without
+   quotes, not a JSON array).
 
 ACCEPTANCE RULES:
-1. Include officially registered candidates AND officially declared "pre-candidates" backed by major political parties.
-2. Return an empty array [] ONLY if you cannot find any serious declared pre-candidates.
+• Include officially registered candidates AND officially declared
+  pre-candidates backed by major political parties.
+• Return an empty array [] ONLY if no serious declared pre-candidates exist
+  AND the election is currently underway (not just scheduled for the future).
 
-MANDATORY OUTPUT FORMAT:
-Return ONLY a valid JSON array. No markdown. No preamble.
-Example:
-[
-  {"fullName": "Luiz Inácio Lula da Silva", "party": "PT"},
-  {"fullName": "Tarcísio de Freitas", "party": "Republicanos"}
-]
+OUTPUT FORMAT (choose exactly one):
+A) A valid JSON array:
+   [{"fullName": "...", "party": "..."}]
+B) The exact string SCHEDULED (no quotes, no markdown, no other text)
+   — use this when the election is confirmed but candidates are not yet declared.
+
+No markdown fences. No preamble. No explanation outside the JSON.\
 """
 
-# Pass 2: find official URLs for a single candidate
 SYSTEM_SOURCES = """\
-You are a strict OSINT sourcing agent for World Contrast, a cryptographically
-sealed political promise registry. Your task is to identify ONLY OFFICIAL URLs
-for a given political candidate FOR THE SPECIFIC ELECTION REQUESTED.
+You are a strict OSINT sourcing agent for World Contrast. Your task is to
+identify ONLY OFFICIAL, VERIFIED URLs for a political candidate.
 
-OFFICIAL SOURCE HIERARCHY (in descending priority):
-  1. Electoral court filing URL  (TSE in Brazil, CNE in Venezuela, etc.)
-  2. Official campaign website   (registered by the candidate's own party)
-  3. Verified social media       (blue-tick / verified accounts ONLY):
-       — Instagram: instagram.com/<handle>
-       — X/Twitter: x.com/<handle> or twitter.com/<handle>
-       — YouTube:   youtube.com/@<handle>
-       — Facebook:  facebook.com/<official-page>
-       — TikTok:    tiktok.com/@<handle>
+OFFICIAL SOURCE HIERARCHY:
+  1. Electoral court filing (TSE/BR, CNE/VE, FEC/US, etc.)
+  2. Official campaign website (party-registered domain)
+  3. Verified social-media accounts (blue-tick / government-verified only)
 
-HARD REJECTION RULES — never return these:
-  ✗ WRONG OFFICE OR YEAR: NEVER return an electoral filing for a past election or a different office. For example, if searching for "Presidential 2026", do NOT return a 2022 filing for Governor or President. If the filing for the current requested election does not exist yet, you MUST return null.
-  ✗ News articles (g1.globo.com, folha.uol.com.br, bbc.com, etc.)
-  ✗ Wikipedia or any wiki
-  ✗ Opinion blogs or political commentary sites
-  ✗ Fan pages, parody accounts, or unofficial profiles
-  ✗ Aggregator sites (allsides.com, politico.com candidate pages)
-  ✗ URLs with 404 or redirect chains you are unsure about
-  ✗ Any URL you cannot confidently attribute to the candidate directly
+TRIANGULATION RULE — MANDATORY FOR SOCIAL MEDIA:
+A social-media handle is ONLY valid if it satisfies BOTH conditions:
+  a) It appears in the search snippets, AND
+  b) At least one of the following is also present in the same snippets:
+       — The candidate's official campaign website references the handle, OR
+       — An official electoral court record references the handle, OR
+       — Two or more credible press outlets independently name the exact same handle.
+If only a single source mentions a handle without corroboration → return null.
 
-ANTI-SPOOFING & NO-GUESSING RULES:
-  • DO NOT GUESS URLs. The exact URL or handle MUST be explicitly supported by the search snippets.
-  • NEVER assume a social media handle is just the candidate's first or last name (e.g., do NOT guess instagram.com/lula). You must find the actual verified handle (like @lulaoficial).
-  • If the search snippet only gives a handle (e.g., @tarcisiogdf), you may construct the URL (e.g., https://instagram.com/tarcisiogdf).
-  • If the social media URL does not contain the candidate's last name, party abbreviation, or a well-known campaign handle, omit it.
-  • When in doubt, return null for that field — NEVER GUESS.
+HARD REJECTION RULES:
+  ✗ Wrong office / wrong year filings
+  ✗ News articles as source URLs
+  ✗ Wikipedia, wikis, fan pages, parody accounts
+  ✗ Any URL you cannot attribute with high confidence directly to the candidate
 
-MANDATORY OUTPUT FORMAT:
-Return ONLY a valid JSON object. No markdown. No explanation. No preamble.
-Required schema:
+NO-GUESSING RULE:
+  • NEVER construct a URL by guessing. The handle MUST be explicitly stated.
+  • When in doubt, return null.
+
+OUTPUT FORMAT:
+Return ONLY a valid JSON object. No markdown. No preamble.
 {
   "electoral_filing": "<url or null>",
   "official_site":    "<url or null>",
@@ -119,76 +156,38 @@ Required schema:
   "youtube":          "<url or null>",
   "facebook":         "<url or null>",
   "tiktok":           "<url or null>"
-}
-
-NEVER return a URL you are not confident is official and current.\
+}\
 """
 
-# ═════════════════════════════════════════════════════════════════════════════
-# Search backends
-# ═════════════════════════════════════════════════════════════════════════════
+SYSTEM_VERIFY = """\
+You are a critical fact-checker for World Contrast. You will be given a
+candidate, a proposed social-media URL, and search-result snippets.
 
-def _sync_ddg(query: str) -> list[dict]:
-    """Runs the duckduckgo search synchronously securely."""
-    try:
-        from duckduckgo_search import DDGS
-        with DDGS() as ddgs:
-            results = []
-            for r in ddgs.text(query):
-                results.append(r)
-                if len(results) >= 10:
-                    break
-            return results
-    except Exception as e:
-        log.warning(f"DDGS internal error: {e}")
-        return []
+TASK: Decide whether the proposed URL is genuinely the candidate's official
+account based on the snippets.
 
-async def search_duckduckgo(query: str, client: httpx.AsyncClient) -> str:
-    """
-    Search using the official duckduckgo-search package (bypasses blocks).
-    """
-    log.info(f"  [DDG] {query}")
-    try:
-        results = await asyncio.to_thread(_sync_ddg, query)
-        
-        lines: list[str] = []
-        for i, r in enumerate(results):
-            url = r.get("href", "")
-            body = r.get("body", "")
-            lines.append(f"[{i+1}] {url}  —  {body}")
+RETURN EXACTLY ONE OF:
+  CONFIRMED  — at least two independent credible signals in the snippets
+               corroborate this handle as belonging to this candidate.
+  REJECTED   — only one source mentions it, or the evidence is ambiguous.
 
-        combined = "\n".join(lines)
-        return combined[:4500]
-
-    except Exception as exc:
-        log.warning(f"  [DDG] Search failed for '{query}': {exc}")
-        return ""
-
-async def search_tavily(query: str, api_key: str) -> str:
-    if not HAS_TAVILY:
-        raise RuntimeError("Tavily not installed. Run: pip install tavily-python")
-    log.info(f"  [TAVILY] {query}")
-    client = TavilyClient(api_key=api_key)
-    loop = asyncio.get_event_loop()
-    result = await loop.run_in_executor(
-        None,
-        lambda: client.search(
-            query,
-            search_depth="advanced",
-            max_results=8,
-            include_raw_content=False,
-        ),
-    )
-    lines: list[str] = []
-    for i, r in enumerate(result.get("results", [])):
-        lines.append(f"[{i+1}] {r.get('url','')}  —  {r.get('content','')[:300]}")
-    return "\n".join(lines)[:4500]
+No markdown. No preamble. No explanation. Just CONFIRMED or REJECTED.\
+"""
 
 # ═════════════════════════════════════════════════════════════════════════════
 # LLM caller
 # ═════════════════════════════════════════════════════════════════════════════
 
-async def call_llm(system: str, user_message: str, api_key: str, client: httpx.AsyncClient) -> str:
+async def call_llm(
+    system: str,
+    user_message: str,
+    api_key: str,
+    client: httpx.AsyncClient,
+) -> str:
+    global _ANTHROPIC_SEM
+    if _ANTHROPIC_SEM is None:
+        _ANTHROPIC_SEM = asyncio.Semaphore(4)
+
     payload = {
         "model":      ANTHROPIC_MODEL,
         "max_tokens": MAX_TOKENS,
@@ -200,224 +199,50 @@ async def call_llm(system: str, user_message: str, api_key: str, client: httpx.A
         "anthropic-version": "2023-06-01",
         "content-type":      "application/json",
     }
-    resp = await client.post(ANTHROPIC_API_URL, json=payload, headers=headers, timeout=60)
-    if resp.status_code != 200:
-        raise RuntimeError(f"Anthropic API error {resp.status_code}: {resp.text[:300]}")
-    data = resp.json()
-    blocks = data.get("content", [])
-    text_blocks = [b["text"] for b in blocks if b.get("type") == "text"]
-    return "\n".join(text_blocks).strip()
+
+    async with _ANTHROPIC_SEM:
+        for attempt, wait_s in enumerate(RETRY_BACKOFF):
+            try:
+                resp = await client.post(
+                    ANTHROPIC_API_URL,
+                    json=payload,
+                    headers=headers,
+                    timeout=60,
+                )
+                if resp.status_code in (429, 529):
+                    log.warning(
+                        f"  [LLM] Rate-limited (HTTP {resp.status_code}), "
+                        f"retry {attempt+1}/{MAX_RETRIES} in {wait_s}s…"
+                    )
+                    await asyncio.sleep(wait_s)
+                    continue
+                if resp.status_code != 200:
+                    raise RuntimeError(
+                        f"Anthropic API error {resp.status_code}: "
+                        f"{resp.text[:300]}"
+                    )
+                data   = resp.json()
+                blocks = data.get("content", [])
+                return "\n".join(
+                    b["text"] for b in blocks if b.get("type") == "text"
+                ).strip()
+            except httpx.TimeoutException:
+                if attempt == MAX_RETRIES - 1:
+                    raise
+                log.warning(f"  [LLM] Timeout, retry {attempt+1}…")
+                await asyncio.sleep(wait_s)
+
+    raise RuntimeError("All Anthropic API retries exhausted")
 
 # ═════════════════════════════════════════════════════════════════════════════
-# JSON parsing helpers
+# Helpers
 # ═════════════════════════════════════════════════════════════════════════════
 
 def extract_json(raw: str) -> Any:
-    clean = re.sub(r"`{3}(?:json)?", "", raw)
-    clean = clean.replace("`" * 3, "").strip()
-    try:
-        return json.loads(clean)
-    except json.JSONDecodeError:
-        pass
-    for pattern in (r"\[.*\]", r"\{.*\}"):
-        m = re.search(pattern, clean, re.DOTALL)
-        if m:
-            try:
-                return json.loads(m.group())
-            except json.JSONDecodeError:
-                continue
-    raise ValueError(f"No valid JSON found in LLM output:\n{raw[:400]}")
+    clean = re.sub(r"
+http://googleusercontent.com/immersive_entry_chip/0
 
-def validate_url(url: str | None) -> str | None:
-    if not url or not isinstance(url, str):
-        return None
-    url = url.strip().rstrip("/")
-    if not url.startswith(("http://", "https://")):
-        return None
-    REJECT_DOMAINS = (
-        "wikipedia.org", "wikimedia.org", "g1.globo.com", "folha.uol.com.br", "uol.com.br",
-        "bbc.com", "bbc.co.uk", "cnn.com", "reuters.com", "apnews.com",
-        "politico.com", "allsides.com", "reddit.com", "twitter.com/search",
-        "google.com", "bing.com", "duckduckgo.com", "youtube.com/results",
-    )
-    lower = url.lower()
-    if any(d in lower for d in REJECT_DOMAINS):
-        return None
-    return url
+6. Clique no botão verde **Commit changes**.
 
-# ═════════════════════════════════════════════════════════════════════════════
-# Slug helpers
-# ═════════════════════════════════════════════════════════════════════════════
-
-def slugify(text: str) -> str:
-    text = unicodedata.normalize("NFKD", text)
-    text = text.encode("ascii", "ignore").decode("ascii")
-    text = re.sub(r"[^\w\s-]", "", text).strip().lower()
-    return re.sub(r"[\s_]+", "-", text)
-
-# ═════════════════════════════════════════════════════════════════════════════
-# Core Scout
-# ═════════════════════════════════════════════════════════════════════════════
-
-class Scout:
-    def __init__(self, country: str, election: str, api_key: str, search_backend: str = "duckduckgo", tavily_key: str | None = None, dry_run: bool = False) -> None:
-        self.country  = country.upper().strip()
-        self.election = election.strip()
-        self.api_key  = api_key
-        self.search_backend = search_backend
-        self.tavily_key     = tavily_key
-        self.dry_run        = dry_run
-        slug = slugify(f"{self.country} {self.election}")
-        self.output_path = OUTPUT_DIR / f"{slug}.json"
-
-    async def run(self) -> dict:
-        async with httpx.AsyncClient(follow_redirects=True) as http:
-            log.info(f"PASS 1 — Discovering candidates for: {self.country} / {self.election}")
-            candidates = await self._discover_candidates(http)
-            if not candidates:
-                log.error("No candidates found. Check your search results or try a different query.")
-                sys.exit(1)
-            
-            log.info(f"  Found {len(candidates)} candidate(s): {', '.join(c['fullName'] for c in candidates)}")
-            
-            log.info("PASS 2 — Discovering official sources per candidate")
-            enriched: list[dict] = []
-            for cand in candidates:
-                log.info(f"  Sourcing: {cand['fullName']} ({cand.get('party', '?')})")
-                sources = await self._discover_sources(cand, http)
-                enriched.append({
-                    "fullName": cand["fullName"],
-                    "party":    cand.get("party", ""),
-                    "sources":  sources,
-                })
-
-            output = {
-                "country":    self.country,
-                "election":   self.election,
-                "generated":  datetime.now(timezone.utc).isoformat(),
-                "scout_version": "1.0.0",
-                "candidates": enriched,
-            }
-
-            if self.dry_run:
-                log.info("DRY RUN — printing JSON to stdout")
-                print(json.dumps(output, ensure_ascii=False, indent=2))
-            else:
-                self._save(output)
-            return output
-
-    async def _discover_candidates(self, http: httpx.AsyncClient) -> list[dict]:
-        queries = [
-            f"{self.election} {self.country} candidates official registered 2026",
-            f"eleição {self.country} {self.election} candidatos registrados TSE 2026",
-            f"{self.country} election {self.election} confirmed candidates ballot",
-        ]
-        for i, query in enumerate(queries):
-            snippets = await self._search(query, http)
-            if not snippets:
-                continue
-            user_msg = f"Election: {self.election}\nCountry: {self.country}\n\nWeb search results:\n{snippets}\n\nExtract the confirmed candidates from these results."
-            try:
-                raw = await call_llm(SYSTEM_CANDIDATES, user_msg, self.api_key, http)
-                candidates = extract_json(raw)
-                if isinstance(candidates, list) and candidates:
-                    return candidates
-                log.warning(f"  Pass 1 attempt {i+1}: LLM returned empty list, retrying…")
-            except (ValueError, Exception) as exc:
-                log.warning(f"  Pass 1 attempt {i+1} failed: {exc}")
-        return []
-
-    async def _discover_sources(self, candidate: dict, http: httpx.AsyncClient) -> dict:
-        name   = candidate["fullName"]
-        party  = candidate.get("party", "")
-        queries = [
-            f'"{name}" {party} {self.country} site oficial candidatura TSE inscricao',
-            f'"{name}" {party} instagram verified official account',
-            f'"{name}" {party} site campanha eleitoral oficial 2026',
-        ]
-        all_snippets: list[str] = []
-        for q in queries:
-            snip = await self._search(q, http)
-            if snip:
-                all_snippets.append(snip)
-        
-        combined_snippets = "\n\n---\n\n".join(all_snippets)[:6000]
-        if not combined_snippets:
-            log.warning(f"  No search results for {name}. Returning empty sources.")
-            return self._empty_sources()
-        
-        user_msg = f"Candidate: {name}\nParty: {party}\nCountry: {self.country}\nElection: {self.election}\n\nWeb search results:\n{combined_snippets}\n\nFind ONLY official source URLs for this candidate. Return null for any field you cannot confirm."
-        try:
-            raw     = await call_llm(SYSTEM_SOURCES, user_msg, self.api_key, http)
-            sources = extract_json(raw)
-            if not isinstance(sources, dict):
-                raise ValueError("LLM did not return a JSON object")
-            return self._sanitise_sources(sources)
-        except Exception as exc:
-            log.warning(f"  Source extraction failed for {name}: {exc}")
-            return self._empty_sources()
-
-    async def _search(self, query: str, http: httpx.AsyncClient) -> str:
-        if self.search_backend == "tavily" and self.tavily_key:
-            return await search_tavily(query, self.tavily_key)
-        return await search_duckduckgo(query, http)
-
-    def _sanitise_sources(self, raw: dict) -> dict:
-        keys = ["electoral_filing", "official_site", "instagram", "twitter", "youtube", "facebook", "tiktok"]
-        result: dict = {}
-        for k in keys:
-            url = validate_url(raw.get(k))
-            result[k] = url 
-        return result
-
-    @staticmethod
-    def _empty_sources() -> dict:
-        return {"electoral_filing": None, "official_site": None, "instagram": None, "twitter": None, "youtube": None, "facebook": None, "tiktok": None}
-
-    def _save(self, data: dict) -> None:
-        OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-        with open(self.output_path, "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False, indent=2)
-        log.info(f"✓ Saved: {self.output_path}")
-
-def parse_args() -> argparse.Namespace:
-    p = argparse.ArgumentParser(description="World Contrast — Discovery Scout (OSINT Agent)")
-    p.add_argument("--country", required=True)
-    p.add_argument("--election", required=True)
-    p.add_argument("--search", choices=["duckduckgo", "tavily"], default="duckduckgo")
-    p.add_argument("--output-dir", default="data/countries")
-    p.add_argument("--dry-run", action="store_true")
-    p.add_argument("--verbose", "-v", action="store_true")
-    return p.parse_args()
-
-async def main() -> None:
-    args = parse_args()
-    if args.verbose:
-        logging.getLogger().setLevel(logging.DEBUG)
-    global OUTPUT_DIR
-    OUTPUT_DIR = pathlib.Path(args.output_dir)
-    
-    api_key = os.environ.get("ANTHROPIC_API_KEY", "").strip()
-    if not api_key:
-        log.error("ANTHROPIC_API_KEY not set.")
-        sys.exit(1)
-
-    tavily_key: str | None = None
-    if args.search == "tavily":
-        tavily_key = os.environ.get("TAVILY_API_KEY", "").strip()
-        if not HAS_TAVILY:
-            log.error("Tavily not installed.")
-            sys.exit(1)
-
-    scout = Scout(
-        country=args.country,
-        election=args.election,
-        api_key=api_key,
-        search_backend=args.search,
-        tavily_key=tavily_key,
-        dry_run=args.dry_run,
-    )
-    await scout.run()
-
-if __name__ == "__main__":
-    asyncio.run(main())
+### O que vai acontecer agora?
+Ao fazer isto, você instalou o cérebro atualizado no robô. Se voltar ao separador **Actions** e clicar novamente no botão **Run workflow** para o *Scout — Discovery Agent*, o erro vai desaparecer e a pesquisa OSINT vai finalmente arrancar com sucesso! Pode avançar.
