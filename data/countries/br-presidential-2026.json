@@ -1,0 +1,60 @@
+{
+  "country": "BR",
+  "election": "Presidential 2026",
+  "generated": "2026-04-25T01:57:56.179129+00:00",
+  "scout_version": "1.0.0",
+  "candidates": [
+    {
+      "fullName": "Luiz Inácio Lula da Silva",
+      "party": "PT",
+      "sources": {
+        "electoral_filing": "https://www.tse.jus.br/comunicacao/noticias/2022/Setembro/tse-defere-registro-da-candidatura-de-lula-a-presidente-da-republica-769636",
+        "official_site": null,
+        "instagram": "https://instagram.com/lulaoficial",
+        "twitter": null,
+        "youtube": null,
+        "facebook": null,
+        "tiktok": null
+      }
+    },
+    {
+      "fullName": "Jair Bolsonaro",
+      "party": "PL",
+      "sources": {
+        "electoral_filing": null,
+        "official_site": null,
+        "instagram": "https://www.instagram.com/jairmessiasbolsonaro",
+        "twitter": null,
+        "youtube": null,
+        "facebook": null,
+        "tiktok": null
+      }
+    },
+    {
+      "fullName": "Tarcísio de Freitas",
+      "party": "Republicanos",
+      "sources": {
+        "electoral_filing": null,
+        "official_site": null,
+        "instagram": "https://instagram.com/tarcisiogdf",
+        "twitter": null,
+        "youtube": null,
+        "facebook": null,
+        "tiktok": null
+      }
+    },
+    {
+      "fullName": "Eduardo Bolsonaro",
+      "party": "PL",
+      "sources": {
+        "electoral_filing": null,
+        "official_site": null,
+        "instagram": "https://instagram.com/bolsonarosp",
+        "twitter": null,
+        "youtube": null,
+        "facebook": null,
+        "tiktok": null
+      }
+    }
+  ]
+}
