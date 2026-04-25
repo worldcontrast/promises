@@ -118,7 +118,9 @@ STRICT RULES:
 2. Because some elections are still in the pre-campaign phase, it is ACCEPTABLE to include major pre-candidates even if the electoral court (e.g., TSE) registration is not yet open.
 3. Do NOT include purely speculative names, internet rumors, or people who have explicitly denied running.
 4. Return an empty array [] ONLY if you cannot find any serious declared pre-candidates.
-5. NEVER add commentary outside the JSON array.\
+5. NEVER add commentary outside the JSON array.
+6. EXCLUDE politicians who are legally ineligible to run (e.g., "inelegível" in Brazil).
+7. EXCLUDE politicians who are clearly running for a DIFFERENT office (e.g., Senate, Governor) rather than the Presidency.
 """
 
 # Pass 2: find official URLs for a single candidate
