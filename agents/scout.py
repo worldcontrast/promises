@@ -101,10 +101,12 @@ HARD REJECTION RULES — never return these:
   ✗ URLs with 404 or redirect chains you are unsure about
   ✗ Any URL you cannot confidently attribute to the candidate directly
 
-ANTI-SPOOFING RULES:
-  • If the social media URL does not contain the candidate's last name,
-    party abbreviation, or a well-known campaign handle, omit it.
-  • When in doubt, return null for that field — never guess.
+ANTI-SPOOFING & NO-GUESSING RULES:
+  • DO NOT GUESS URLs. The exact URL or handle MUST be explicitly supported by the search snippets.
+  • NEVER assume a social media handle is just the candidate's first or last name (e.g., do NOT guess instagram.com/lula). You must find the actual verified handle (like @lulaoficial).
+  • If the search snippet only gives a handle (e.g., @tarcisiogdf), you may construct the URL (e.g., https://instagram.com/tarcisiogdf).
+  • If the social media URL does not contain the candidate's last name, party abbreviation, or a well-known campaign handle, omit it.
+  • When in doubt, return null for that field — NEVER GUESS.
 
 MANDATORY OUTPUT FORMAT:
 Return ONLY a valid JSON object. No markdown. No explanation. No preamble.
