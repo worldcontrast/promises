@@ -1,4 +1,4 @@
-name: Scout — Discovery Agent
+name: World Contrast — Scout Discovery Agent
 
 on:
   workflow_dispatch:
@@ -25,7 +25,7 @@ jobs:
           python-version: '3.11'
 
       - name: Install Dependencies
-        run: pip install httpx anthropic
+        run: pip install httpx anthropic duckduckgo-search
 
       - name: Run Scout Agent
         env:
