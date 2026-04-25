@@ -1,34 +1,8 @@
 {
   "country": "BR",
   "election": "Presidential 2026",
-  "generated": "2026-04-25T13:57:18.077053+00:00",
-  "scout_version": "1.0.0",
-  "candidates": [
-    {
-      "fullName": "Luiz Inácio Lula da Silva",
-      "party": "PT",
-      "sources": {
-        "electoral_filing": null,
-        "official_site": null,
-        "instagram": "https://www.instagram.com/lulaoficial",
-        "twitter": null,
-        "youtube": null,
-        "facebook": null,
-        "tiktok": null
-      }
-    },
-    {
-      "fullName": "Tarcísio de Freitas",
-      "party": "Republicanos",
-      "sources": {
-        "electoral_filing": null,
-        "official_site": null,
-        "instagram": "https://instagram.com/tarcisiogdf",
-        "twitter": null,
-        "youtube": null,
-        "facebook": null,
-        "tiktok": null
-      }
-    }
-  ]
+  "status": "scheduled",
+  "generated": "2026-04-25T18:31:15.327190+00:00",
+  "scout_version": "2.0.0",
+  "candidates": []
 }
