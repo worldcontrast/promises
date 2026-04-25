@@ -48,7 +48,7 @@ logging.basicConfig(
 log = logging.getLogger("scout")
 
 # ── Constants ─────────────────────────────────────────────────────────────────
-ANTHROPIC_API_URL = "[https://api.anthropic.com/v1/messages](https://api.anthropic.com/v1/messages)"
+ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages"
 ANTHROPIC_MODEL   = "claude-sonnet-4-20250514"
 MAX_TOKENS        = 2048
 
