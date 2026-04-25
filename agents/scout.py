@@ -13,6 +13,8 @@ CHANGES FROM v1
 
 3. Scheduled-election scaffolding — can emit `status: "scheduled"` records for
    elections where candidates are not yet declared.
+
+4. Markdown Bug Fix — safe string parsing for JSON blocks.
 """
 
 from __future__ import annotations
@@ -46,7 +48,7 @@ logging.basicConfig(
 log = logging.getLogger("scout")
 
 # ── Constants ─────────────────────────────────────────────────────────────────
-ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages"
+ANTHROPIC_API_URL = "[https://api.anthropic.com/v1/messages](https://api.anthropic.com/v1/messages)"
 ANTHROPIC_MODEL   = "claude-sonnet-4-20250514"
 MAX_TOKENS        = 2048
 
@@ -65,9 +67,9 @@ _REJECT_DOMAINS: frozenset[str] = frozenset({
     "bbc.com", "bbc.co.uk", "cnn.com",
     "reuters.com", "apnews.com",
     "politico.com", "allsides.com",
-    "reddit.com", "twitter.com/search",
+    "reddit.com", "[twitter.com/search](https://twitter.com/search)",
     "google.com", "bing.com", "duckduckgo.com",
-    "youtube.com/results",
+    "[youtube.com/results](https://youtube.com/results)",
 })
 
 _CORROBORATION_SOURCES: frozenset[str] = frozenset({
@@ -239,10 +241,328 @@ async def call_llm(
 # ═════════════════════════════════════════════════════════════════════════════
 
 def extract_json(raw: str) -> Any:
-    clean = re.sub(r"
-http://googleusercontent.com/immersive_entry_chip/0
+    # SAFE STRING PARSING: Uses multipliers instead of literal backticks
+    # to avoid breaking markdown parsers in chat interfaces.
+    clean = re.sub(r"`{3}(?:json)?\s*", "", raw, flags=re.IGNORECASE)
+    clean = clean.replace("`" * 3, "").strip()
 
-6. Clique no botão verde **Commit changes**.
+    try:
+        return json.loads(clean)
+    except json.JSONDecodeError:
+        pass
 
-### O que vai acontecer agora?
-Ao fazer isto, você instalou o cérebro atualizado no robô. Se voltar ao separador **Actions** e clicar novamente no botão **Run workflow** para o *Scout — Discovery Agent*, o erro vai desaparecer e a pesquisa OSINT vai finalmente arrancar com sucesso! Pode avançar.
+    for pattern in (r"\[[\s\S]*\]", r"\{[\s\S]*\}"):
+        m = re.search(pattern, clean)
+        if m:
+            try:
+                return json.loads(m.group())
+            except json.JSONDecodeError:
+                continue
+
+    raise ValueError(f"No valid JSON found in LLM output:\n{raw[:400]}")
+
+def validate_url(url: str | None) -> str | None:
+    if not url or not isinstance(url, str):
+        return None
+    url = url.strip().rstrip("/")
+    if not url.startswith(("http://", "https://")):
+        return None
+    lower = url.lower()
+    if any(d in lower for d in _REJECT_DOMAINS):
+        return None
+    return url
+
+def slugify(text: str) -> str:
+    text = unicodedata.normalize("NFKD", text)
+    text = text.encode("ascii", "ignore").decode("ascii")
+    text = re.sub(r"[^\w\s-]", "", text).strip().lower()
+    return re.sub(r"[\s_]+", "-", text)
+
+def _sync_ddg(query: str) -> list[dict]:
+    try:
+        from duckduckgo_search import DDGS   # type: ignore
+        with DDGS() as ddgs:
+            results: list[dict] = []
+            for r in ddgs.text(query):
+                results.append(r)
+                if len(results) >= 10:
+                    break
+            return results
+    except Exception as exc:
+        log.warning(f"DDGS error: {exc}")
+        return []
+
+async def search_duckduckgo(query: str, _client: httpx.AsyncClient) -> str:
+    log.info(f"  [DDG] {query}")
+    results = await asyncio.to_thread(_sync_ddg, query)
+    lines = [
+        f"[{i+1}] {r.get('href', '')}  —  {r.get('body', '')}"
+        for i, r in enumerate(results)
+    ]
+    return "\n".join(lines)[:4500]
+
+async def search_tavily(query: str, api_key: str) -> str:
+    if not HAS_TAVILY:
+        raise RuntimeError("Tavily not installed. Run: pip install tavily-python")
+    log.info(f"  [TAVILY] {query}")
+    tv = TavilyClient(api_key=api_key)
+    result = await asyncio.to_thread(
+        lambda: tv.search(
+            query,
+            search_depth="advanced",
+            max_results=8,
+            include_raw_content=False,
+        )
+    )
+    lines = [
+        f"[{i+1}] {r.get('url','')}  —  {r.get('content','')[:300]}"
+        for i, r in enumerate(result.get("results", []))
+    ]
+    return "\n".join(lines)[:4500]
+
+# ═════════════════════════════════════════════════════════════════════════════
+# Scout
+# ═════════════════════════════════════════════════════════════════════════════
+
+class Scout:
+    def __init__(
+        self,
+        country: str,
+        election: str,
+        api_key: str,
+        search_backend: str = "duckduckgo",
+        tavily_key: str | None = None,
+        dry_run: bool = False,
+        allow_scheduled: bool = True,
+    ) -> None:
+        self.country         = country.upper().strip()
+        self.election        = election.strip()
+        self.api_key         = api_key
+        self.search_backend  = search_backend
+        self.tavily_key      = tavily_key
+        self.dry_run         = dry_run
+        self.allow_scheduled = allow_scheduled
+
+        slug             = slugify(f"{self.country} {self.election}")
+        self.output_path = OUTPUT_DIR / f"{slug}.json"
+
+    async def run(self) -> dict:
+        async with httpx.AsyncClient(follow_redirects=True) as http:
+            log.info(f"PASS 1 — Discovering candidates: {self.country} / {self.election}")
+            candidates_or_sentinel = await self._discover_candidates(http)
+
+            if candidates_or_sentinel == SCHEDULED_PLACEHOLDER:
+                return self._emit_scheduled()
+
+            candidates = candidates_or_sentinel
+            if not candidates:
+                log.error("No candidates found and election is not scheduled.")
+                sys.exit(1)
+
+            log.info(f"  Found {len(candidates)} candidate(s): " + ", ".join(c["fullName"] for c in candidates))
+
+            log.info("PASS 2 — Discovering and verifying official sources")
+            enriched: list[dict] = []
+            for cand in candidates:
+                log.info(f"  [{cand['fullName']}]")
+                sources = await self._discover_sources(cand, http)
+                enriched.append({
+                    "fullName": cand["fullName"],
+                    "party":    cand.get("party", ""),
+                    "sources":  sources,
+                })
+
+            output = self._build_output(enriched, status="live")
+
+            if self.dry_run:
+                log.info("DRY RUN — printing to stdout")
+                print(json.dumps(output, ensure_ascii=False, indent=2))
+            else:
+                self._save(output)
+
+            return output
+
+    async def _discover_candidates(self, http: httpx.AsyncClient) -> list[dict] | str:
+        queries = [
+            f"{self.election} {self.country} candidates official pre-candidates 2026 registered",
+            f"eleição {self.country} {self.election} pré-candidatos declarados TSE 2026",
+            f"{self.country} {self.election} confirmed candidates ballot declared",
+        ]
+
+        for i, query in enumerate(queries):
+            snippets = await self._search(query, http)
+            if not snippets:
+                continue
+
+            user_msg = (
+                f"Election: {self.election}\n"
+                f"Country: {self.country}\n\n"
+                f"Web search results:\n{snippets}\n\n"
+                f"Extract confirmed candidates. "
+                f"If the election is scheduled but no candidates are declared "
+                f"yet, return the word SCHEDULED."
+            )
+
+            try:
+                raw = await call_llm(SYSTEM_CANDIDATES, user_msg, self.api_key, http)
+                if raw.strip().upper() == "SCHEDULED":
+                    log.info("  LLM: election is SCHEDULED, no candidates yet.")
+                    return SCHEDULED_PLACEHOLDER
+
+                cands = extract_json(raw)
+                if isinstance(cands, list) and cands:
+                    return cands
+                log.warning(f"  Pass 1 attempt {i+1}: empty list, retrying…")
+            except (ValueError, RuntimeError) as exc:
+                log.warning(f"  Pass 1 attempt {i+1} failed: {exc}")
+        return []
+
+    async def _discover_sources(self, candidate: dict, http: httpx.AsyncClient) -> dict:
+        name  = candidate["fullName"]
+        party = candidate.get("party", "")
+        queries = [
+            f'"{name}" {party} {self.country} site oficial candidatura TSE inscrição',
+            f'"{name}" {party} perfil oficial instagram twitter verificado',
+            f'"{name}" {party} campanha eleitoral site oficial 2026',
+        ]
+
+        snippets_parts: list[str] = []
+        for q in queries:
+            s = await self._search(q, http)
+            if s:
+                snippets_parts.append(s)
+
+        combined = "\n\n---\n\n".join(snippets_parts)[:6000]
+
+        if not combined:
+            return self._empty_sources()
+
+        user_msg = (
+            f"Candidate: {name}\n"
+            f"Party: {party}\n"
+            f"Country: {self.country}\n"
+            f"Election: {self.election}\n\n"
+            f"Web search results:\n{combined}\n\n"
+            f"Find ONLY official source URLs. Apply the TRIANGULATION RULE for social media."
+        )
+
+        try:
+            raw     = await call_llm(SYSTEM_SOURCES, user_msg, self.api_key, http)
+            sources = extract_json(raw)
+            if not isinstance(sources, dict):
+                raise ValueError("LLM did not return a JSON object")
+
+            sanitised = self._sanitise_sources(sources)
+
+            social_keys = ["instagram", "twitter", "youtube", "facebook", "tiktok"]
+            for key in social_keys:
+                url = sanitised.get(key)
+                if url:
+                    ok = await self._verify_social(name, url, combined, http)
+                    if not ok:
+                        log.info(f"  [VERIFY] {key} {url} → REJECTED")
+                        sanitised[key] = None
+
+            return sanitised
+        except Exception as exc:
+            log.warning(f"  Source extraction failed for {name}: {exc}")
+            return self._empty_sources()
+
+    async def _verify_social(self, name: str, url: str, snippets: str, http: httpx.AsyncClient) -> bool:
+        user_msg = (
+            f"Candidate: {name}\n"
+            f"Proposed URL: {url}\n\n"
+            f"Search snippets:\n{snippets[:3000]}\n\n"
+            f"Is this URL confirmed by at least two independent credible signals in the snippets? Reply CONFIRMED or REJECTED only."
+        )
+        try:
+            verdict = await call_llm(SYSTEM_VERIFY, user_msg, self.api_key, http)
+            return verdict.strip().upper().startswith("CONFIRMED")
+        except Exception:
+            return False
+
+    def _emit_scheduled(self) -> dict:
+        output = self._build_output([], status="scheduled")
+        log.info(f"  Election is SCHEDULED — emitting empty scaffold")
+        if self.dry_run:
+            print(json.dumps(output, ensure_ascii=False, indent=2))
+        else:
+            self._save(output)
+        return output
+
+    def _build_output(self, candidates: list[dict], status: Literal["live", "scheduled"]) -> dict:
+        return {
+            "country":       self.country,
+            "election":      self.election,
+            "status":        status,
+            "generated":     datetime.now(timezone.utc).isoformat(),
+            "scout_version": "2.0.0",
+            "candidates":    candidates,
+        }
+
+    async def _search(self, query: str, http: httpx.AsyncClient) -> str:
+        if self.search_backend == "tavily" and self.tavily_key:
+            return await search_tavily(query, self.tavily_key)
+        return await search_duckduckgo(query, http)
+
+    def _sanitise_sources(self, raw: dict) -> dict:
+        keys = ["electoral_filing", "official_site", "instagram", "twitter", "youtube", "facebook", "tiktok"]
+        return {k: validate_url(raw.get(k)) for k in keys}
+
+    @staticmethod
+    def _empty_sources() -> dict:
+        return {"electoral_filing": None, "official_site": None, "instagram": None, "twitter": None, "youtube": None, "facebook": None, "tiktok": None}
+
+    def _save(self, data: dict) -> None:
+        OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+        with open(self.output_path, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+        log.info(f"✓ Saved: {self.output_path}")
+
+# ═════════════════════════════════════════════════════════════════════════════
+# CLI
+# ═════════════════════════════════════════════════════════════════════════════
+
+def parse_args() -> argparse.Namespace:
+    p = argparse.ArgumentParser(description="World Contrast — Discovery Scout v2.0")
+    p.add_argument("--country",    required=True, help="ISO-3166 country code")
+    p.add_argument("--election",   required=True, help='Election name, e.g. "Presidential 2026"')
+    p.add_argument("--search",     choices=["duckduckgo", "tavily"], default="duckduckgo")
+    p.add_argument("--output-dir", default="data/countries")
+    p.add_argument("--dry-run",    action="store_true", help="Print JSON without saving")
+    p.add_argument("--scheduled",  action="store_true", help="Allow output of status=scheduled")
+    p.add_argument("--verbose", "-v", action="store_true")
+    return p.parse_args()
+
+async def main() -> None:
+    args = parse_args()
+    if args.verbose:
+        logging.getLogger().setLevel(logging.DEBUG)
+
+    global OUTPUT_DIR
+    OUTPUT_DIR = pathlib.Path(args.output_dir)
+
+    global _ANTHROPIC_SEM
+    _ANTHROPIC_SEM = asyncio.Semaphore(4)
+
+    api_key = os.environ.get("ANTHROPIC_API_KEY", "").strip()
+    if not api_key:
+        sys.exit(1)
+
+    tavily_key: str | None = None
+    if args.search == "tavily":
+        tavily_key = os.environ.get("TAVILY_API_KEY", "").strip()
+
+    scout = Scout(
+        country=args.country,
+        election=args.election,
+        api_key=api_key,
+        search_backend=args.search,
+        tavily_key=tavily_key,
+        dry_run=args.dry_run,
+        allow_scheduled=args.scheduled,
+    )
+    await scout.run()
+
+if __name__ == "__main__":
+    asyncio.run(main())
