@@ -4,9 +4,9 @@
 name: World Contrast — Global Monitor
 
 on:
-  # Roda AUTOMATICAMENTE todos os Domingos à meia-noite (UTC)
+  # Roda AUTOMATICAMENTE nos dias 1 e 15 de cada mês à meia-noite (UTC)
   schedule:
-    - cron: '0 0 * * 0'
+    - cron: '0 0 1,15 * *'
   # Permite que você clique num botão para rodar manualmente se quiser
   workflow_dispatch:
     inputs:
