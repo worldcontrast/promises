@@ -1,9 +1,10 @@
 /**
- * World Contrast — Compare Page v3.1 · Smoke Index + Apple-Grade UX
+ * World Contrast — Compare Page v3.2 · Universal UX & Smoke Index
  * File: frontend/src/app/[locale]/compare/[electionId]/page.tsx
  *
- * NEW IN v3.1 (UX Doping Mode):
- * - Fluid Typography (clamp 16px-18px) for accessibility
+ * NEW IN v3.2 (Universal UX Mode):
+ * - Complete Typography conversion to `rem` (Native A+ Scaling Support)
+ * - Fluid Typography (clamp 1rem-1.125rem) for accessibility
  * - 44px Touch Targets for all interactive elements (Apple HIG)
  * - Improved WCAG contrast variables (--plat-muted / --plat-faint)
  * - 85vw Mobile columns with mandatory scroll-snapping
@@ -102,7 +103,7 @@ export default async function ComparePage({ params, searchParams }: Props) {
     <>
       <style>{`
         /* ═══════════════════════════════════════════════════
-           COMPARE PAGE v3.1 — SMOKE INDEX + UNIVERSAL UX
+           COMPARE PAGE v3.2 — SMOKE INDEX + UNIVERSAL UX
            ═══════════════════════════════════════════════════ */
 
         :root {
@@ -163,19 +164,19 @@ export default async function ComparePage({ params, searchParams }: Props) {
 
         .cp-breadcrumb { padding-top: 14px; padding-bottom: 4px; }
         .cp-breadcrumb a {
-          font-family: var(--font-m); font-size: 12px; letter-spacing: 1.5px;
+          font-family: var(--font-m); font-size: 0.75rem; letter-spacing: 1.5px;
           text-transform: uppercase; color: var(--plat-muted);
           text-decoration: none; transition: color 0.18s;
         }
         .cp-breadcrumb a:hover { color: var(--platinum); }
 
         .cp-election-title {
-          font-size: clamp(18px, 3vw, 28px); font-weight: 700; color: var(--platinum);
+          font-size: clamp(1.125rem, 3vw, 1.75rem); font-weight: 700; color: var(--platinum);
           letter-spacing: -0.5px; padding: 4px 0 2px;
         }
 
         .cp-meta {
-          font-family: var(--font-m); font-size: 13px; color: var(--plat-muted);
+          font-family: var(--font-m); font-size: 0.8125rem; color: var(--plat-muted);
           letter-spacing: 0.3px; padding-bottom: 10px;
           display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
         }
@@ -197,7 +198,7 @@ export default async function ComparePage({ params, searchParams }: Props) {
           /* UX UPGRADE: 44px min-height for perfect touch accessibility */
           min-height: 44px;
           display: inline-flex; align-items: center; justify-content: center;
-          font-family: var(--font-m); font-size: 13px; font-weight: 500;
+          font-family: var(--font-m); font-size: 0.8125rem; font-weight: 500;
           letter-spacing: 1.5px; text-transform: uppercase;
           border-radius: 6px; border: none; cursor: pointer;
           text-decoration: none; gap: 6px;
@@ -216,23 +217,23 @@ export default async function ComparePage({ params, searchParams }: Props) {
         .cp-round-btn:not(.active):hover, .cp-view-btn:not([class*="active"]):hover {
           color: var(--platinum); background: rgba(255,255,255,0.04);
         }
-        .cp-view-icon { font-size: 14px; line-height: 1; }
+        .cp-view-icon { font-size: 0.875rem; line-height: 1; }
 
         .cp-view-desc {
-          font-family: var(--font-m); font-size: 12px; color: var(--plat-faint);
+          font-family: var(--font-m); font-size: 0.75rem; color: var(--plat-faint);
           letter-spacing: 0.5px; padding: 0 0 8px;
         }
 
         /* ── SCROLL HINT ─────────────────────────────────── */
         .cp-scroll-hint {
-          font-family: var(--font-m); font-size: 13px; color: var(--plat-muted);
+          font-family: var(--font-m); font-size: 0.8125rem; color: var(--plat-muted);
           letter-spacing: 1px; padding: 10px clamp(16px,4vw,48px);
           background: var(--onyx); display: flex; align-items: center; gap: 6px;
           animation: fade-out 4s ease forwards; animation-delay: 3s;
           position: sticky; left: 0; width: 100vw; box-sizing: border-box;
         }
         @keyframes fade-out { to { opacity: 0; pointer-events: none; } }
-        .cp-scroll-arrow { color: var(--gold); font-size: 14px; }
+        .cp-scroll-arrow { color: var(--gold); font-size: 0.875rem; }
 
         /* ── CATEGORY FILTER BAR ─────────────────────────── */
         .cp-filter-bar {
@@ -249,14 +250,14 @@ export default async function ComparePage({ params, searchParams }: Props) {
           /* UX UPGRADE: 44px min-height */
           min-height: 44px; display: inline-flex; align-items: center; justify-content: center;
           padding: 0 16px; gap: 6px;
-          font-family: var(--font-m); font-size: 13px; font-weight: 400;
+          font-family: var(--font-m); font-size: 0.8125rem; font-weight: 400;
           letter-spacing: 1px; text-transform: uppercase; border: 1px solid var(--rule);
           border-radius: 4px; color: var(--plat-muted); background: transparent;
           text-decoration: none; white-space: nowrap; transition: all 0.15s;
         }
         .cp-filter-pill:hover { color: var(--platinum); border-color: var(--plat-faint); }
         .cp-filter-pill.active { background: var(--gold-dim); color: var(--gold); border-color: var(--gold-bdr); }
-        .cp-filter-emoji { font-size: 14px; }
+        .cp-filter-emoji { font-size: 0.875rem; }
 
         /* ── MATRIX ──────────────────────────────────────── */
         main, .cp-matrix-outer, .cp-matrix-inner, .cp-col { margin-top: 0; padding-top: 0; }
@@ -284,17 +285,17 @@ export default async function ComparePage({ params, searchParams }: Props) {
         .cp-avatar {
           width: 50px; height: 50px; border-radius: 50%;
           display: flex; align-items: center; justify-content: center;
-          font-size: 16px; font-weight: 700; color: var(--onyx);
+          font-size: 1rem; font-weight: 700; color: var(--onyx);
           flex-shrink: 0; overflow: hidden; border: 1.5px solid rgba(255,255,255,0.12);
         }
         .cp-avatar img { width: 100%; height: 100%; object-fit: cover; }
-        .cp-cand-name { font-size: 16px; font-weight: 700; color: var(--platinum); line-height: 1.25; letter-spacing: -0.2px; }
-        .cp-cand-party { font-family: var(--font-m); font-size: 13px; color: var(--plat-muted); letter-spacing: 0.5px; margin-top: 4px; }
+        .cp-cand-name { font-size: 1rem; font-weight: 700; color: var(--platinum); line-height: 1.25; letter-spacing: -0.2px; }
+        .cp-cand-party { font-family: var(--font-m); font-size: 0.8125rem; color: var(--plat-muted); letter-spacing: 0.5px; margin-top: 4px; }
         
         .cp-official-btn {
           /* UX UPGRADE: 44px min-height */
           min-height: 44px; display: inline-flex; align-items: center; justify-content: center;
-          padding: 0 16px; font-family: var(--font-m); font-size: 13px; font-weight: 500;
+          padding: 0 16px; font-family: var(--font-m); font-size: 0.8125rem; font-weight: 500;
           letter-spacing: 1.5px; text-transform: uppercase; color: var(--gold);
           border: 1px solid var(--gold-bdr); background: var(--gold-dim);
           border-radius: 4px; text-decoration: none; align-self: flex-start;
@@ -303,10 +304,10 @@ export default async function ComparePage({ params, searchParams }: Props) {
         .cp-official-btn:hover { background: rgba(200,169,110,0.18); border-color: rgba(200,169,110,0.45); }
 
         .cp-smoke-count {
-          display: flex; align-items: center; gap: 6px; font-family: var(--font-m); font-size: 13px;
+          display: flex; align-items: center; gap: 6px; font-family: var(--font-m); font-size: 0.8125rem;
           color: var(--smoke); letter-spacing: 0.5px;
         }
-        .cp-smoke-count-icon { font-size: 15px; }
+        .cp-smoke-count-icon { font-size: 0.9375rem; }
 
         .cp-col-content { padding-top: 16px; display: flex; flex-direction: column; flex: 1; }
 
@@ -317,8 +318,8 @@ export default async function ComparePage({ params, searchParams }: Props) {
           display: flex; align-items: center; gap: 10px;
         }
         .cp-cat-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-        .cp-cat-label { font-family: var(--font-m); font-size: 13px; font-weight: 500; letter-spacing: 1.5px; text-transform: uppercase; color: var(--plat-muted); }
-        .cp-cat-count { font-family: var(--font-m); font-size: 12px; color: var(--plat-faint); margin-left: auto; }
+        .cp-cat-label { font-family: var(--font-m); font-size: 0.8125rem; font-weight: 500; letter-spacing: 1.5px; text-transform: uppercase; color: var(--plat-muted); }
+        .cp-cat-count { font-family: var(--font-m); font-size: 0.75rem; color: var(--plat-faint); margin-left: auto; }
 
         /* ── PROMISE CARD — base ─────────────────────────── */
         .cp-promise {
@@ -332,36 +333,36 @@ export default async function ComparePage({ params, searchParams }: Props) {
 
         .cp-cat-tag {
           display: inline-flex; align-items: center; gap: 6px;
-          font-family: var(--font-m); font-size: 13px; font-weight: 500;
+          font-family: var(--font-m); font-size: 0.8125rem; font-weight: 500;
           letter-spacing: 1.5px; text-transform: uppercase; padding: 4px 10px; border-radius: 2px; align-self: flex-start;
         }
 
         /* UX UPGRADE: Fluid Typography & Readability */
         .cp-promise-text {
-          font-size: clamp(16px, 2vw, 18px);
+          font-size: clamp(1rem, 2vw, 1.125rem);
           font-weight: 400; color: var(--platinum);
           line-height: 1.6; letter-spacing: 0.01em;
         }
         .cp-promise.rhetoric .cp-promise-text { opacity: 0.65; }
 
         .cp-promise-quote {
-          font-size: clamp(14px, 1.5vw, 16px);
+          font-size: clamp(0.875rem, 1.5vw, 1rem);
           font-style: italic; font-weight: 300; color: var(--plat-muted);
-          line-height: 1.6; padding-left: 16px; border-left: 3px solid var(--rule-gold); margin-left: 0;
+          line-height: 1.6; padding-left: 1rem; border-left: 3px solid var(--rule-gold); margin-left: 0;
         }
 
-        .cp-promise-empty { font-family: var(--font-m); font-size: 14px; font-style: italic; color: var(--plat-faint); letter-spacing: 0.3px; }
+        .cp-promise-empty { font-family: var(--font-m); font-size: 0.875rem; font-style: italic; color: var(--plat-faint); letter-spacing: 0.3px; }
 
         /* ── METRIC TAGS ────────────────────────────── */
         .cp-metric-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
         .cp-metric-tag {
           display: inline-flex; align-items: center; gap: 6px;
-          font-family: var(--font-m); font-size: 12px; font-weight: 400;
+          font-family: var(--font-m); font-size: 0.75rem; font-weight: 400;
           letter-spacing: 0.8px; text-transform: uppercase; padding: 4px 10px; border-radius: 4px;
           border: 1px solid var(--rule); color: var(--plat-muted); background: transparent;
         }
         .cp-metric-tag.has-value { border-color: rgba(200,169,110,0.20); color: var(--gold); }
-        .cp-metric-tag-key { color: var(--plat-faint); font-size: 11px; }
+        .cp-metric-tag-key { color: var(--plat-faint); font-size: 0.6875rem; }
 
         .cp-score { display: inline-flex; align-items: center; gap: 4px; margin-left: auto; }
         .cp-score-pip { width: 6px; height: 16px; border-radius: 2px; background: var(--rule); flex-shrink: 0; }
@@ -370,42 +371,43 @@ export default async function ComparePage({ params, searchParams }: Props) {
         /* ── SMOKE TAG ─────────────────────────────── */
         .cp-smoke-tag {
           display: inline-flex; align-items: center; gap: 6px;
-          font-family: var(--font-m); font-size: 12px; font-weight: 500;
+          font-family: var(--font-m); font-size: 0.75rem; font-weight: 500;
           letter-spacing: 1px; text-transform: uppercase; padding: 5px 12px; border-radius: 4px;
           border: 1px solid var(--smoke-bdr); color: var(--smoke); background: var(--smoke-dim); align-self: flex-start;
         }
-        .cp-smoke-icon { font-size: 14px; }
+        .cp-smoke-icon { font-size: 0.875rem; }
         .cp-smoke-reason {
-          font-family: var(--font-m); font-size: 13px; color: var(--plat-muted); line-height: 1.6;
+          font-family: var(--font-m); font-size: 0.8125rem; color: var(--plat-muted); line-height: 1.6;
           font-style: italic; padding: 8px 12px; border-radius: 4px; background: rgba(255,255,255,0.02); border-left: 3px solid var(--smoke-bdr);
         }
-        .cp-smoke-note { font-family: var(--font-m); font-size: 12px; color: var(--plat-faint); line-height: 1.7; }
+        .cp-smoke-note { font-family: var(--font-m); font-size: 0.75rem; color: var(--plat-faint); line-height: 1.7; }
 
         /* ── PROVENANCE ──────────────────────────────────── */
         .cp-provenance {
           display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
           margin-top: auto; padding-top: 14px; border-top: 1px solid var(--rule-faint);
         }
-        .cp-prov-src, .cp-prov-date { font-family: var(--font-m); font-size: 13px; color: var(--plat-faint); letter-spacing: 0.3px; }
-        .cp-prov-sep { color: var(--plat-faint); font-size: 12px; }
-        .cp-prov-archive { font-family: var(--font-m); font-size: 13px; color: var(--gold); text-decoration: none; opacity: 0.8; transition: opacity 0.15s; }
+        .cp-prov-src, .cp-prov-date { font-family: var(--font-m); font-size: 0.8125rem; color: var(--plat-faint); letter-spacing: 0.3px; }
+        .cp-prov-sep { color: var(--plat-faint); font-size: 0.75rem; }
+        .cp-prov-archive { font-family: var(--font-m); font-size: 0.8125rem; color: var(--gold); text-decoration: none; opacity: 0.8; transition: opacity 0.15s; }
         .cp-prov-archive:hover { opacity: 1; }
 
         .cp-authentic {
           display: inline-flex; align-items: center; gap: 6px;
-          font-family: var(--font-m); font-size: 12px; letter-spacing: 1px; text-transform: uppercase;
+          font-family: var(--font-m); font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase;
           color: var(--emerald); border: 1px solid rgba(200,169,110,0.25); background: var(--emerald-dim);
           padding: 4px 10px; border-radius: 4px; margin-left: auto;
         }
+        .cp-authentic-icon { font-size: 0.8125rem; }
 
         /* ── SOURCES FOOTER ──────────────────────────────── */
         .cp-sources-row { padding: 32px 24px; border-top: 1px solid var(--rule); background: var(--onyx-3); margin-top: auto; }
-        .cp-sources-title { font-family: var(--font-m); font-size: 13px; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); opacity: 0.7; margin-bottom: 16px; }
+        .cp-sources-title { font-family: var(--font-m); font-size: 0.8125rem; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); opacity: 0.7; margin-bottom: 16px; }
         .cp-social-links { display: flex; flex-wrap: wrap; gap: 8px; }
         .cp-social-pill {
           /* UX UPGRADE: 44px min-height */
           min-height: 44px; display: inline-flex; align-items: center; justify-content: center;
-          padding: 0 16px; font-family: var(--font-m); font-size: 13px; letter-spacing: 1px; text-transform: uppercase;
+          padding: 0 16px; font-family: var(--font-m); font-size: 0.8125rem; letter-spacing: 1px; text-transform: uppercase;
           border-radius: 4px; text-decoration: none; border: 1px solid var(--rule); color: var(--plat-muted); transition: all 0.15s;
         }
         .cp-social-pill:hover { color: var(--platinum); border-color: var(--plat-faint); }
@@ -415,10 +417,10 @@ export default async function ComparePage({ params, searchParams }: Props) {
         /* ── PAGE FOOTER ─────────────────────────────────── */
         .cp-footer { position: sticky; left: 0; width: 100vw; box-sizing: border-box; background: var(--onyx); padding: 40px clamp(16px,4vw,48px); border-top: 1px solid var(--rule-faint); display: flex; flex-direction: column; gap: 12px; }
         .cp-footer-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
-        .cp-footer-text, .cp-footer-link { font-family: var(--font-m); font-size: 13px; color: var(--plat-muted); letter-spacing: 0.03em; }
+        .cp-footer-text, .cp-footer-link { font-family: var(--font-m); font-size: 0.8125rem; color: var(--plat-muted); letter-spacing: 0.03em; }
         .cp-footer-link { color: var(--gold); opacity: 0.75; transition: opacity 0.15s; }
         .cp-footer-link:hover { opacity: 1; }
-        .cp-disclaimer { font-family: var(--font-m); font-size: 13px; color: var(--plat-faint); line-height: 1.7; max-width: 680px; letter-spacing: 0.02em; }
+        .cp-disclaimer { font-family: var(--font-m); font-size: 0.8125rem; color: var(--plat-faint); line-height: 1.7; max-width: 680px; letter-spacing: 0.02em; }
 
         /* ── RESPONSIVE / UNIVERSAL UX ───────────────────── */
         @media(max-width: 640px) {
@@ -440,14 +442,14 @@ export default async function ComparePage({ params, searchParams }: Props) {
           
           .cp-filter-bar { top: 56px; }
           .cp-cand-header { padding: 16px 16px 14px; top: 116px; }
-          .cp-avatar { width: 44px; height: 44px; font-size: 14px; }
+          .cp-avatar { width: 44px; height: 44px; font-size: 0.875rem; }
           .cp-promise { padding: 24px 16px 20px; }
           .cp-promise--empty { padding: 24px 16px; }
           .cp-cat-header { padding: 14px 16px 10px; }
           .cp-sources-row { padding: 24px 16px; }
           
           /* Ensures buttons fit nicely but retain 44px height */
-          .cp-view-btn { padding: 0 12px; font-size: 12px; }
+          .cp-view-btn { padding: 0 12px; font-size: 0.75rem; }
           .cp-view-btn .cp-view-icon { display: none; }
         }
       `}</style>
