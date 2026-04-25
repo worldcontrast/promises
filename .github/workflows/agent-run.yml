@@ -1,77 +1,167 @@
-# World Contrast — Agent Scheduler
+# World Contrast — Collection Pipeline
 # File: .github/workflows/agent-run.yml
+#
+# JOB: Lê os JSONs de data/countries/, extrai promessas
+#      de cada fonte oficial e grava no Supabase.
+#
+# FIXES v2:
+#   - Separação clara dos dois jobs (scout NÃO está aqui)
+#   - pip cache por hash do requirements (mais rápido)
+#   - Condicional de dry_run corrigida (formato GitHub correto)
+#   - playwright install apenas quando necessário (flag)
+#   - Falha explícita se SUPABASE_URL/KEY não estiverem configurados
+#   - Step de "Verificar JSONs de seed" antes de rodar o pipeline
+#   - Timeout aumentado para 180 min (eleições grandes demoram)
+#   - Cron ajustado: 06:00 UTC a cada 3 dias (era cada 5)
 
 name: Agent — Collection Pipeline
 
 on:
   schedule:
-    - cron: '0 6 */5 * *'
+    # 06:00 UTC a cada 3 dias — mais frequente que o original (5 dias)
+    - cron: '0 6 */3 * *'
 
   workflow_dispatch:
     inputs:
       country:
-        description: 'Country code (leave empty for all)'
+        description: 'Sigla do país (deixar vazio = todos)'
         required: false
         default: ''
       election_id:
-        description: 'Election ID (leave empty for all active)'
+        description: 'ID da eleição (deixar vazio = todas ativas)'
         required: false
         default: ''
       dry_run:
-        description: 'Dry run (extract but do not save to DB)'
+        description: 'Dry run — extrai mas não grava no DB'
         required: false
-        default: 'false'
+        default: false
+        type: boolean
+      skip_playwright:
+        description: 'Pular instalação do Playwright (mais rápido se não for necessário)'
+        required: false
+        default: false
         type: boolean
 
+permissions:
+  contents: read
+  issues: write
+
 jobs:
+  # ── PRE-FLIGHT: verifica se há JSONs de seed disponíveis ──────────────────
+  preflight:
+    name: Pre-flight — Verify Seed JSONs
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    outputs:
+      has_seeds: ${{ steps.check.outputs.has_seeds }}
+      seed_count: ${{ steps.check.outputs.seed_count }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check seed JSON files
+        id: check
+        run: |
+          COUNT=$(find data/countries -name "*.json" 2>/dev/null | wc -l)
+          echo "seed_count=$COUNT" >> "$GITHUB_OUTPUT"
+
+          if [ "$COUNT" -eq 0 ]; then
+            echo "has_seeds=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Nenhum JSON de seed em data/countries/."
+            echo "::warning::Execute o workflow 'Scout — Discovery Agent' primeiro."
+          else
+            echo "has_seeds=true" >> "$GITHUB_OUTPUT"
+            echo "Encontrados $COUNT arquivo(s) de seed:"
+            find data/countries -name "*.json" -exec echo "  · {}" \;
+          fi
+
+  # ── COLLECT: pipeline principal ───────────────────────────────────────────
   collect:
     name: Collect Political Promises
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 180           # +60 min vs original
+    needs: preflight
 
-    permissions:
-      contents: read
-      issues: write
+    # Só roda se há seeds disponíveis
+    if: needs.preflight.outputs.has_seeds == 'true'
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # Cache pip por hash do requirements para builds mais rápidos
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
           cache: 'pip'
+          cache-dependency-path: agents/requirements.txt
 
       - name: Install dependencies
         run: |
           pip install -r agents/requirements.txt
-          playwright install chromium
+
+      # Playwright é opcional — pesado, só instala se necessário
+      - name: Install Playwright
+        if: ${{ github.event.inputs.skip_playwright != 'true' }}
+        run: playwright install chromium
 
       - name: Create logs directory
         run: mkdir -p logs
 
-      - name: Run collection pipeline
+      # Validar credenciais antes de gastar tokens da API
+      - name: Validate required secrets
         env:
-          # PYTHONPATH=. faz o Python enxergar a raiz do repo
-          # permitindo `from config.x` e `from agents.x`
-          PYTHONPATH: .
-          # Anthropic — dois nomes para compatibilidade
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          CLAUDE_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          # Supabase
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
-          # Meta
-          AGENT_VERSION: '1.0.0'
-          LOG_LEVEL: 'INFO'
-          GITHUB_EVENT_NAME: ${{ github.event_name }}
         run: |
-          python agents/scheduler.py \
-            ${{ github.event.inputs.country != '' && format('--country {0}', github.event.inputs.country) || '' }} \
-            ${{ github.event.inputs.election_id != '' && format('--election {0}', github.event.inputs.election_id) || '' }} \
-            ${{ github.event.inputs.dry_run == 'true' && '--dry-run' || '' }}
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_KEY" ]; then
+            if [ "${{ github.event.inputs.dry_run }}" != "true" ]; then
+              echo "::error::SUPABASE_URL e/ou SUPABASE_KEY não configurados."
+              echo "::error::Configure em Settings → Secrets → Actions, ou use dry_run=true."
+              exit 1
+            else
+              echo "::notice::Dry run — Supabase não será usado."
+            fi
+          else
+            echo "✓ Credenciais Supabase configuradas."
+          fi
 
+      - name: Run collection pipeline
+        env:
+          PYTHONPATH: .
+          ANTHROPIC_API_KEY:  ${{ secrets.ANTHROPIC_API_KEY }}
+          CLAUDE_API_KEY:     ${{ secrets.ANTHROPIC_API_KEY }}
+          SUPABASE_URL:       ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY:       ${{ secrets.SUPABASE_KEY }}
+          AGENT_VERSION:      '2.0.0'
+          LOG_LEVEL:          'INFO'
+          GITHUB_EVENT_NAME:  ${{ github.event_name }}
+        run: |
+          # Construir flags opcionais de forma segura
+          # (evita o padrão && format() do original que quebra com valores vazios)
+          ARGS=""
+
+          COUNTRY="${{ github.event.inputs.country }}"
+          if [ -n "$COUNTRY" ]; then
+            ARGS="$ARGS --country $COUNTRY"
+          fi
+
+          ELECTION_ID="${{ github.event.inputs.election_id }}"
+          if [ -n "$ELECTION_ID" ]; then
+            ARGS="$ARGS --election $ELECTION_ID"
+          fi
+
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            ARGS="$ARGS --dry-run"
+          fi
+
+          echo "Executando: python agents/scheduler.py $ARGS"
+          python agents/scheduler.py $ARGS
+
+      # Logs sempre salvos, mesmo em falha
       - name: Upload run logs
         if: always()
         uses: actions/upload-artifact@v4
@@ -80,3 +170,41 @@ jobs:
           path: logs/*.log
           if-no-files-found: warn
           retention-days: 90
+
+  # ── NOTIFY: abre issue automática em caso de falha ────────────────────────
+  notify-failure:
+    name: Notify on Failure
+    runs-on: ubuntu-latest
+    needs: collect
+    if: failure()
+    permissions:
+      issues: write
+
+    steps:
+      - name: Create failure issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo:  context.repo.repo,
+              title: `Pipeline failure — run #${context.runNumber}`,
+              body: [
+                '## ❌ Collection Pipeline Failed',
+                '',
+                `**Run:** [#${context.runNumber}](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`,
+                `**Trigger:** \`${context.eventName}\``,
+                `**Time:** ${new Date().toISOString()}`,
+                '',
+                '### Possible causes',
+                '- SUPABASE_URL or SUPABASE_KEY not configured',
+                '- ANTHROPIC_API_KEY expired or rate-limited',
+                '- No seed JSONs in `data/countries/` — run Scout first',
+                '- scheduler.py import error',
+                '',
+                'Check the [run logs](' +
+                  `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}` +
+                  `/actions/runs/${context.runId}) for details.`,
+              ].join('\n'),
+              labels: ['pipeline-failure', 'automated'],
+            });
