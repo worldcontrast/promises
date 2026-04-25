@@ -25,13 +25,14 @@ jobs:
           python-version: '3.11'
 
       - name: Install Dependencies
-        run: pip install httpx anthropic duckduckgo-search
+        run: pip install httpx anthropic tavily-python
 
       - name: Run Scout Agent
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
         run: |
-          python agents/scout.py --country "${{ github.event.inputs.country }}" --election "${{ github.event.inputs.election }}"
+          python agents/scout.py --country "${{ github.event.inputs.country }}" --election "${{ github.event.inputs.election }}" --search tavily
 
       - name: Commit and Push JSON (O Carimbo Humano)
         run: |
