@@ -12,6 +12,9 @@ on:
         required: true
         default: 'Presidential 2026'
 
+permissions:
+  contents: write
+
 jobs:
   run-scout:
     runs-on: ubuntu-latest
