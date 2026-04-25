@@ -1,0 +1,61 @@
+{
+  "country": "US",
+  "election": "Presidential 2024",
+  "status": "live",
+  "generated": "2026-04-25T19:00:20.781113+00:00",
+  "scout_version": "2.0.0",
+  "candidates": [
+    {
+      "fullName": "Donald J. Trump",
+      "party": "Republican Party",
+      "sources": {
+        "electoral_filing": "https://www.fec.gov/data/candidate/P80001571",
+        "official_site": "https://www.donaldjtrump.com",
+        "instagram": null,
+        "twitter": null,
+        "youtube": null,
+        "facebook": null,
+        "tiktok": null
+      }
+    },
+    {
+      "fullName": "Kamala Harris",
+      "party": "Democratic Party",
+      "sources": {
+        "electoral_filing": "https://www.fec.gov/data/candidate/P00009423",
+        "official_site": "https://kamalaharris.com",
+        "instagram": null,
+        "twitter": null,
+        "youtube": null,
+        "facebook": null,
+        "tiktok": null
+      }
+    },
+    {
+      "fullName": "Cornel West",
+      "party": "Independent",
+      "sources": {
+        "electoral_filing": null,
+        "official_site": "https://www.cornelwest.com",
+        "instagram": null,
+        "twitter": null,
+        "youtube": null,
+        "facebook": null,
+        "tiktok": null
+      }
+    },
+    {
+      "fullName": "Jill Stein",
+      "party": "Green Party",
+      "sources": {
+        "electoral_filing": "https://www.fec.gov/updates/commission-certifies-jill-stein-eligible-to-receive-federal-matching-funds-2024",
+        "official_site": "https://www.jillstein2024.com",
+        "instagram": null,
+        "twitter": null,
+        "youtube": null,
+        "facebook": null,
+        "tiktok": null
+      }
+    }
+  ]
+}
