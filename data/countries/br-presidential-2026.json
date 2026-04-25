@@ -1,14 +1,14 @@
 {
   "country": "BR",
   "election": "Presidential 2026",
-  "generated": "2026-04-25T03:45:32.259351+00:00",
+  "generated": "2026-04-25T04:03:55.337956+00:00",
   "scout_version": "1.0.0",
   "candidates": [
     {
       "fullName": "Luiz Inácio Lula da Silva",
       "party": "PT",
       "sources": {
-        "electoral_filing": "https://www.tse.jus.br/comunicacao/noticias/2022/Setembro/tse-defere-registro-da-candidatura-de-lula-a-presidente-da-republica-769636",
+        "electoral_filing": null,
         "official_site": null,
         "instagram": "https://www.instagram.com/lulaoficial",
         "twitter": null,
@@ -21,7 +21,7 @@
       "fullName": "Tarcísio de Freitas",
       "party": "Republicanos",
       "sources": {
-        "electoral_filing": "https://www.tre-sp.jus.br/comunicacao/noticias/2022/Setembro/tre-sp-defere-pedido-de-registro-de-candidatura-de-tarcisio-de-freitas-para-governador-191878",
+        "electoral_filing": null,
         "official_site": null,
         "instagram": "https://www.instagram.com/tarcisiogdf",
         "twitter": null,
