@@ -7,6 +7,7 @@ import json
 import logging
 import asyncio
 import anthropic
+import re
 from pathlib import Path
 
 log = logging.getLogger('extractor')
@@ -14,8 +15,10 @@ PROMPT_PATH = Path(__file__).parent / 'prompts' / 'extraction_prompt.txt'
 
 class PromiseExtractor:
     def __init__(self, settings):
-        # 1. A BLINDAGEM DA CHAVE: Removemos o \n que estava a causar os erros de Headers/Conexão
-        clean_key = settings.anthropic_api_key.strip(" \r\n\t'\"")
+        # 1. A BLINDAGEM MÁXIMA DA CHAVE (O "Aspirador" Absoluto):
+        # Removemos não só espaços, mas quebras de linha literais (\\n) que enganam o sistema!
+        raw_key = str(settings.anthropic_api_key)
+        clean_key = re.sub(r"[\s\r\n]+", "", raw_key).replace("\\n", "").replace("\\r", "").strip("'\"")
         
         self.client = anthropic.AsyncAnthropic(
             api_key=clean_key,
