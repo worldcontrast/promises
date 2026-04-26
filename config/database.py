@@ -161,3 +161,47 @@ class Database:
     async def promise_hash_exists(self, text_hash: str, candidate_id: str) -> bool:
         res = self.client.table('promises').select('id').eq('candidate_id', candidate_id).eq('text_hash', text_hash).execute()
         return len(res.data) > 0
+
+    # FIX 4a: Método que faltava — pipeline_runner chama isto para cada rejeição.
+    # Sem ele, qualquer run com rejeições crashava silenciosamente.
+    async def log_rejection_real(
+        self,
+        candidate_id: str | None,
+        text: str,
+        reason: str,
+        source_url: str,
+    ) -> None:
+        """
+        Grava rejeições POCVA-01 na tabela pública extraction_rejections.
+        Transparência total — nada é descartado silenciosamente.
+        """
+        try:
+            record = {
+                'candidate_id':     candidate_id,
+                'rejected_text':    text[:300],   # schema: max 300 chars
+                'rejection_reason': reason,
+                'source_url':       source_url,
+                'collected_at':     datetime.now(timezone.utc).isoformat(),
+            }
+            self.client.table('extraction_rejections').insert(record).execute()
+        except Exception as e:
+            # Nunca deixar a falha de log bloquear o pipeline principal
+            log.warning(f"Não foi possível gravar rejeição: {e}")
+
+    # FIX 3: Método para refrescar a Materialized View após cada run.
+    # O Supabase não tem cron automático para isto — tem de ser chamado explicitamente.
+    async def refresh_materialized_view(self, view_name: str) -> None:
+        """
+        Executa REFRESH MATERIALIZED VIEW via RPC do Supabase.
+        Requer que exista uma função SQL: refresh_<view_name>() com SECURITY DEFINER.
+        Ver: supabase/functions/refresh_candidate_stats.sql
+        """
+        try:
+            # Método preferido: chamar função RPC dedicada (mais seguro que SQL raw)
+            self.client.rpc(f'refresh_{view_name}').execute()
+            log.info(f"✓ Materialized View '{view_name}' refrescada.")
+        except Exception as e:
+            log.warning(
+                f"Não foi possível refrescar '{view_name}': {e}. "
+                f"Execute manualmente: REFRESH MATERIALIZED VIEW {view_name};"
+            )
