@@ -43,7 +43,6 @@ log = logging.getLogger('scheduler')
 from agents.crawler.crawler import WebCrawler
 from agents.extraction.extractor import PromiseExtractor
 from agents.validation.validator import PromiseValidator
-from agents.archive.archiver import PageArchiver
 from agents.pipeline_runner import PipelineRunner
 from config.settings import Settings
 from config.database import Database
@@ -94,7 +93,9 @@ async def run_pipeline(
     crawler   = WebCrawler(settings)
     extractor = PromiseExtractor(settings)
     validator = PromiseValidator(settings, db=db)
-    archiver  = PageArchiver(settings)
+    
+    # O ARQUIVADOR FOI DESLIGADO PARA PROTEGER A REDE E A API DA ANTHROPIC
+    archiver  = None 
 
     # FIX 1: Garantir que cada eleição existe na tabela ANTES do pipeline correr.
     # Sem isto, upsert_candidate() falha com erro de FK (election_id não existe).
