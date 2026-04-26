@@ -67,9 +67,13 @@ jobs:
           if git diff --staged --quiet; then
             echo "Nenhuma eleição nova encontrada no mundo hoje."
           else
+            # FIX 5: A ordem correcta é fetch → rebase → commit → push.
+            # O stash DEPOIS do commit (versão anterior) guardava o commit
+            # já feito e criava conflito no rebase seguinte.
+            git fetch origin main
+            git rebase origin/main
+
             git commit -m "🌐 Global Monitor: Novos mapas eleitorais descobertos"
-            git stash --include-untracked
-            git pull --rebase origin main
             git push origin main
             echo "✓ Mapas globais atualizados com sucesso!"
           fi
