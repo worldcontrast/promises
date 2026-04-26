@@ -18,8 +18,8 @@ class PromiseExtractor:
     def __init__(self, settings):
         self.settings = settings
         self.client = anthropic.AsyncAnthropic(api_key=settings.anthropic_api_key)
-        # Modelo estável que funciona em todas as contas Anthropic
-        self.model = 'claude-3-5-sonnet-20240620' 
+        # Regra de arquitectura: usar sempre o alias latest, nunca datas fixas
+        self.model = 'claude-3-5-sonnet-latest'
 
         self._prompt_raw = self._load_prompt_file()
         self._system_prompt = self._parse_system_prompt()
