@@ -96,6 +96,16 @@ async def run_pipeline(
     validator = PromiseValidator(settings, db=db)
     archiver  = PageArchiver(settings)
 
+    # FIX 1: Garantir que cada eleição existe na tabela ANTES do pipeline correr.
+    # Sem isto, upsert_candidate() falha com erro de FK (election_id não existe).
+    if db:
+        log.info("Step 2/5: Ensuring election records exist in database...")
+        for election in registry:
+            await db.ensure_election_exists(
+                country_code=election['country'],
+                election_name=election['id'],   # já é slug; ensure_election_exists aceita slug
+            )
+
     runner = PipelineRunner(crawler, extractor, validator, archiver, db, dry_run=dry_run)
     stats = await runner.run_parallel(registry, stats)
 
@@ -109,6 +119,9 @@ async def run_pipeline(
 
     if not dry_run and db:
         await db.finish_run(stats)
+        # FIX 3: Refrescar a Materialized View após o pipeline para que o
+        # frontend veja os dados imediatamente (sem esperar pelo cron do Supabase).
+        await db.refresh_materialized_view('candidate_stats')
 
     return stats
 
