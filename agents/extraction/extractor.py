@@ -6,7 +6,7 @@ File: agents/extraction/extractor.py
 import json
 import logging
 import asyncio
-import anthropic
+import httpx
 from pathlib import Path
 
 log = logging.getLogger('extractor')
@@ -14,18 +14,8 @@ PROMPT_PATH = Path(__file__).parent / 'prompts' / 'extraction_prompt.txt'
 
 class PromiseExtractor:
     def __init__(self, settings):
-        self.settings = settings
-        
-        # Abre apenas UMA ligação (pool) no início do programa. Não esgota a internet do servidor.
-        self.client = anthropic.AsyncAnthropic(
-            api_key=settings.anthropic_api_key,
-            max_retries=3,
-            timeout=60.0
-        )
-        
+        self.api_key = settings.anthropic_api_key
         self.model = 'claude-3-haiku-20240307' 
-        
-        # Semáforo para processar no máximo 2 de cada vez, protegendo o seu saldo
         self.semaphore = asyncio.Semaphore(2)
 
         self._prompt_raw = self._load_prompt_file()
@@ -57,14 +47,40 @@ class PromiseExtractor:
         async with self.semaphore:
             log.info(f"Calling Claude [{self.model}] — {candidate_name}")
 
+            # Usar HTTPX diretamente para evitar os Connection Errors do SDK da Anthropic no GitHub Actions
+            headers = {
+                "x-api-key": self.api_key,
+                "anthropic-version": "2023-06-01",
+                "content-type": "application/json",
+                # Mantém a ligação viva mesmo que demore
+                "Connection": "keep-alive" 
+            }
+            
+            payload = {
+                "model": self.model,
+                "max_tokens": 4096,
+                "system": self._system_prompt,
+                "messages": [{"role": "user", "content": user_message}]
+            }
+
             try:
-                response = await self.client.messages.create(
-                    model=self.model,
-                    max_tokens=4096,
-                    system=self._system_prompt,
-                    messages=[{'role': 'user', 'content': user_message}],
-                )
-                return self._parse_response(response.content[0].text, source_url)
+                # Timeout gigante de 300 segundos (5 minutos) com retentativas manuais
+                async with httpx.AsyncClient(timeout=300.0) as client:
+                    for attempt in range(3):
+                        try:
+                            response = await client.post(
+                                "https://api.anthropic.com/v1/messages",
+                                headers=headers,
+                                json=payload
+                            )
+                            response.raise_for_status()
+                            data = response.json()
+                            return self._parse_response(data['content'][0]['text'], source_url)
+                        except (httpx.ReadTimeout, httpx.ConnectError) as e:
+                            log.warning(f"Network error on attempt {attempt+1} for {candidate_name}: {e}")
+                            if attempt == 2:
+                                raise e
+                            await asyncio.sleep(2)
             except Exception as e:
                 log.error(f"Claude API error: {e}")
                 return self._empty_result(str(e))
