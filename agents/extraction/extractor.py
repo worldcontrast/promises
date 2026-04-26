@@ -14,8 +14,12 @@ PROMPT_PATH = Path(__file__).parent / 'prompts' / 'extraction_prompt.txt'
 
 class PromiseExtractor:
     def __init__(self, settings):
-        self.api_key = settings.anthropic_api_key
-        self.model = 'claude-3-haiku-20240307' 
+        # AQUI ESTÁ A BLINDAGEM DA CHAVE! O .strip() limpa qualquer "Enter" ou espaço invisível
+        self.api_key = settings.anthropic_api_key.strip(" \r\n\t'\"")
+        
+        # O modelo mais inteligente e recente
+        self.model = 'claude-3-5-sonnet-latest' 
+        
         self.semaphore = asyncio.Semaphore(2)
 
         self._prompt_raw = self._load_prompt_file()
@@ -47,12 +51,10 @@ class PromiseExtractor:
         async with self.semaphore:
             log.info(f"Calling Claude [{self.model}] — {candidate_name}")
 
-            # Usar HTTPX diretamente para evitar os Connection Errors do SDK da Anthropic no GitHub Actions
             headers = {
                 "x-api-key": self.api_key,
                 "anthropic-version": "2023-06-01",
                 "content-type": "application/json",
-                # Mantém a ligação viva mesmo que demore
                 "Connection": "keep-alive" 
             }
             
@@ -64,7 +66,6 @@ class PromiseExtractor:
             }
 
             try:
-                # Timeout gigante de 300 segundos (5 minutos) com retentativas manuais
                 async with httpx.AsyncClient(timeout=300.0) as client:
                     for attempt in range(3):
                         try:
