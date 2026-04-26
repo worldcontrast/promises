@@ -8,6 +8,7 @@ import logging
 import asyncio
 import anthropic
 import re
+import httpx
 from pathlib import Path
 
 log = logging.getLogger('extractor')
@@ -19,18 +20,19 @@ class PromiseExtractor:
         raw_key = str(settings.anthropic_api_key)
         clean_key = re.sub(r"[\s\r\n]+", "", raw_key).replace("\\n", "").replace("\\r", "").strip("'\"")
         
+        self.api_key = clean_key
         self.client = anthropic.AsyncAnthropic(
             api_key=clean_key,
             max_retries=3,
             timeout=80.0
         )
         
-        # O SEMÁFORO: Processa 2 de cada vez
         self.semaphore = asyncio.Semaphore(2)
+        self._models_checked = False
 
         self._prompt_raw = self._load_prompt_file()
         self._system_prompt = self._parse_system_prompt()
-        log.info(f"Extractor ready — prompt hash: {self.get_prompt_hash()[:12]}...")
+        log.info(f"Extractor ready — key length: {len(clean_key)} chars.")
 
     def _load_prompt_file(self) -> str:
         if not PROMPT_PATH.exists(): return ""
@@ -48,12 +50,30 @@ class PromiseExtractor:
         if not content or len(content.strip()) < 50:
             return self._empty_result("content_too_short")
 
+        # 🔍 O RADAR DE DIAGNÓSTICO 🔍
+        if not self._models_checked:
+            self._models_checked = True
+            try:
+                async with httpx.AsyncClient() as http:
+                    res = await http.get(
+                        "https://api.anthropic.com/v1/models",
+                        headers={"x-api-key": self.api_key, "anthropic-version": "2023-06-01"}
+                    )
+                    if res.status_code == 200:
+                        data = res.json().get('data', [])
+                        available = [m['id'] for m in data]
+                        log.info(f"🔍 DIAGNÓSTICO DA CHAVE: Modelos autorizados nesta chave: {available}")
+                    else:
+                        log.error(f"🔍 DIAGNÓSTICO DA CHAVE: A Anthropic rejeitou a listagem. Erro {res.status_code}: {res.text}")
+            except Exception as e:
+                log.error(f"🔍 DIAGNÓSTICO DA CHAVE: Falha ao testar chave: {e}")
+
+
         user_message = (
             f"Extract political promises for {candidate_name} in {country} from {source_url}.\n\n"
             f"---CONTENT---\n{content[:150000]}\n---END---"
         )
 
-        # A MÁGICA: Lista de todos os modelos atuais. Se um der erro 404, salta para o próximo!
         models_to_try = [
             'claude-3-5-sonnet-20241022',
             'claude-3-5-haiku-20241022',
@@ -75,23 +95,19 @@ class PromiseExtractor:
                 
                 except Exception as e:
                     error_msg = str(e).lower()
-                    # Se for erro 404 de modelo não encontrado, ignoramos e tentamos o seguinte
                     if "404" in error_msg or "not_found" in error_msg:
-                        log.warning(f"⚠️ Model {model_name} bloqueado na sua conta (404). A tentar o próximo...")
+                        log.warning(f"⚠️ Model {model_name} não autorizado para esta chave (404).")
                         continue
                     
-                    # Se for outro erro (ex: rede), regista e avança
                     log.error(f"Claude API error: {e}")
                     return self._empty_result(str(e))
             
-            # Se todos os modelos derem erro 404
-            log.error("❌ CRÍTICO: Todos os modelos deram erro 404. Precisa ativar os modelos no site da Anthropic: Settings -> Workspaces -> Models")
+            log.error("❌ CRÍTICO: Nenhum modelo funcionou. A chave no GitHub não tem permissão para usar os modelos Claude 3.")
             return self._empty_result("all_models_404")
 
     def _parse_response(self, raw: str, url: str) -> dict:
         try:
             clean = raw.strip()
-            # TRUQUE: Evitar escrever três crases juntas para a interface não quebrar o ficheiro
             f_json = "`" * 3 + "json"
             f_code = "`" * 3
             
