@@ -15,8 +15,7 @@ PROMPT_PATH = Path(__file__).parent / 'prompts' / 'extraction_prompt.txt'
 
 class PromiseExtractor:
     def __init__(self, settings):
-        # 1. A BLINDAGEM MÁXIMA DA CHAVE (O "Aspirador" Absoluto):
-        # Removemos não só espaços, mas quebras de linha literais (\\n) que enganam o sistema!
+        # 1. A BLINDAGEM MÁXIMA DA CHAVE (A funcionar perfeitamente!)
         raw_key = str(settings.anthropic_api_key)
         clean_key = re.sub(r"[\s\r\n]+", "", raw_key).replace("\\n", "").replace("\\r", "").strip("'\"")
         
@@ -26,8 +25,8 @@ class PromiseExtractor:
             timeout=120.0
         )
         
-        # 2. O MODELO GARANTIDO: A versão 20240620 do Sonnet é a mais segura para o Tier 1
-        self.model = 'claude-3-5-sonnet-20240620' 
+        # 2. O MODELO SEGURO: O Haiku é super-rápido e está confirmado na sua conta!
+        self.model = 'claude-3-haiku-20240307' 
         
         # 3. O SEMÁFORO: Processa 2 de cada vez para não ser bloqueado por SPAM
         self.semaphore = asyncio.Semaphore(2)
