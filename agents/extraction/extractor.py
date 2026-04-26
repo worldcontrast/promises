@@ -91,4 +91,35 @@ class PromiseExtractor:
     def _parse_response(self, raw: str, url: str) -> dict:
         try:
             clean = raw.strip()
-            if "
+            # TRUQUE: Evitar escrever três crases juntas para a interface não quebrar o ficheiro
+            f_json = "`" * 3 + "json"
+            f_code = "`" * 3
+            
+            if f_json in clean: 
+                clean = clean.split(f_json)[1].split(f_code)[0]
+            elif f_code in clean: 
+                clean = clean.split(f_code)[1].split(f_code)[0]
+            
+            result = json.loads(clean.strip())
+            if 'promises' not in result: 
+                result['promises'] = []
+            return result
+        except Exception as e:
+            log.error(f"JSON Parse Error: {e}")
+            return self._empty_result(f"json_error: {e}")
+
+    def _empty_result(self, reason: str) -> dict:
+        return {
+            'promises': [],
+            'extraction_rejections': [{'reason': reason}],
+            'extraction_metadata': {
+                'total_considered': 0,
+                'total_accepted': 0,
+                'total_rejected': 1,
+                'language_detected': 'unknown'
+            }
+        }
+
+    def get_prompt_hash(self) -> str:
+        import hashlib
+        return hashlib.sha256(self._prompt_raw.encode('utf-8')).hexdigest()
