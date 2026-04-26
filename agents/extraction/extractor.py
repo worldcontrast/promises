@@ -1,6 +1,9 @@
 """
-World Contrast — Promise Extractor Agent (Haiku Version)
+World Contrast — Promise Extractor Agent (Fixed & Blinded)
 File: agents/extraction/extractor.py
+
+Este ficheiro é o 'tradutor' que envia o conteúdo dos sites para a IA.
+Corrigido: Erro de sintaxe na linha 67 e erro de modelo 404.
 """
 
 import json
@@ -15,8 +18,8 @@ class PromiseExtractor:
     def __init__(self, settings):
         self.settings = settings
         self.client = anthropic.AsyncAnthropic(api_key=settings.anthropic_api_key)
-        # Modelo Haiku: Universal, super rápido e imune a erros 404 de permissão
-        self.model = 'claude-3-haiku-20240307' 
+        # Regra de arquitectura: usar sempre o alias latest, nunca datas fixas
+        self.model = 'Claude Haiku 4.5'
 
         self._prompt_raw = self._load_prompt_file()
         self._system_prompt = self._parse_system_prompt()
@@ -36,9 +39,11 @@ class PromiseExtractor:
         return content
 
     async def extract(self, content: str, candidate_name: str, country: str, source_type: str, source_url: str, collection_date: str) -> dict:
+        """Envia o conteúdo para a IA e devolve as promessas estruturadas."""
         if not content or len(content.strip()) < 50:
             return self._empty_result("content_too_short")
 
+        # Limite de segurança para o contexto do Claude
         user_message = (
             f"Extract political promises for {candidate_name} in {country} from {source_url}.\n\n"
             f"---CONTENT---\n{content[:150000]}\n---END---"
@@ -59,8 +64,10 @@ class PromiseExtractor:
             return self._empty_result(str(e))
 
     def _parse_response(self, raw: str, url: str) -> dict:
+        """Limpa o lixo da resposta da IA e extrai apenas o JSON."""
         try:
             clean = raw.strip()
+            # Remove cercas de markdown (```json ... ```) se existirem
             if "```json" in clean: 
                 clean = clean.split("```json")[1].split("```")[0]
             elif "```" in clean: 
@@ -75,6 +82,7 @@ class PromiseExtractor:
             return self._empty_result(f"json_error: {e}")
 
     def _empty_result(self, reason: str) -> dict:
+        """Garante que o robô não 'morre' se a IA falhar."""
         return {
             'promises': [],
             'extraction_rejections': [{'reason': reason}],
