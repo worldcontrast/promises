@@ -15,19 +15,7 @@ PROMPT_PATH = Path(__file__).parent / 'prompts' / 'extraction_prompt.txt'
 class PromiseExtractor:
     def __init__(self, settings):
         self.settings = settings
-        
-        # BLINDAGEM DE REDE: Mais tentativas e timeout alargado (120s)
-        self.client = anthropic.AsyncAnthropic(
-            api_key=settings.anthropic_api_key,
-            max_retries=5,
-            timeout=120.0
-        )
-        
-        # O modelo mais rápido para evitar timeouts
         self.model = 'claude-3-haiku-20240307' 
-        
-        # O SEMÁFORO: Apenas 2 candidatos processados ao mesmo tempo
-        # Isto evita que a Anthropic bloqueie a sua conta Tier 1
         self.semaphore = asyncio.Semaphore(2)
 
         self._prompt_raw = self._load_prompt_file()
@@ -56,16 +44,25 @@ class PromiseExtractor:
             f"---CONTENT---\n{content[:150000]}\n---END---"
         )
 
-        # O robô entra na fila. Se já houver 2 a processar, ele espera educadamente.
         async with self.semaphore:
             log.info(f"Calling Claude [{self.model}] — {candidate_name}")
 
             try:
-                response = await self.client.messages.create(
+                # O TRUQUE DE MESTRE: Criamos o cliente AQUI dentro. 
+                # Isto garante uma ligação TCP limpa, fresca e imune a quebras do GitHub Actions.
+                client = anthropic.AsyncAnthropic(
+                    api_key=self.settings.anthropic_api_key,
+                    max_retries=5,
+                    timeout=120.0
+                )
+                
+                response = await client.messages.create(
                     model=self.model,
                     max_tokens=4096,
                     system=self._system_prompt,
                     messages=[{'role': 'user', 'content': user_message}],
+                    # Dizemos aos servidores para fecharem a ligação no fim, evitando erros fantasma
+                    extra_headers={"Connection": "close"}
                 )
                 return self._parse_response(response.content[0].text, source_url)
             except Exception as e:
