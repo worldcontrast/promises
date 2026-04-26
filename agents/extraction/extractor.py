@@ -6,7 +6,7 @@ File: agents/extraction/extractor.py
 import json
 import logging
 import asyncio
-import httpx
+import anthropic
 from pathlib import Path
 
 log = logging.getLogger('extractor')
@@ -14,12 +14,19 @@ PROMPT_PATH = Path(__file__).parent / 'prompts' / 'extraction_prompt.txt'
 
 class PromiseExtractor:
     def __init__(self, settings):
-        # AQUI ESTÁ A BLINDAGEM DA CHAVE! O .strip() limpa qualquer "Enter" ou espaço invisível
-        self.api_key = settings.anthropic_api_key.strip(" \r\n\t'\"")
+        # 1. A BLINDAGEM DA CHAVE: Removemos o \n que estava a causar os erros de Headers/Conexão
+        clean_key = settings.anthropic_api_key.strip(" \r\n\t'\"")
         
-        # O modelo mais inteligente e recente
-        self.model = 'claude-3-5-sonnet-latest' 
+        self.client = anthropic.AsyncAnthropic(
+            api_key=clean_key,
+            max_retries=4,
+            timeout=120.0
+        )
         
+        # 2. O MODELO GARANTIDO: A versão 20240620 do Sonnet é a mais segura para o Tier 1
+        self.model = 'claude-3-5-sonnet-20240620' 
+        
+        # 3. O SEMÁFORO: Processa 2 de cada vez para não ser bloqueado por SPAM
         self.semaphore = asyncio.Semaphore(2)
 
         self._prompt_raw = self._load_prompt_file()
@@ -51,37 +58,14 @@ class PromiseExtractor:
         async with self.semaphore:
             log.info(f"Calling Claude [{self.model}] — {candidate_name}")
 
-            headers = {
-                "x-api-key": self.api_key,
-                "anthropic-version": "2023-06-01",
-                "content-type": "application/json",
-                "Connection": "keep-alive" 
-            }
-            
-            payload = {
-                "model": self.model,
-                "max_tokens": 4096,
-                "system": self._system_prompt,
-                "messages": [{"role": "user", "content": user_message}]
-            }
-
             try:
-                async with httpx.AsyncClient(timeout=300.0) as client:
-                    for attempt in range(3):
-                        try:
-                            response = await client.post(
-                                "https://api.anthropic.com/v1/messages",
-                                headers=headers,
-                                json=payload
-                            )
-                            response.raise_for_status()
-                            data = response.json()
-                            return self._parse_response(data['content'][0]['text'], source_url)
-                        except (httpx.ReadTimeout, httpx.ConnectError) as e:
-                            log.warning(f"Network error on attempt {attempt+1} for {candidate_name}: {e}")
-                            if attempt == 2:
-                                raise e
-                            await asyncio.sleep(2)
+                response = await self.client.messages.create(
+                    model=self.model,
+                    max_tokens=4096,
+                    system=self._system_prompt,
+                    messages=[{'role': 'user', 'content': user_message}],
+                )
+                return self._parse_response(response.content[0].text, source_url)
             except Exception as e:
                 log.error(f"Claude API error: {e}")
                 return self._empty_result(str(e))
