@@ -96,9 +96,15 @@ class PipelineRunner:
                 stats['errors'].append(f"fetch_failed:{url}")
                 return
 
-            archive_url = await self.archiver.save(page)
-            page['archive_url'] = archive_url
-            stats['pages_archived'] += 1
+            # Archiver é opcional — se None ou falhar, pipeline continua sem arquivo
+            archive_url = None
+            if self.archiver is not None:
+                try:
+                    archive_url = await self.archiver.save(page)
+                    stats['pages_archived'] += 1
+                except Exception as arch_err:
+                    log.warning(f"    ⚠ Archiver falhou para {url}: {arch_err} — continuando sem arquivo")
+            page['archive_url'] = archive_url or ''
 
             crawled_page_id = None
             if not self.dry_run and self.db:
