@@ -15,7 +15,17 @@ PROMPT_PATH = Path(__file__).parent / 'prompts' / 'extraction_prompt.txt'
 class PromiseExtractor:
     def __init__(self, settings):
         self.settings = settings
+        
+        # Abre apenas UMA ligação (pool) no início do programa. Não esgota a internet do servidor.
+        self.client = anthropic.AsyncAnthropic(
+            api_key=settings.anthropic_api_key,
+            max_retries=3,
+            timeout=60.0
+        )
+        
         self.model = 'claude-3-haiku-20240307' 
+        
+        # Semáforo para processar no máximo 2 de cada vez, protegendo o seu saldo
         self.semaphore = asyncio.Semaphore(2)
 
         self._prompt_raw = self._load_prompt_file()
@@ -48,21 +58,11 @@ class PromiseExtractor:
             log.info(f"Calling Claude [{self.model}] — {candidate_name}")
 
             try:
-                # O TRUQUE DE MESTRE: Criamos o cliente AQUI dentro. 
-                # Isto garante uma ligação TCP limpa, fresca e imune a quebras do GitHub Actions.
-                client = anthropic.AsyncAnthropic(
-                    api_key=self.settings.anthropic_api_key,
-                    max_retries=5,
-                    timeout=120.0
-                )
-                
-                response = await client.messages.create(
+                response = await self.client.messages.create(
                     model=self.model,
                     max_tokens=4096,
                     system=self._system_prompt,
                     messages=[{'role': 'user', 'content': user_message}],
-                    # Dizemos aos servidores para fecharem a ligação no fim, evitando erros fantasma
-                    extra_headers={"Connection": "close"}
                 )
                 return self._parse_response(response.content[0].text, source_url)
             except Exception as e:
