@@ -19,7 +19,7 @@ class PromiseExtractor:
         self.settings = settings
         self.client = anthropic.AsyncAnthropic(api_key=settings.anthropic_api_key)
         # Regra de arquitectura: usar sempre o alias latest, nunca datas fixas
-        self.model = 'Claude Haiku 4.5'
+        self.model = 'Claude Sonnet 4.6'
 
         self._prompt_raw = self._load_prompt_file()
         self._system_prompt = self._parse_system_prompt()
