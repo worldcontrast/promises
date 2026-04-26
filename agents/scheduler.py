@@ -103,7 +103,7 @@ async def run_pipeline(
         for election in registry:
             await db.ensure_election_exists(
                 country_code=election['country'],
-                election_name=election['id'],   # já é slug; ensure_election_exists aceita slug
+                election_name=election['id'].replace(f"{election['country'].lower()}-", ""),
             )
 
     runner = PipelineRunner(crawler, extractor, validator, archiver, db, dry_run=dry_run)
