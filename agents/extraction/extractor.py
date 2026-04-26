@@ -5,6 +5,7 @@ File: agents/extraction/extractor.py
 
 import json
 import logging
+import asyncio
 import anthropic
 from pathlib import Path
 
@@ -15,15 +16,19 @@ class PromiseExtractor:
     def __init__(self, settings):
         self.settings = settings
         
-        # BLINDAGEM DE REDE: Mais tempo de espera e mais tentativas para não cair a ligação
+        # BLINDAGEM DE REDE: Mais tentativas e timeout alargado (120s)
         self.client = anthropic.AsyncAnthropic(
             api_key=settings.anthropic_api_key,
             max_retries=5,
-            timeout=60.0
+            timeout=120.0
         )
         
-        # NOME OFICIAL DO MODELO (O mais rápido e garantido)
+        # O modelo mais rápido para evitar timeouts
         self.model = 'claude-3-haiku-20240307' 
+        
+        # O SEMÁFORO: Apenas 2 candidatos processados ao mesmo tempo
+        # Isto evita que a Anthropic bloqueie a sua conta Tier 1
+        self.semaphore = asyncio.Semaphore(2)
 
         self._prompt_raw = self._load_prompt_file()
         self._system_prompt = self._parse_system_prompt()
@@ -51,19 +56,21 @@ class PromiseExtractor:
             f"---CONTENT---\n{content[:150000]}\n---END---"
         )
 
-        log.info(f"Calling Claude [{self.model}] — {candidate_name}")
+        # O robô entra na fila. Se já houver 2 a processar, ele espera educadamente.
+        async with self.semaphore:
+            log.info(f"Calling Claude [{self.model}] — {candidate_name}")
 
-        try:
-            response = await self.client.messages.create(
-                model=self.model,
-                max_tokens=4096,
-                system=self._system_prompt,
-                messages=[{'role': 'user', 'content': user_message}],
-            )
-            return self._parse_response(response.content[0].text, source_url)
-        except Exception as e:
-            log.error(f"Claude API error: {e}")
-            return self._empty_result(str(e))
+            try:
+                response = await self.client.messages.create(
+                    model=self.model,
+                    max_tokens=4096,
+                    system=self._system_prompt,
+                    messages=[{'role': 'user', 'content': user_message}],
+                )
+                return self._parse_response(response.content[0].text, source_url)
+            except Exception as e:
+                log.error(f"Claude API error: {e}")
+                return self._empty_result(str(e))
 
     def _parse_response(self, raw: str, url: str) -> dict:
         try:
