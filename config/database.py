@@ -100,9 +100,9 @@ class Database:
             log.error(f"Erro ao salvar promessa: {e}")
             return False
 
-    async def promise_hash_exists(self, h, cid):
-        res = self.client.table('promises').select('id').eq('candidate_id', cid).eq('text_hash', h).execute()
-        return len(res.data) > 0
+async def promise_hash_exists(self, h, cid):
+        # O Supabase não tem a coluna text_hash, então vamos contornar isto para não dar erro:
+        return False
         
     async def refresh_materialized_view(self, view_name: str):
         try:
