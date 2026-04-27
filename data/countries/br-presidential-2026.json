@@ -10,7 +10,7 @@
       "party": "PT",
       "electoralNumber": "13",
       "sources": {
-        "official_site": "https://pt.org.br/resolucoes-do-diretorio-nacional-do-pt/"
+        "official_site": "https://pt.org.br"
       }
     },
     {
@@ -19,7 +19,7 @@
       "party": "Republicanos",
       "electoralNumber": "10",
       "sources": {
-        "official_site": "https://republicanos10.org.br/10-motivos/"
+        "official_site": "https://republicanos10.org.br"
       }
     },
     {
@@ -28,7 +28,7 @@
       "party": "NOVO",
       "electoralNumber": "30",
       "sources": {
-        "official_site": "https://novo.org.br/o-que-pensamos/"
+        "official_site": "https://novo.org.br"
       }
     },
     {
@@ -37,7 +37,7 @@
       "party": "PL",
       "electoralNumber": "22",
       "sources": {
-        "official_site": "https://pl.org.br/pl-na-camara/"
+        "official_site": "https://pl.org.br"
       }
     }
   ]
