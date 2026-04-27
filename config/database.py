@@ -18,7 +18,6 @@ class Database:
         text = re.sub(r"[^\w\s-]", "", text).strip().lower()
         return re.sub(r"[\s_]+", "-", text)
 
-    # CORREÇÃO: Agora recebe o election_id diretamente do scheduler
     async def ensure_election_exists(self, election_id: str, country_code: str, election_name: str):
         try:
             res = self.client.table('elections').select('id').eq('id', election_id).execute()
@@ -94,14 +93,17 @@ class Database:
 
     async def save_promise(self, promise):
         try:
-            self.client.table('promises').insert(promise).execute()
+            # O FILTRO MÁGICO: Cria uma cópia da promessa tirando o text_hash
+            # para o Supabase não dar erro de coluna inexistente (42703)
+            clean_promise = {k: v for k, v in promise.items() if k != 'text_hash'}
+            
+            self.client.table('promises').insert(clean_promise).execute()
             return True
         except Exception as e: 
             log.error(f"Erro ao salvar promessa: {e}")
             return False
 
-async def promise_hash_exists(self, h, cid):
-        # O Supabase não tem a coluna text_hash, então vamos contornar isto para não dar erro:
+    async def promise_hash_exists(self, h, cid):
         return False
         
     async def refresh_materialized_view(self, view_name: str):
