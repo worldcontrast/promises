@@ -56,7 +56,8 @@ class PipelineRunner:
         for src_type, url in sources.items():
             if not url: continue
             streams.append(
-                self._process_source(url, source_type, candidate, candidate_name, candidate_db_id, election_id, country, stats, crawl_sem, extract_sem)
+                # A CORREÇÃO ESTÁ AQUI: mudei 'source_type' para 'src_type' que era o nome correto da variável!
+                self._process_source(url, src_type, candidate, candidate_name, candidate_db_id, election_id, country, stats, crawl_sem, extract_sem)
             )
             
         await asyncio.gather(*streams, return_exceptions=True)
@@ -96,8 +97,6 @@ class PipelineRunner:
             if self.dry_run: return
 
             for raw_promise in extraction.get('promises', []):
-                # FILTRO MÁGICO APLICADO: Removemos a linha problemática do text_hash!
-                
                 validated = await self.validator.validate(raw_promise, candidate.get('id', ''), election_id, page)
                 if not validated: continue
 
