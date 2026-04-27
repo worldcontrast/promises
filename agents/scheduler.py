@@ -189,7 +189,10 @@ def main():
         dry_run=args.dry_run,
         election_id=args.election,
     ))
-    sys.exit(1 if stats.get('errors') else 0)
+    
+    # IGNORA ERROS DE SITES EM BAIXO (fetch_failed). O GitHub só fica vermelho se a base de dados ou a IA falharem de vez.
+    erros_criticos = [e for e in stats.get('errors', []) if not e.startswith('fetch_failed')]
+    sys.exit(1 if erros_criticos else 0)
 
 if __name__ == '__main__':
     main()
