@@ -47,8 +47,10 @@ class PromiseExtractor:
         if not content or len(content.strip()) < 50:
             return self._empty_result("content_too_short")
 
+        # CORREÇÃO: Limite pedido à IA para evitar que ela escreva demais e corte a meio
         user_message = (
-            f"Extract political promises for {candidate_name} in {country} from {source_url}.\n\n"
+            f"Extract political promises for {candidate_name} in {country} from {source_url}.\n"
+            f"IMPORTANT: Please limit your extraction to the 20 most critical and specific promises to avoid truncating the JSON response.\n\n"
             f"---CONTENT---\n{content[:150000]}\n---END---"
         )
 
@@ -63,9 +65,10 @@ class PromiseExtractor:
             for model_name in models_to_try:
                 log.info(f"Calling Claude [{model_name}] — {candidate_name}")
                 try:
+                    # CORREÇÃO: max_tokens aumentado para o máximo permitido (8192)
                     response = await self.client.messages.create(
                         model=model_name,
-                        max_tokens=4096,
+                        max_tokens=8192,
                         system=self._system_prompt,
                         messages=[{'role': 'user', 'content': user_message}],
                     )
@@ -91,7 +94,6 @@ class PromiseExtractor:
             elif f_code in clean: 
                 clean = clean.split(f_code)[1].split(f_code)[0]
             
-            # CORREÇÃO CRÍTICA: strict=False permite que o JSON tenha control characters (como \n) invisíveis
             result = json.loads(clean.strip(), strict=False)
             
             if 'promises' not in result: 
