@@ -51,7 +51,7 @@ class PromiseExtractor:
         user_message = (
             f"Extract political promises for {candidate_name} in {country} from {source_url}.\n"
             f"IMPORTANT: Please limit your extraction to the 20 most critical and specific promises to avoid truncating the JSON response.\n\n"
-            f"---CONTENT---\n{content[:150000]}\n---END---"
+            f"---CONTENT---\n{content[:40000]}\n---END---"
         )
 
         models_to_try = [
