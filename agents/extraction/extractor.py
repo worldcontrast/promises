@@ -74,11 +74,12 @@ class PromiseExtractor:
             f"---CONTENT---\n{content[:150000]}\n---END---"
         )
 
+        # OS MODELOS DA GERAÇÃO CLAUDE 4 QUE A SUA CHAVE TEM AUTORIZAÇÃO:
         models_to_try = [
-            'claude-3-5-sonnet-20241022',
-            'claude-3-5-haiku-20241022',
-            'claude-3-5-sonnet-20240620',
-            'claude-3-haiku-20240307'
+            'claude-sonnet-4-6',
+            'claude-haiku-4-5-20251001',
+            'claude-sonnet-4-5-20250929',
+            'claude-opus-4-7'
         ]
 
         async with self.semaphore:
@@ -102,7 +103,7 @@ class PromiseExtractor:
                     log.error(f"Claude API error: {e}")
                     return self._empty_result(str(e))
             
-            log.error("❌ CRÍTICO: Nenhum modelo funcionou. A chave no GitHub não tem permissão para usar os modelos Claude 3.")
+            log.error("❌ CRÍTICO: Nenhum modelo funcionou. A chave no GitHub não tem permissão para usar os modelos.")
             return self._empty_result("all_models_404")
 
     def _parse_response(self, raw: str, url: str) -> dict:
