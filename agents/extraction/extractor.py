@@ -23,7 +23,8 @@ class PromiseExtractor:
         self.client = anthropic.AsyncAnthropic(
             api_key=clean_key,
             max_retries=3,
-            timeout=80.0
+            # A CORREÇÃO DE OURO: Aumentado de 80 para 300 segundos para o Claude ter tempo de escrever
+            timeout=300.0 
         )
         
         self.semaphore = asyncio.Semaphore(2)
@@ -47,7 +48,6 @@ class PromiseExtractor:
         if not content or len(content.strip()) < 50:
             return self._empty_result("content_too_short")
 
-        # CORREÇÃO: Limite pedido à IA para evitar que ela escreva demais e corte a meio
         user_message = (
             f"Extract political promises for {candidate_name} in {country} from {source_url}.\n"
             f"IMPORTANT: Please limit your extraction to the 20 most critical and specific promises to avoid truncating the JSON response.\n\n"
@@ -65,7 +65,6 @@ class PromiseExtractor:
             for model_name in models_to_try:
                 log.info(f"Calling Claude [{model_name}] — {candidate_name}")
                 try:
-                    # CORREÇÃO: max_tokens aumentado para o máximo permitido (8192)
                     response = await self.client.messages.create(
                         model=model_name,
                         max_tokens=8192,
