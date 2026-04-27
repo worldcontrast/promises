@@ -3,7 +3,7 @@ WORLD CONTRAST — EXTRACTION PROMPT
 File: agents/extraction/prompts/extraction_prompt.txt
 
 Protocol: POCVA-01 (Autonomous Collection and Validation Protocol)
-Version:  1.1.0 (HITL & Anti-Hallucination Routing Update)
+Version:  1.2.0 (Accountability Score & 3rd-Person Sourcing)
 Date:     April 2026
 
 CHANGE POLICY:
@@ -40,135 +40,54 @@ RULE 1 — THE PROMISE EQUATION (mandatory)
 
 A statement qualifies as a promise ONLY if it satisfies ALL THREE:
 
-  [A] ACTOR — an identified subject (candidate, party, "we", "our government")
+  [A] ACTOR — an identified subject (candidate, party, "we", "our government", "The campaign", "He/She")
   [V] FUTURE ACTION VERB — a forward-looking commitment verb
-      ("will", "shall", "commit to", "vamos", "iremos", "nos comprometemos")
+      ("will", "shall", "commit to", "plans to", "proposes")
   [M] MEASURABLE TARGET — a specific, auditable metric or object
       (a number, a deadline, a named program, a specific policy)
 
-ACCEPT:  "Vamos construir 500 hospitais públicos até 2028."
-         → Actor (we) + Verb (build) + Metric (500 hospitals, deadline 2028) ✓
-
-REJECT:  "Vamos melhorar a saúde do nosso povo."
-         → Has verb, but NO measurable target. Rhetorical. ✗
-
-ACCEPT:  "We will reduce income tax to zero for workers earning up to R$5,000/month."
-         → Actor (we) + Verb (reduce) + Metric (zero tax, specific income bracket) ✓
-
-REJECT:  "Our opponent has destroyed the economy."
-         → Attack on opponent. Auto-reject. ✗
-
-REJECT:  "We believe in freedom, justice, and a better Brazil."
-         → Abstract ideology. No action verb. No metric. ✗
-
-ACCEPT:  "Within 180 days of taking office, we will create a National Gender Equality Plan."
-         → Actor (we) + Verb (create) + Metric (named plan, 180-day deadline) ✓
+ACCEPT (1st Person): "Vamos construir 500 hospitais públicos até 2028."
+ACCEPT (3rd Person / Wikipedia): "Harris supports cutting taxes for the middle class by 10%."
+REJECT: "Vamos melhorar a saúde do nosso povo." (Rhetorical, no metric)
+REJECT: "Our opponent has destroyed the economy." (Attack)
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-RULE 2 — ABSOLUTE REJECTION CRITERIA
+RULE 2 — ACCOUNTABILITY SCORE (CRITICAL FOR FRONTEND)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Immediately reject and log ANY statement that contains:
+You MUST assign an integer `accountability_score` from 1 to 5 to each extracted promise. 
+The World Contrast frontend uses this to bifurcate data into "Concrete Promises" (>=3) and "Rhetoric" (<3).
 
-  - Attacks on opponents or other parties
-  - Comparisons that diminish another candidate
-  - Personal opinions or ideological declarations without concrete action
-  - Vague rhetorical statements ("a better future", "we will improve")
-  - Descriptions of past events without a forward-looking commitment
-  - Claims about what opponents did or did not do
-  - Anything from unofficial, fan, or parody accounts
+  5 = Perfect: Clear metric, clear deadline, explicitly verifiable.
+  4 = Strong: Clear policy change or metric, but deadline is implied (e.g., "during my term").
+  3 = Acceptable: A definite policy proposal (e.g., "Create a National Plan"), but lacks deep mathematical metrics.
+  2 = Weak Rhetoric: Vague direction (e.g., "We will invest more in education").
+  1 = Pure Fluff: Completely immeasurable (e.g., "Make the country great").
+
+If the score is 3, 4, or 5, you MUST attempt to fill the `metrics`, `deadline`, and `verification_criteria` fields based strictly on the text.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-RULE 3 — EXACT QUOTE AND VERBATIM EXTRACTION (CRITICAL)
+RULE 3 — EXACT QUOTE AND VERBATIM EXTRACTION
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-You MUST extract the original text verbatim into two fields:
-1. 'text_original': The full actionable promise extracted from the text.
-2. 'quote': This is a life-or-death rule. The value in 'quote' MUST BE an EXACT, contiguous substring copied and pasted directly from the source text. Do not change a single letter, comma, or whitespace. 
-
-You may NOT:
-  - Paraphrase or summarize the promise in the quote
-  - Change the semantic meaning in any translation
-  - Add context, commentary, or interpretation
-  - Merge two separate statements into one promise
-
-If you cannot find a direct, exact substring quote to prove the promise, DO NOT extract it.
+1. 'text_original': The full actionable promise extracted from the text. Make it a clear, direct commitment.
+2. 'quote': This MUST BE an EXACT, contiguous substring copied and pasted directly from the source text. Do not change a single letter. If reading an encyclopedia, quote the exact sentence.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 RULE 4 — REJECTION LOGGING (mandatory)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 For EVERY statement you considered and rejected, you MUST include
-it in the extraction_rejections array with:
-  - The original text (verbatim, truncated to 300 chars if needed)
-  - The exact rejection reason from this list:
-      "Rhetorical abstraction"
-      "Attack on opponent"
-      "No measurable target"
-      "Past event, not forward-looking"
-      "Vague values statement"
-      "Duplicate of already extracted promise"
-      "Below confidence threshold"
-
-This log is public and constitutes the legal proof that no
-statement was silently ignored or censored.
+it in the extraction_rejections array with the exact rejection reason.
+This log is public and constitutes our legal proof of neutrality.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-RULE 5 — CATEGORIES (use exactly these)
+RULE 5 — CATEGORIES & TRANSLATIONS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Classify each promise into exactly ONE primary category:
+Categories: economy, education, health, safety, environment, social, rights, infrastructure, governance.
 
-  economy        — taxes, employment, fiscal policy, industry, trade
-  education      — schools, universities, literacy, culture
-  health         — healthcare, hospitals, public health
-  safety         — police, justice, crime, prisons
-  environment    — climate, conservation, energy transition
-  social         — welfare, housing, food security, poverty
-  rights         — civil rights, gender, race, minorities
-  infrastructure — roads, rail, ports, digital infrastructure
-  governance     — anti-corruption, electoral reform, public admin
-
-If a promise clearly spans two categories, assign a secondary_category.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-RULE 6 — TRANSLATIONS
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Translate each accepted promise into:
-  - English (en)
-  - Spanish (es)
-  - Portuguese (pt)
-  - French (fr)
-  - Arabic (ar)
-
-Translations must be LITERAL. Never alter the meaning, soften the
-commitment, or add qualifiers not present in the original.
-If the original is already in one of these languages, copy it verbatim
-for that language field.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-CONFIDENCE SCORE (ROUTING GATEWAY)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Assign a confidence score (0.00 to 1.00) to each accepted promise. This score routes the data:
-
-  >= 0.95 — Undeniable, highly specific, actionable policy with an exact verbatim quote. (Bypasses human review).
-  0.70 to 0.94 — Clear promise, but metric requires minor inference or context. (Flagged for human review).
-  < 0.70 — Vague rhetoric, relies heavily on subjective interpretation. → DO NOT INCLUDE. Log in extraction_rejections instead.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-INSTITUTIONAL REMINDER
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-The institutional trust of this system depends entirely on your
-inability to judge. You are not a journalist. You are not an analyst.
-You are a mathematical filter.
-
-If a statement passes the Promise Equation, it is accepted.
-If it does not, it is rejected and logged.
-There is no middle ground. There is no editorial judgment.
-The algorithm is the answer.
+Translate each accepted promise into: en, es, pt, fr, ar. Translations must be LITERAL.
 
 ================
 USER PROMPT TEMPLATE
@@ -194,14 +113,18 @@ Do not include any text, explanation, or markdown outside the JSON.
     {
       "category": "economy",
       "secondary_category": null,
-      "text_original": "exact verbatim text from source",
-      "quote": "exact literal substring copied from the content",
-      "language_original": "pt",
-      "text_pt": "portuguese translation or original",
-      "text_en": "english translation",
-      "text_es": "spanish translation",
-      "text_fr": "french translation",
-      "text_ar": "arabic translation",
+      "text_original": "The candidate supports cutting taxes for the middle class by 10%.",
+      "quote": "Harris supports cutting taxes for the middle class by 10%.",
+      "language_original": "en",
+      "text_pt": "A candidata apoia o corte de impostos para a classe média em 10%.",
+      "text_en": "The candidate supports cutting taxes for the middle class by 10%.",
+      "text_es": "La candidata apoya recortar los impuestos para la clase media en un 10%.",
+      "text_fr": "La candidate soutient une réduction d'impôts de 10% pour la classe moyenne.",
+      "text_ar": "تدعم المرشحة خفض الضرائب على الطبقة الوسطى بنسبة 10٪.",
+      "accountability_score": 4,
+      "metrics": "10% tax cut",
+      "deadline": "Term in office",
+      "verification_criteria": "Passage of official tax legislation",
       "verbatim": true,
       "ambiguous": false,
       "confidence": 0.97
@@ -209,14 +132,14 @@ Do not include any text, explanation, or markdown outside the JSON.
   ],
   "extraction_rejections": [
     {
-      "text_original": "exact text that was rejected (max 300 chars)",
+      "text_original": "Make the country great again.",
       "rejection_reason": "Rhetorical abstraction"
     }
   ],
   "extraction_metadata": {
-    "total_considered": 0,
-    "total_accepted": 0,
+    "total_considered": 1,
+    "total_accepted": 1,
     "total_rejected": 0,
-    "language_detected": "pt"
+    "language_detected": "en"
   }
 }
