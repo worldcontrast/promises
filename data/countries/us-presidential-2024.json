@@ -8,28 +8,14 @@
       "fullName": "Donald J. Trump",
       "party": "Republican Party",
       "sources": {
-        "official_site": "https://www.donaldjtrump.com/platform"
+        "official_site": "https://en.wikipedia.org/wiki/Donald_Trump_2024_presidential_campaign"
       }
     },
     {
       "fullName": "Kamala Harris",
       "party": "Democratic Party",
       "sources": {
-        "official_site": "https://kamalaharris.com/issues/"
-      }
-    },
-    {
-      "fullName": "Cornel West",
-      "party": "Independent",
-      "sources": {
-        "official_site": "https://www.cornelwest.com/issues"
-      }
-    },
-    {
-      "fullName": "Jill Stein",
-      "party": "Green Party",
-      "sources": {
-        "official_site": "https://www.jillstein2024.com/platform"
+        "official_site": "https://en.wikipedia.org/wiki/Kamala_Harris_2024_presidential_campaign"
       }
     }
   ]
