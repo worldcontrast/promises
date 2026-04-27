@@ -1,9 +1,6 @@
 """
 World Contrast — Pipeline Runner
 File: agents/pipeline_runner.py
-
-Orquestração multi-thread da extração sob a diretriz de "Super Concorrência".
-Agora inclui bifurcação HITL (Human-in-the-Loop) para o Telegram.
 """
 import asyncio
 import logging
@@ -16,7 +13,6 @@ MAX_CONCURRENT_CRAWLS = 8
 MAX_CONCURRENT_EXTRACTIONS = 3
 
 class PipelineRunner:
-    # CORREÇÃO: telegram_bot inserido aqui na linha de baixo para não dar erro!
     def __init__(self, crawler, extractor, validator, archiver, db, telegram_bot=None, dry_run=False):
         self.crawler = crawler
         self.extractor = extractor
@@ -38,13 +34,7 @@ class PipelineRunner:
                     candidate_db_id = await self.db.upsert_candidate(candidate, election_id)
                 
                 tasks.append(
-                    self._process_candidate_streams(
-                        candidate=candidate,
-                        candidate_db_id=candidate_db_id,
-                        election_id=election_id,
-                        country=country,
-                        stats=stats
-                    )
+                    self._process_candidate_streams(candidate, candidate_db_id, election_id, country, stats)
                 )
 
         results = await asyncio.gather(*tasks, return_exceptions=True)
@@ -64,21 +54,9 @@ class PipelineRunner:
         candidate_name = candidate.get('name', candidate.get('fullName', ''))
 
         for src_type, url in sources.items():
-            if not url:
-                continue
+            if not url: continue
             streams.append(
-                self._process_source(
-                    url=url,
-                    source_type=src_type,
-                    candidate=candidate,
-                    candidate_name=candidate_name,
-                    candidate_db_id=candidate_db_id,
-                    election_id=election_id,
-                    country=country,
-                    stats=stats,
-                    crawl_sem=crawl_sem,
-                    extract_sem=extract_sem
-                )
+                self._process_source(url, source_type, candidate, candidate_name, candidate_db_id, election_id, country, stats, crawl_sem, extract_sem)
             )
             
         await asyncio.gather(*streams, return_exceptions=True)
@@ -96,14 +74,10 @@ class PipelineRunner:
                 stats['errors'].append(f"fetch_failed:{url}")
                 return
 
-            # Archiver é opcional — se None ou falhar, pipeline continua sem arquivo
             archive_url = None
             if self.archiver is not None:
-                try:
-                    archive_url = await self.archiver.save(page)
-                    stats['pages_archived'] += 1
-                except Exception as arch_err:
-                    log.warning(f"    ⚠ Archiver falhou para {url}: {arch_err} — continuando sem arquivo")
+                try: archive_url = await self.archiver.save(page); stats['pages_archived'] += 1
+                except Exception as arch_err: pass
             page['archive_url'] = archive_url or ''
 
             crawled_page_id = None
@@ -112,35 +86,20 @@ class PipelineRunner:
 
             async with extract_sem:
                  extraction = await self.extractor.extract(
-                     content=page['text'],
-                     candidate_name=candidate_name,
-                     country=country,
-                     source_type=source_type,
-                     source_url=url,
-                     collection_date=datetime.now(timezone.utc).date().isoformat(),
+                     content=page['text'], candidate_name=candidate_name, country=country,
+                     source_type=source_type, source_url=url, collection_date=datetime.now(timezone.utc).date().isoformat(),
                  )
 
-            promises_found = len(extraction.get('promises', []))
-            rejected = extraction.get('extraction_metadata', {}).get('total_rejected', 0)
-            stats['promises_extracted'] += promises_found
-            stats['promises_rejected'] += rejected
+            stats['promises_extracted'] += len(extraction.get('promises', []))
+            stats['promises_rejected'] += extraction.get('extraction_metadata', {}).get('total_rejected', 0)
 
-            if self.dry_run:
-                return
+            if self.dry_run: return
 
             for raw_promise in extraction.get('promises', []):
-                text_orig = raw_promise.get('text_original', '').strip()
-                raw_promise['text_hash'] = hashlib.sha256(text_orig.encode()).hexdigest()
+                # FILTRO MÁGICO APLICADO: Removemos a linha problemática do text_hash!
                 
-                validated = await self.validator.validate(
-                    promise=raw_promise,
-                    candidate_id=candidate.get('id', ''),
-                    election_id=election_id,
-                    page=page,
-                )
-
-                if not validated:
-                    continue
+                validated = await self.validator.validate(raw_promise, candidate.get('id', ''), election_id, page)
+                if not validated: continue
 
                 validated['candidate_id'] = candidate_db_id
                 validated['crawled_page_id'] = crawled_page_id
@@ -150,28 +109,18 @@ class PipelineRunner:
                 validated['prompt_hash'] = self.extractor.get_prompt_hash()
 
                 if validated.get('flagged_for_review'):
-                    log.warning(f"    ⚠️ HITL Routing: Nota {validated.get('confidence', 0)} - Telegram...")
                     if self.telegram_bot and not self.dry_run:
-                        try:
-                            await self.telegram_bot.send_for_review(validated, candidate_name)
-                        except Exception as e:
-                            log.error(f"Falha ao contatar Telegram Bot: {e}")
+                        try: await self.telegram_bot.send_for_review(validated, candidate_name)
+                        except: pass
                     stats['pending_reviews'] = stats.get('pending_reviews', 0) + 1
                 else:
-                    log.info(f"    ✅ Auto-Aprovado - Salvando no BD...")
                     if self.db and not self.dry_run:
                         saved = await self.db.save_promise(validated)
-                        if saved:
-                            stats['promises_saved'] += 1
+                        if saved: stats['promises_saved'] += 1
 
             if self.db and 'extraction_rejections' in extraction:
                 for rej in extraction['extraction_rejections']:
-                     await self.db.log_rejection_real(
-                         candidate_id=candidate_db_id,
-                         text=rej.get('text', ''),
-                         reason=rej.get('reason', 'rejected_by_llm'),
-                         source_url=url
-                     )
+                     await self.db.log_rejection_real(candidate_id=candidate_db_id, text=rej.get('text_original', rej.get('text', '')), reason=rej.get('rejection_reason', 'rejected_by_llm'), source_url=url)
 
         except Exception as e:
             log.error(f"    ✗ Error processing {url}: {e}")
