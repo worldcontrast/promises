@@ -18,8 +18,8 @@ class Database:
         text = re.sub(r"[^\w\s-]", "", text).strip().lower()
         return re.sub(r"[\s_]+", "-", text)
 
-    async def ensure_election_exists(self, country_code: str, election_name: str):
-        election_id = self._slugify(f"{country_code}-{election_name}")
+    # CORREÇÃO: Agora recebe o election_id diretamente do scheduler
+    async def ensure_election_exists(self, election_id: str, country_code: str, election_name: str):
         try:
             res = self.client.table('elections').select('id').eq('id', election_id).execute()
             if not res.data:
@@ -83,7 +83,6 @@ class Database:
                 'run_id': self.run_id, 
                 'candidate_id': candidate_id, 
                 'url': page.get('url', ''), 
-                # A CORREÇÃO DO ERRO 400 ESTÁ AQUI: Enviamos sempre o content_hash!
                 'content_hash': page.get('content_hash', 'hash_ausente_ou_falha'),
                 'collected_at': datetime.now(timezone.utc).isoformat()
             }
