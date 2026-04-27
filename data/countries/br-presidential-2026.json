@@ -9,8 +9,7 @@
       "party": "PT",
       "electoralNumber": "13",
       "sources": {
-        "official_site": "https://lula.com.br",
-        "twitter": "https://twitter.com/LulaOficial"
+        "official_site": "https://pt.org.br/resolucoes-do-diretorio-nacional-do-pt/"
       }
     },
     {
@@ -19,17 +18,7 @@
       "party": "Republicanos",
       "electoralNumber": "10",
       "sources": {
-        "official_site": "https://tarcisiogdf.com.br",
-        "twitter": "https://twitter.com/tarcisiogdf"
-      }
-    },
-    {
-      "fullName": "Ronaldo Ramos Caiado",
-      "displayName": "Ronaldo Caiado",
-      "party": "PSD",
-      "electoralNumber": "55",
-      "sources": {
-        "twitter": "https://twitter.com/ronaldocaiado"
+        "official_site": "https://republicanos10.org.br/10-motivos/"
       }
     },
     {
@@ -38,7 +27,7 @@
       "party": "NOVO",
       "electoralNumber": "30",
       "sources": {
-        "twitter": "https://twitter.com/RomeuZema"
+        "official_site": "https://novo.org.br/o-que-pensamos/"
       }
     },
     {
@@ -47,70 +36,8 @@
       "party": "PL",
       "electoralNumber": "22",
       "sources": {
-        "twitter": "https://twitter.com/FlavioBolsonaro"
+        "official_site": "https://pl.org.br/pl-na-camara/"
       }
-    },
-    {
-      "fullName": "José Aldo Rebelo Figueiredo",
-      "displayName": "Aldo Rebelo",
-      "party": "DC",
-      "electoralNumber": "27",
-      "sources": {}
-    },
-    {
-      "fullName": "Edmilson Silva Costa",
-      "displayName": "Edmilson Costa",
-      "party": "PCB",
-      "electoralNumber": "21",
-      "sources": {}
-    },
-    {
-      "fullName": "Hertz da Conceição Dias",
-      "displayName": "Hertz Dias",
-      "party": "PSTU",
-      "electoralNumber": "16",
-      "sources": {}
-    },
-    {
-      "fullName": "Renan Antônio Ferreira dos Santos",
-      "displayName": "Renan Santos",
-      "party": "MISSÃO",
-      "electoralNumber": "",
-      "sources": {
-        "twitter": "https://twitter.com/RenanSantosMBL"
-      }
-    },
-    {
-      "fullName": "Rui Costa Pimenta",
-      "displayName": "Rui Costa Pimenta",
-      "party": "PCO",
-      "electoralNumber": "29",
-      "sources": {
-        "twitter": "https://twitter.com/Ruicpimenta29"
-      }
-    },
-    {
-      "fullName": "Samara Martins da Silva",
-      "displayName": "Samara Martins",
-      "party": "UP",
-      "electoralNumber": "80",
-      "sources": {}
-    },
-    {
-      "fullName": "Benevenuto Daciolo Fonseca dos Santos",
-      "displayName": "Cabo Daciolo",
-      "party": "MOBILIZA",
-      "electoralNumber": "33",
-      "sources": {
-        "twitter": "https://twitter.com/CaboDaciolo"
-      }
-    },
-    {
-      "fullName": "Augusto Jorge Cury",
-      "displayName": "Augusto Cury",
-      "party": "Avante",
-      "electoralNumber": "70",
-      "sources": {}
     }
   ]
 }
