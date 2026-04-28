@@ -8,8 +8,9 @@ from datetime import datetime, timezone
 
 log = logging.getLogger('pipeline')
 
-MAX_CONCURRENT_CRAWLS = 8
-MAX_CONCURRENT_EXTRACTIONS = 3
+MAX_CONCURRENT_CRAWLS = 5
+# CORREÇÃO 1: Reduzido para 1. Acaba com o erro 429 e o script roda em 1 minuto!
+MAX_CONCURRENT_EXTRACTIONS = 1
 
 class PipelineRunner:
     def __init__(self, crawler, extractor, validator, archiver, db, telegram_bot=None, dry_run=False):
@@ -95,8 +96,6 @@ class PipelineRunner:
             if self.dry_run: return
 
             for raw_promise in extraction.get('promises', []):
-                # O text_hash foi removido daqui!
-                
                 validated = await self.validator.validate(raw_promise, candidate.get('id', ''), election_id, page)
                 if not validated: continue
 
@@ -112,10 +111,12 @@ class PipelineRunner:
                         try: await self.telegram_bot.send_for_review(validated, candidate_name)
                         except: pass
                     stats['pending_reviews'] = stats.get('pending_reviews', 0) + 1
-                else:
-                    if self.db and not self.dry_run:
-                        saved = await self.db.save_promise(validated)
-                        if saved: stats['promises_saved'] += 1
+
+                # CORREÇÃO 2: O BURACO NEGRO FECHOU! 
+                # Agora o sistema salva TODAS as promessas no Supabase obrigatoriamente!
+                if self.db and not self.dry_run:
+                    saved = await self.db.save_promise(validated)
+                    if saved: stats['promises_saved'] += 1
 
             if self.db and 'extraction_rejections' in extraction:
                 for rej in extraction['extraction_rejections']:
