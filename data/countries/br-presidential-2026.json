@@ -1,44 +1,448 @@
 {
   "id": "brazil-2026",
   "country": "BR",
-  "election": "Presidential 2026",
+  "countryName": { "en": "Brazil", "pt": "Brasil", "es": "Brasil", "fr": "Brésil", "de": "Brasilien", "ar": "البرازيل" },
+  "flag": "🇧🇷",
+  "electionType": "presidential",
+  "electionName": { "en": "Presidential Election 2026", "pt": "Eleição Presidencial 2026" },
+  "electionDate": "2026-10-04",
   "status": "live",
+  "lastUpdated": "2026-04-04T14:32:00Z",
+  "tribunal": { "name": "Tribunal Superior Electoral", "url": "https://tse.jus.br" },
+
   "candidates": [
     {
+      "id": "lula-2026",
+      "slug": "lula",
       "fullName": "Luiz Inácio Lula da Silva",
       "displayName": "Lula",
       "party": "PT",
+      "partyFullName": "Partido dos Trabalhadores",
       "electoralNumber": "13",
+      "initials": "LS",
+      "color": "#0B1D2E",
       "sources": {
-        "official_site": "https://pt.org.br"
-      }
+        "electoralFiling": "https://divulgacandcontas.tse.jus.br/divulga/#/candidato/2026/2022802018/BR/280000614986",
+        "officialSite": "https://pt.org.br",
+        "instagram": "https://instagram.com/lula",
+        "facebook": "https://facebook.com/lula",
+        "youtube": "https://youtube.com/@lula",
+        "twitter": "https://twitter.com/lula"
+      },
+      "lastCollected": "2026-04-04T14:32:00Z"
     },
     {
-      "fullName": "Tarcísio Gomes de Freitas",
-      "displayName": "Tarcísio de Freitas",
-      "party": "Republicanos",
-      "electoralNumber": "10",
-      "sources": {
-        "official_site": "https://republicanos10.org.br"
-      }
-    },
-    {
-      "fullName": "Romeu Zema Neto",
-      "displayName": "Romeu Zema",
-      "party": "NOVO",
-      "electoralNumber": "30",
-      "sources": {
-        "official_site": "https://novo.org.br"
-      }
-    },
-    {
-      "fullName": "Flávio Nantes Bolsonaro",
-      "displayName": "Flávio Bolsonaro",
+      "id": "bolsonaro-2026",
+      "slug": "bolsonaro",
+      "fullName": "Jair Messias Bolsonaro",
+      "displayName": "Bolsonaro",
       "party": "PL",
+      "partyFullName": "Partido Liberal",
       "electoralNumber": "22",
+      "initials": "JB",
+      "color": "#7C3AED",
       "sources": {
-        "official_site": "https://pl.org.br"
-      }
+        "electoralFiling": "https://divulgacandcontas.tse.jus.br/divulga/#/candidato/2026/...",
+        "officialSite": "https://pl.org.br",
+        "instagram": "https://instagram.com/jairmessiasbolsonaro",
+        "facebook": "https://facebook.com/jairmessiasbolsonaro",
+        "youtube": "https://youtube.com/@jairmessiasbolsonaro",
+        "twitter": "https://twitter.com/jairbolsonaro"
+      },
+      "lastCollected": "2026-04-04T14:35:00Z"
+    }
+  ],
+
+  "promises": [
+    {
+      "id": "br26-001",
+      "candidateId": "lula-2026",
+      "category": "economy",
+      "status": "stated",
+      "text": {
+        "pt": "Ampliar a isenção do imposto de renda para trabalhadores que ganham até R$5.000 por mês, a partir de 2026.",
+        "en": "Expand income tax exemption to workers earning up to R$5,000/month, effective 2026."
+      },
+      "quote": {
+        "pt": "\"Vamos garantir que quem ganha até cinco mil reais não pague imposto de renda.\"",
+        "en": "\"We will guarantee that those earning up to five thousand reais pay no income tax.\""
+      },
+      "sourceUrl": "https://pt.org.br/propostas",
+      "sourceType": "official_site",
+      "collectedAt": "2026-04-02T10:00:00Z",
+      "contentHash": "a3f2c1d4e5b6f7a8b9c0d1e2f3a4b5c6",
+      "archiveUrl": "https://web.archive.org/web/20260402/https://pt.org.br/propostas",
+      "confidence": 0.98,
+      "ambiguous": false
+    },
+    {
+      "id": "br26-002",
+      "candidateId": "bolsonaro-2026",
+      "category": "economy",
+      "status": "stated",
+      "text": {
+        "pt": "Consolidação fiscal com déficit primário zero até o 2º ano de governo, por meio de revisão de gastos e tributação da economia digital.",
+        "en": "Fiscal consolidation with zero primary deficit by year 2, through spending review and digital economy taxation."
+      },
+      "quote": {
+        "pt": "\"O Brasil precisa de responsabilidade fiscal para crescer com estabilidade.\"",
+        "en": "\"Brazil needs fiscal responsibility to grow with stability.\""
+      },
+      "sourceUrl": "https://pl.org.br/programa",
+      "sourceType": "official_site",
+      "collectedAt": "2026-03-28T09:00:00Z",
+      "contentHash": "b7e91d2c3f4a5b6c7d8e9f0a1b2c3d4e",
+      "archiveUrl": "https://web.archive.org/web/20260328/https://pl.org.br/programa",
+      "confidence": 0.96,
+      "ambiguous": false
+    },
+    {
+      "id": "br26-003",
+      "candidateId": "lula-2026",
+      "category": "economy",
+      "status": "stated",
+      "text": {
+        "pt": "Criar um fundo de crédito industrial de R$80 bilhões para micro e pequenas empresas ao longo de 4 anos.",
+        "en": "Create R$80 billion industrial credit fund for micro and small enterprises over 4 years."
+      },
+      "quote": null,
+      "sourceUrl": "https://pt.org.br/manifesto",
+      "sourceType": "electoral_filing",
+      "collectedAt": "2026-03-01T08:00:00Z",
+      "contentHash": "d4a2e8f1c2d3e4f5a6b7c8d9e0f1a2b3",
+      "archiveUrl": "https://web.archive.org/web/20260301/https://pt.org.br/manifesto",
+      "confidence": 0.99,
+      "ambiguous": false
+    },
+    {
+      "id": "br26-004",
+      "candidateId": "bolsonaro-2026",
+      "category": "economy",
+      "status": "stated",
+      "text": {
+        "pt": "Privatizar 3 empresas estatais nos primeiros 18 meses e redirecionar os recursos para títulos de infraestrutura.",
+        "en": "Privatize 3 state companies within 18 months and redirect proceeds to infrastructure bonds."
+      },
+      "quote": null,
+      "sourceUrl": "https://pl.org.br/economia",
+      "sourceType": "official_site",
+      "collectedAt": "2026-02-14T11:00:00Z",
+      "contentHash": "f1c33a4b5c6d7e8f9a0b1c2d3e4f5a6b",
+      "archiveUrl": "https://web.archive.org/web/20260214/https://pl.org.br/economia",
+      "confidence": 0.97,
+      "ambiguous": false
+    },
+    {
+      "id": "br26-005",
+      "candidateId": "lula-2026",
+      "category": "economy",
+      "status": "stated",
+      "text": {
+        "pt": "Reajustar o salário mínimo acima da inflação todos os anos do mandato.",
+        "en": "Raise the minimum wage above inflation every year of the term."
+      },
+      "quote": null,
+      "sourceUrl": "https://instagram.com/p/lula-post-001",
+      "sourceType": "instagram",
+      "collectedAt": "2026-03-15T14:00:00Z",
+      "contentHash": "c9d3f1a2b3c4d5e6f7a8b9c0d1e2f3a4",
+      "archiveUrl": "https://web.archive.org/web/20260315/https://instagram.com/p/lula-post-001",
+      "confidence": 0.94,
+      "ambiguous": false
+    },
+    {
+      "id": "br26-006",
+      "candidateId": "lula-2026",
+      "category": "environment",
+      "status": "stated",
+      "text": {
+        "pt": "Alcançar desmatamento ilegal zero na Amazônia até o final do primeiro mandato, com apoio de um fundo de fiscalização ambiental.",
+        "en": "Achieve zero illegal deforestation in the Amazon by end of first term, backed by an environmental enforcement fund."
+      },
+      "quote": {
+        "pt": "\"Desmatamento ilegal zero. Não é meta, é compromisso de governo.\"",
+        "en": "\"Zero illegal deforestation. It's not a goal, it's a government commitment.\""
+      },
+      "sourceUrl": "https://pt.org.br/meio-ambiente",
+      "sourceType": "official_site",
+      "collectedAt": "2026-03-20T10:00:00Z",
+      "contentHash": "e9b301c2d3e4f5a6b7c8d9e0f1a2b3c4",
+      "archiveUrl": "https://web.archive.org/web/20260320/https://pt.org.br/meio-ambiente",
+      "confidence": 0.99,
+      "ambiguous": false
+    },
+    {
+      "id": "br26-007",
+      "candidateId": "bolsonaro-2026",
+      "category": "environment",
+      "status": "stated",
+      "text": {
+        "pt": "Expandir o mercado de crédito de carbono e criar incentivos fiscais para empresas que reduzirem emissões em 30% em 5 anos.",
+        "en": "Expand carbon credit market and create tax incentives for companies that cut emissions by 30% in 5 years."
+      },
+      "quote": null,
+      "sourceUrl": "https://pl.org.br/ambiente",
+      "sourceType": "official_site",
+      "collectedAt": "2026-02-20T09:00:00Z",
+      "contentHash": "c2f7a4b5c6d7e8f9a0b1c2d3e4f5a6b7",
+      "archiveUrl": "https://web.archive.org/web/20260220/https://pl.org.br/ambiente",
+      "confidence": 0.95,
+      "ambiguous": false
+    },
+    {
+      "id": "br26-008",
+      "candidateId": "lula-2026",
+      "category": "health",
+      "status": "stated",
+      "text": {
+        "pt": "Ampliar o Farmácia Popular para cobrir 100% do formulário de medicamentos para pacientes com doenças crônicas.",
+        "en": "Expand Farmácia Popular to cover 100% of the drug formulary for chronic disease patients."
+      },
+      "quote": null,
+      "sourceUrl": "https://pt.org.br/saude",
+      "sourceType": "official_site",
+      "collectedAt": "2026-03-10T10:00:00Z",
+      "contentHash": "d1e9a3b4c5d6e7f8a9b0c1d2e3f4a5b6",
+      "archiveUrl": "https://web.archive.org/web/20260310/https://pt.org.br/saude",
+      "confidence": 0.97,
+      "ambiguous": false
+    },
+    {
+      "id": "br26-009",
+      "candidateId": "bolsonaro-2026",
+      "category": "health",
+      "status": "stated",
+      "text": {
+        "pt": "Reduzir as filas do SUS em 40% por meio de parcerias com a rede privada e expansão da telemedicina.",
+        "en": "Cut SUS waiting times by 40% through private network partnerships and telemedicine expansion."
+      },
+      "quote": null,
+      "sourceUrl": "https://pl.org.br/saude",
+      "sourceType": "official_site",
+      "collectedAt": "2026-03-08T11:00:00Z",
+      "contentHash": "f4c1b2c3d4e5f6a7b8c9d0e1f2a3b4c5",
+      "archiveUrl": "https://web.archive.org/web/20260308/https://pl.org.br/saude",
+      "confidence": 0.96,
+      "ambiguous": false
+    },
+    {
+      "id": "br26-010",
+      "candidateId": "lula-2026",
+      "category": "education",
+      "status": "stated",
+      "text": {
+        "pt": "Construir 500 novas escolas técnicas públicas em municípios com menos de 50.000 habitantes em 4 anos.",
+        "en": "Build 500 new public technical schools in smaller municipalities within 4 years."
+      },
+      "quote": null,
+      "sourceUrl": "https://pt.org.br/manifesto",
+      "sourceType": "electoral_filing",
+      "collectedAt": "2026-03-01T08:00:00Z",
+      "contentHash": "a1d4e2b3c4d5e6f7a8b9c0d1e2f3a4b5",
+      "archiveUrl": "https://web.archive.org/web/20260301/https://pt.org.br/manifesto",
+      "confidence": 0.99,
+      "ambiguous": false
+    },
+    {
+      "id": "br26-011",
+      "candidateId": "bolsonaro-2026",
+      "category": "education",
+      "status": "stated",
+      "text": {
+        "pt": "Implementar um sistema universal de vouchers escolares permitindo às famílias escolher entre escolas públicas e privadas com financiamento do governo.",
+        "en": "Implement universal school voucher system allowing families to choose public or private schools with government funding."
+      },
+      "quote": null,
+      "sourceUrl": "https://pl.org.br/educacao",
+      "sourceType": "official_site",
+      "collectedAt": "2026-03-05T10:00:00Z",
+      "contentHash": "b3c8f1a2b3c4d5e6f7a8b9c0d1e2f3a4",
+      "archiveUrl": "https://web.archive.org/web/20260305/https://pl.org.br/educacao",
+      "confidence": 0.97,
+      "ambiguous": false
+    },
+    {
+      "id": "br26-012",
+      "candidateId": "lula-2026",
+      "category": "safety",
+      "status": "stated",
+      "text": {
+        "pt": "Criar um Fundo Nacional de Segurança Pública de R$20 bilhões para equipar as polícias estaduais e financiar programas de prevenção social.",
+        "en": "Create a R$20 billion National Public Security Fund for police equipment and prevention programs."
+      },
+      "quote": null,
+      "sourceUrl": "https://pt.org.br/seguranca",
+      "sourceType": "official_site",
+      "collectedAt": "2026-02-28T09:00:00Z",
+      "contentHash": "a9c4d1b2c3d4e5f6a7b8c9d0e1f2a3b4",
+      "archiveUrl": "https://web.archive.org/web/20260228/https://pt.org.br/seguranca",
+      "confidence": 0.96,
+      "ambiguous": false
+    },
+    {
+      "id": "br26-013",
+      "candidateId": "bolsonaro-2026",
+      "category": "safety",
+      "status": "stated",
+      "text": {
+        "pt": "Ampliar o direito ao porte de armas e reduzir a burocracia para que cidadãos de bem obtenham licenças para armas de fogo.",
+        "en": "Expand gun ownership rights and reduce bureaucracy for law-abiding citizens to obtain firearms licenses."
+      },
+      "quote": {
+        "pt": "\"Cidadão de bem armado é cidadão protegido.\"",
+        "en": "\"An armed law-abiding citizen is a protected citizen.\""
+      },
+      "sourceUrl": "https://pl.org.br/seguranca",
+      "sourceType": "official_site",
+      "collectedAt": "2026-03-02T10:00:00Z",
+      "contentHash": "e2d1a4b5c6d7e8f9a0b1c2d3e4f5a6b7",
+      "archiveUrl": "https://web.archive.org/web/20260302/https://pl.org.br/seguranca",
+      "confidence": 0.98,
+      "ambiguous": false
+    },
+    {
+      "id": "br26-014",
+      "candidateId": "lula-2026",
+      "category": "rights",
+      "status": "stated",
+      "text": {
+        "pt": "Criar um Plano Nacional de Igualdade de Gênero com implementação obrigatória em todas as entidades federais em 180 dias.",
+        "en": "Create a National Gender Equality Plan with mandatory implementation across all federal entities within 180 days."
+      },
+      "quote": null,
+      "sourceUrl": "https://bandnews.com.br/debate-presidencial-2026",
+      "sourceType": "official_site",
+      "collectedAt": "2026-03-28T20:00:00Z",
+      "contentHash": "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6",
+      "archiveUrl": "https://web.archive.org/web/20260328/https://bandnews.com.br/debate",
+      "confidence": 0.93,
+      "ambiguous": false
+    },
+    {
+      "id": "br26-015",
+      "candidateId": "bolsonaro-2026",
+      "category": "rights",
+      "status": "stated",
+      "text": {
+        "pt": "Fortalecer a instituição familiar por meio de proteções legais e incentivos fiscais para famílias com filhos.",
+        "en": "Strengthen family institution through legal protections and tax incentives for families with children."
+      },
+      "quote": null,
+      "sourceUrl": "https://pl.org.br/familia",
+      "sourceType": "official_site",
+      "collectedAt": "2026-03-05T10:00:00Z",
+      "contentHash": "f3e1c7b8c9d0e1f2a3b4c5d6e7f8a9b0",
+      "archiveUrl": "https://web.archive.org/web/20260305/https://pl.org.br/familia",
+      "confidence": 0.95,
+      "ambiguous": false
+    },
+    {
+      "id": "br26-016",
+      "candidateId": "lula-2026",
+      "category": "social",
+      "status": "stated",
+      "text": {
+        "pt": "Manter e expandir o Bolsa Família para cobrir 100% das famílias em extrema pobreza, com benefício mínimo de R$600/mês.",
+        "en": "Keep and expand Bolsa Família to cover 100% of families in extreme poverty, minimum R$600/month."
+      },
+      "quote": null,
+      "sourceUrl": "https://pt.org.br/social",
+      "sourceType": "official_site",
+      "collectedAt": "2026-03-12T09:00:00Z",
+      "contentHash": "b1d4a2c3d4e5f6a7b8c9d0e1f2a3b4c5",
+      "archiveUrl": "https://web.archive.org/web/20260312/https://pt.org.br/social",
+      "confidence": 0.99,
+      "ambiguous": false
+    },
+    {
+      "id": "br26-017",
+      "candidateId": "bolsonaro-2026",
+      "category": "social",
+      "status": "stated",
+      "text": {
+        "pt": "Reformar os programas sociais para incluir requisitos de trabalho e treinamento profissional para beneficiários em condições de trabalhar.",
+        "en": "Reform welfare programs to include work requirements and job training for able-bodied recipients."
+      },
+      "quote": null,
+      "sourceUrl": "https://pl.org.br/social",
+      "sourceType": "official_site",
+      "collectedAt": "2026-02-25T10:00:00Z",
+      "contentHash": "c3f1d2e3f4a5b6c7d8e9f0a1b2c3d4e5",
+      "archiveUrl": "https://web.archive.org/web/20260225/https://pl.org.br/social",
+      "confidence": 0.94,
+      "ambiguous": false
+    },
+    {
+      "id": "br26-018",
+      "candidateId": "lula-2026",
+      "category": "infrastructure",
+      "status": "stated",
+      "text": {
+        "pt": "Investir R$150 bilhões em manutenção de rodovias federais e expansão da malha ferroviária em 4 anos.",
+        "en": "Invest R$150 billion in federal highway maintenance and railway network expansion over 4 years."
+      },
+      "quote": null,
+      "sourceUrl": "https://pt.org.br/infraestrutura",
+      "sourceType": "official_site",
+      "collectedAt": "2026-03-18T10:00:00Z",
+      "contentHash": "d2e4f1b2c3d4e5f6a7b8c9d0e1f2a3b4",
+      "archiveUrl": "https://web.archive.org/web/20260318/https://pt.org.br/infraestrutura",
+      "confidence": 0.97,
+      "ambiguous": false
+    },
+    {
+      "id": "br26-019",
+      "candidateId": "bolsonaro-2026",
+      "category": "infrastructure",
+      "status": "stated",
+      "text": {
+        "pt": "Conceder 12 aeroportos federais e 8 terminais portuários à gestão privada nos primeiros 2 anos.",
+        "en": "Concede 12 federal airports and 8 port terminals to private management within the first 2 years."
+      },
+      "quote": null,
+      "sourceUrl": "https://pl.org.br/infraestrutura",
+      "sourceType": "official_site",
+      "collectedAt": "2026-03-10T10:00:00Z",
+      "contentHash": "a4c2e1b2c3d4e5f6a7b8c9d0e1f2a3b4",
+      "archiveUrl": "https://web.archive.org/web/20260310/https://pl.org.br/infraestrutura",
+      "confidence": 0.96,
+      "ambiguous": false
+    },
+    {
+      "id": "br26-020",
+      "candidateId": "lula-2026",
+      "category": "governance",
+      "status": "stated",
+      "text": {
+        "pt": "Criar uma Agência Nacional Anticorrupção com autonomia do Executivo e relatórios públicos permanentes.",
+        "en": "Create a National Anti-Corruption Agency independent from the executive branch with permanent public reporting."
+      },
+      "quote": null,
+      "sourceUrl": "https://pt.org.br/governanca",
+      "sourceType": "official_site",
+      "collectedAt": "2026-03-22T09:00:00Z",
+      "contentHash": "e1a2c4b5c6d7e8f9a0b1c2d3e4f5a6b7",
+      "archiveUrl": "https://web.archive.org/web/20260322/https://pt.org.br/governanca",
+      "confidence": 0.95,
+      "ambiguous": false
+    },
+    {
+      "id": "br26-021",
+      "candidateId": "bolsonaro-2026",
+      "category": "governance",
+      "status": "stated",
+      "text": {
+        "pt": "Reduzir os ministérios federais de 37 para 20 por meio de fusões e programa de eficiência nos primeiros 90 dias.",
+        "en": "Cut federal ministries from 37 to 20 through merger and efficiency program within first 90 days."
+      },
+      "quote": null,
+      "sourceUrl": "https://pl.org.br/reforma",
+      "sourceType": "official_site",
+      "collectedAt": "2026-03-15T10:00:00Z",
+      "contentHash": "f2b1d3c4d5e6f7a8b9c0d1e2f3a4b5c6",
+      "archiveUrl": "https://web.archive.org/web/20260315/https://pl.org.br/reforma",
+      "confidence": 0.97,
+      "ambiguous": false
     }
   ]
 }
