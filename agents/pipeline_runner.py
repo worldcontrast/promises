@@ -9,7 +9,6 @@ from datetime import datetime, timezone
 log = logging.getLogger('pipeline')
 
 MAX_CONCURRENT_CRAWLS = 5
-# CORREÇÃO 1: Reduzido para 1. Acaba com o erro 429 e o script roda em 1 minuto!
 MAX_CONCURRENT_EXTRACTIONS = 1
 
 class PipelineRunner:
@@ -112,8 +111,7 @@ class PipelineRunner:
                         except: pass
                     stats['pending_reviews'] = stats.get('pending_reviews', 0) + 1
 
-                # CORREÇÃO 2: O BURACO NEGRO FECHOU! 
-                # Agora o sistema salva TODAS as promessas no Supabase obrigatoriamente!
+                # Salva TODAS as promessas no Supabase
                 if self.db and not self.dry_run:
                     saved = await self.db.save_promise(validated)
                     if saved: stats['promises_saved'] += 1
