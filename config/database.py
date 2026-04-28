@@ -93,7 +93,6 @@ class Database:
 
     async def save_promise(self, promise):
         try:
-            # O FILTRO BLINDADO
             valid_keys = {
                 'id', 'candidate_id', 'crawled_page_id', 'category', 'secondary_category',
                 'text_original', 'quote', 'language_original', 'text_en', 'text_es', 
@@ -103,9 +102,7 @@ class Database:
                 'status_updated_at', 'status_source_url', 'embedding', 'canonical_id',
                 'accountability_score', 'metrics', 'deadline', 'verification_criteria'
             }
-            
             clean_promise = {k: v for k, v in promise.items() if k in valid_keys}
-            
             self.client.table('promises').insert(clean_promise).execute()
             return True
         except Exception as e: 
