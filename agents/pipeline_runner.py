@@ -4,7 +4,6 @@ File: agents/pipeline_runner.py
 """
 import asyncio
 import logging
-import hashlib
 from datetime import datetime, timezone
 
 log = logging.getLogger('pipeline')
@@ -56,19 +55,18 @@ class PipelineRunner:
         for src_type, url in sources.items():
             if not url: continue
             streams.append(
-                # A CORREÇÃO ESTÁ AQUI: mudei 'source_type' para 'src_type' que era o nome correto da variável!
                 self._process_source(url, src_type, candidate, candidate_name, candidate_db_id, election_id, country, stats, crawl_sem, extract_sem)
             )
             
         await asyncio.gather(*streams, return_exceptions=True)
 
-    async def _process_source(self, url, source_type, candidate, candidate_name, candidate_db_id, election_id, country, stats, crawl_sem, extract_sem):
-        log.info(f"    [{source_type}] {url}")
+    async def _process_source(self, url, src_type, candidate, candidate_name, candidate_db_id, election_id, country, stats, crawl_sem, extract_sem):
+        log.info(f"    [{src_type}] {url}")
         stats['sources_visited'] += 1
 
         try:
             async with crawl_sem:
-                page = await self.crawler.fetch(url, source_type)
+                page = await self.crawler.fetch(url, src_type)
             
             if not page:
                 log.warning(f"    ✗ Failed to fetch: {url}")
@@ -78,7 +76,7 @@ class PipelineRunner:
             archive_url = None
             if self.archiver is not None:
                 try: archive_url = await self.archiver.save(page); stats['pages_archived'] += 1
-                except Exception as arch_err: pass
+                except Exception: pass
             page['archive_url'] = archive_url or ''
 
             crawled_page_id = None
@@ -88,7 +86,7 @@ class PipelineRunner:
             async with extract_sem:
                  extraction = await self.extractor.extract(
                      content=page['text'], candidate_name=candidate_name, country=country,
-                     source_type=source_type, source_url=url, collection_date=datetime.now(timezone.utc).date().isoformat(),
+                     source_type=src_type, source_url=url, collection_date=datetime.now(timezone.utc).date().isoformat(),
                  )
 
             stats['promises_extracted'] += len(extraction.get('promises', []))
@@ -97,6 +95,8 @@ class PipelineRunner:
             if self.dry_run: return
 
             for raw_promise in extraction.get('promises', []):
+                # O text_hash foi removido daqui!
+                
                 validated = await self.validator.validate(raw_promise, candidate.get('id', ''), election_id, page)
                 if not validated: continue
 
