@@ -93,11 +93,7 @@ class Database:
 
     async def save_promise(self, promise):
         try:
-            # O FILTRO MÁGICO: Cria uma cópia da promessa tirando o text_hash
-            # para o Supabase não dar erro de coluna inexistente (42703)
-            clean_promise = {k: v for k, v in promise.items() if k != 'text_hash'}
-            
-            self.client.table('promises').insert(clean_promise).execute()
+            self.client.table('promises').insert(promise).execute()
             return True
         except Exception as e: 
             log.error(f"Erro ao salvar promessa: {e}")
