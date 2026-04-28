@@ -5,6 +5,7 @@ File: agents/validation/validator.py
 
 from __future__ import annotations
 
+import hashlib
 import logging
 import re
 import unicodedata
@@ -139,7 +140,7 @@ class PromiseValidator:
             'text_zh':  promise.get('text_zh'),
             'text_pt':  promise.get('text_pt'),
             
-            # ADICIONADOS OS 4 CAMPOS ESSENCIAIS PARA O SITE
+            # --- CAMPOS VITAIS PARA O SITE MOSTRAR AS PROMESSAS ---
             'accountability_score': int(promise.get('accountability_score', 0)),
             'metrics':              promise.get('metrics', ''),
             'deadline':             promise.get('deadline', ''),
