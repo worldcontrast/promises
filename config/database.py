@@ -93,7 +93,20 @@ class Database:
 
     async def save_promise(self, promise):
         try:
-            clean_promise = {k: v for k, v in promise.items() if k != 'text_hash'}
+            # O FILTRO BLINDADO: Apenas as colunas exatas que existem no Supabase podem passar.
+            # Qualquer chave "lixo" inventada pelo Python fica de fora, evitando erros fatais na gravação!
+            valid_keys = {
+                'id', 'candidate_id', 'crawled_page_id', 'category', 'secondary_category',
+                'text_original', 'quote', 'language_original', 'text_en', 'text_es', 
+                'text_fr', 'text_ar', 'text_zh', 'text_pt', 'source_url', 'archive_url', 
+                'content_hash', 'collected_at', 'verbatim', 'ambiguous', 'confidence', 
+                'agent_version', 'flagged_for_review', 'flag_reason', 'status', 
+                'status_updated_at', 'status_source_url', 'embedding', 'canonical_id',
+                'accountability_score', 'metrics', 'deadline', 'verification_criteria'
+            }
+            
+            clean_promise = {k: v for k, v in promise.items() if k in valid_keys}
+            
             self.client.table('promises').insert(clean_promise).execute()
             return True
         except Exception as e: 
