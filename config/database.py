@@ -93,11 +93,12 @@ class Database:
 
     async def save_promise(self, promise):
         try:
+            # A CORREÇÃO: 'election_id', 'source_type', 'quote_match' adicionados à lista VIP
             valid_keys = {
-                'id', 'candidate_id', 'crawled_page_id', 'category', 'secondary_category',
+                'id', 'candidate_id', 'election_id', 'crawled_page_id', 'category', 'secondary_category',
                 'text_original', 'quote', 'language_original', 'text_en', 'text_es', 
-                'text_fr', 'text_ar', 'text_zh', 'text_pt', 'source_url', 'archive_url', 
-                'content_hash', 'collected_at', 'verbatim', 'ambiguous', 'confidence', 
+                'text_fr', 'text_ar', 'text_zh', 'text_pt', 'source_url', 'source_type', 'archive_url', 
+                'content_hash', 'collected_at', 'verbatim', 'ambiguous', 'confidence', 'quote_match',
                 'agent_version', 'flagged_for_review', 'flag_reason', 'status', 
                 'status_updated_at', 'status_source_url', 'embedding', 'canonical_id',
                 'accountability_score', 'metrics', 'deadline', 'verification_criteria'
@@ -106,7 +107,7 @@ class Database:
             self.client.table('promises').insert(clean_promise).execute()
             return True
         except Exception as e: 
-            log.error(f"Erro ao salvar promessa: {e}")
+            log.error(f"Erro Supabase (save_promise): {e}")
             return False
 
     async def promise_hash_exists(self, h, cid):
