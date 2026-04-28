@@ -55,7 +55,7 @@ REJECT: "Our opponent has destroyed the economy." (Attack)
 RULE 2 — ACCOUNTABILITY SCORE (CRITICAL FOR FRONTEND)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-You MUST assign an integer `accountability_score` from 1 to 5 to each extracted promise. 
+You MUST assign an integer `accountability_score` from 1 to 5 to each extracted promise.
 The World Contrast frontend uses this to bifurcate data into "Concrete Promises" (>=3) and "Rhetoric" (<3).
 
   5 = Perfect: Clear metric, clear deadline, explicitly verifiable.
@@ -86,7 +86,6 @@ RULE 5 — CATEGORIES & TRANSLATIONS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Categories: economy, education, health, safety, environment, social, rights, infrastructure, governance.
-
 Translate each accepted promise into: en, es, pt, fr, ar. Translations must be LITERAL.
 
 ================
@@ -94,7 +93,6 @@ USER PROMPT TEMPLATE
 ================
 
 Extract all political promises from the following official campaign content.
-
 Candidate: {candidate_name}
 Country: {country}
 Source type: {source_type}
