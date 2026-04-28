@@ -93,8 +93,7 @@ class Database:
 
     async def save_promise(self, promise):
         try:
-            # O FILTRO BLINDADO: Apenas as colunas exatas que existem no Supabase podem passar.
-            # Qualquer chave "lixo" inventada pelo Python fica de fora, evitando erros fatais na gravação!
+            # O FILTRO BLINDADO
             valid_keys = {
                 'id', 'candidate_id', 'crawled_page_id', 'category', 'secondary_category',
                 'text_original', 'quote', 'language_original', 'text_en', 'text_es', 
