@@ -5,7 +5,6 @@ File: agents/validation/validator.py
 
 from __future__ import annotations
 
-import hashlib
 import logging
 import re
 import unicodedata
@@ -46,7 +45,6 @@ HISTORICAL_PATTERNS = [
     r'\b(hicimos|logramos|realizamos|entregamos)\b',
 ]
 
-
 class PromiseValidator:
     def __init__(self, settings, db=None) -> None:
         self.settings = settings
@@ -56,7 +54,6 @@ class PromiseValidator:
         text = promise.get('text_original', '').strip()
 
         if not text:
-            log.debug("Rejected: empty text")
             return None
 
         raw_page_text = page.get('text', '')
@@ -142,8 +139,8 @@ class PromiseValidator:
             'text_zh':  promise.get('text_zh'),
             'text_pt':  promise.get('text_pt'),
             
-            # A CORREÇÃO DE OURO: Os campos mágicos que o site usa!
-            'accountability_score': promise.get('accountability_score', 0),
+            # ADICIONADOS OS 4 CAMPOS ESSENCIAIS PARA O SITE
+            'accountability_score': int(promise.get('accountability_score', 0)),
             'metrics':              promise.get('metrics', ''),
             'deadline':             promise.get('deadline', ''),
             'verification_criteria':promise.get('verification_criteria', ''),
